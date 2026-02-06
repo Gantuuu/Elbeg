@@ -327,3 +327,41 @@ CREATE POLICY "Users can insert components" ON generated_meal_kit_components FOR
 DROP POLICY IF EXISTS "Users can read components" ON generated_meal_kit_components;
 CREATE POLICY "Users can read components" ON generated_meal_kit_components FOR SELECT USING (true);
 
+
+-- Insert default site settings (Fixing 406 error for site_name)
+INSERT INTO site_settings (key, value, description)
+VALUES ('site_name', 'Элбэг мах хүнс', 'Site Name')
+ON CONFLICT (key) DO NOTHING;
+
+-- Insert default footer settings
+INSERT INTO footer_settings (company_name, description, address, phone, email, copyright_text)
+VALUES (
+  'Элбэг мах хүнс',
+  'Чанартай махны бүтээгдэхүүн',
+  '대전광역시 동구 계족로 489번길 상가동 112호 용전동 한숲아파트',
+  '010 5940 0081',
+  'elbegmeat@example.com',
+  '© 2025 Элбэг мах хүнс. Бүх эрх хуулиар хамгаалагдсан.'
+)
+ON CONFLICT DO NOTHING;
+
+-- Insert default hero content
+INSERT INTO site_content (key, title, content, image_url)
+VALUES (
+  'hero',
+  'Элбэг мах хүнс',
+  'Амт чанар болон найдвартай үйлчилгээ нэг дор',
+  'https://images.unsplash.com/photo-1603048588665-791ca8aea617?q=80&w=2000&auto=format&fit=crop'
+)
+ON CONFLICT (key) DO NOTHING;
+
+-- Ensure RLS is enabled and policies exist for footer_settings
+ALTER TABLE footer_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read footer_settings" ON footer_settings;
+CREATE POLICY "Public can read footer_settings" ON footer_settings FOR SELECT USING (true);
+
+-- Ensure RLS is enabled and policies exist for site_settings
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read site_settings" ON site_settings;
+CREATE POLICY "Public can read site_settings" ON site_settings FOR SELECT USING (true);
+
