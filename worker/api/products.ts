@@ -132,6 +132,11 @@ app.put('/:id', requireAdmin, async (c) => {
     }
 
     try {
+        if (file && file instanceof File) {
+            const fileName = `products/${Date.now()}_${file.name}`;
+            updateData.imageUrl = await storage.uploadFile('media', fileName, file);
+        }
+
         const updatedProduct = await storage.updateProduct(id, updateData);
 
         if (!updatedProduct) {
