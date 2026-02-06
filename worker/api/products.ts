@@ -43,15 +43,21 @@ app.get('/:id', async (c) => {
 app.post('/', requireAdmin, async (c) => {
     const storage = c.get('storage');
 
-    // Parse multipart form data
+    // Parse body based on content type
     let body: any = {};
-    try {
+    let parsedData: any = {};
+    const contentType = c.req.header('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+        parsedData = await c.req.json();
+    } else if (contentType.includes('multipart/form-data')) {
         body = await c.req.parseBody();
-    } catch (e) {
-        // Not multipart
+        if (body['productData'] && typeof body['productData'] === 'string') {
+            parsedData = JSON.parse(body['productData']);
+        }
     }
 
-    const file = body['image'];
+    const file = body['image'] || body['file']; // Support both keys
     let imageUrl = '';
 
     // Handle file upload to R2 if present
@@ -63,16 +69,6 @@ app.post('/', requireAdmin, async (c) => {
     }
 
     try {
-        // Parse productData JSON if sent from frontend
-        let parsedData: any = {};
-
-        // Check if content-type is JSON
-        const contentType = c.req.header('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            parsedData = await c.req.json();
-        } else if (body['productData'] && typeof body['productData'] === 'string') {
-            parsedData = JSON.parse(body['productData']);
-        }
 
         // Merge parsed data with direct form fields (for backward compatibility)
         // Handle both camelCase from API and snake_case from direct components
@@ -113,23 +109,21 @@ app.put('/:id', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const id = parseInt(c.req.param('id'));
 
-    // Parse multipart form data
+    // Parse body based on content type
     let body: any = {};
-    try {
-        body = await c.req.parseBody();
-    } catch (e) {
-        // Not multipart
-    }
-    const file = body['image'];
-
-    // Parse productData JSON if sent from frontend
     let parsedData: any = {};
-    const contentType = c.req.header('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    const contentType = c.req.header('content-type') || '';
+
+    if (contentType.includes('application/json')) {
         parsedData = await c.req.json();
-    } else if (body['productData'] && typeof body['productData'] === 'string') {
-        parsedData = JSON.parse(body['productData']);
+    } else if (contentType.includes('multipart/form-data')) {
+        body = await c.req.parseBody();
+        if (body['productData'] && typeof body['productData'] === 'string') {
+            parsedData = JSON.parse(body['productData']);
+        }
     }
+
+    const file = body['image'] || body['file'];
 
     // Build update data from parsed JSON or direct form fields
     const updateData: any = {
