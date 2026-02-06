@@ -31,10 +31,14 @@ export class SupabaseStorage implements IStorage {
         this.supabaseKey = supabaseKey;
     }
 
+    private isPlainObject(obj: any): boolean {
+        return typeof obj === 'object' && obj !== null && !Array.isArray(obj) && obj.constructor === Object;
+    }
+
     private toCamel(obj: any): any {
         if (Array.isArray(obj)) {
             return obj.map(v => this.toCamel(v));
-        } else if (obj !== null && obj.constructor === Object) {
+        } else if (this.isPlainObject(obj)) {
             return Object.keys(obj).reduce(
                 (result, key) => ({
                     ...result,
@@ -49,7 +53,7 @@ export class SupabaseStorage implements IStorage {
     private toSnake(obj: any): any {
         if (Array.isArray(obj)) {
             return obj.map(v => this.toSnake(v));
-        } else if (obj !== null && obj.constructor === Object) {
+        } else if (this.isPlainObject(obj)) {
             return Object.keys(obj).reduce(
                 (result, key) => ({
                     ...result,
@@ -64,12 +68,22 @@ export class SupabaseStorage implements IStorage {
     private async fetch<T>(path: string, options?: RequestInit): Promise<T> {
         const url = `${this.supabaseUrl}/rest/v1/${path}`;
 
-        // Convert body to snake_case if it exists
+        // Convert body to snake_case if it's a plain search params object or similar
+        // BUT if it's already a string, we assume it's JSON.
+        // We only want to snake_case the TOP LEVEL properties for PostgREST.
         let body = options?.body;
         if (body && typeof body === 'string') {
             try {
                 const parsed = JSON.parse(body);
-                body = JSON.stringify(this.toSnake(parsed));
+                // ONLY snake_case top level keys to avoid corrupting nested JSON strings or values
+                if (this.isPlainObject(parsed)) {
+                    const snaked: any = {};
+                    for (const key of Object.keys(parsed)) {
+                        const snakedKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+                        snaked[snakedKey] = parsed[key];
+                    }
+                    body = JSON.stringify(snaked);
+                }
             } catch (e) {
                 // Not JSON or already processed
             }
@@ -93,6 +107,30 @@ export class SupabaseStorage implements IStorage {
 
         const data = await response.json();
         return this.toCamel(data) as T;
+    }
+
+    // Storage/Upload operations
+    async uploadFile(bucket: string, path: string, file: File): Promise<string> {
+        const url = `${this.supabaseUrl}/storage/v1/object/${bucket}/${path}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            body: file, // Supabase allows raw body for objects
+            headers: {
+                'apikey': this.supabaseKey,
+                'Authorization': `Bearer ${this.supabaseKey}`,
+                'Content-Type': file.type,
+                'x-upsert': 'true'
+            }
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Supabase Storage error: ${response.status} ${text}`);
+        }
+
+        // Return public URL (assuming public bucket)
+        return `${this.supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;
     }
 
     // User operations

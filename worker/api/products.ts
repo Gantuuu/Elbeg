@@ -52,8 +52,7 @@ app.post('/', requireAdmin, async (c) => {
     // Handle file upload to R2 if present
     if (file && file instanceof File) {
         const fileName = `products/${Date.now()}_${file.name}`;
-        await c.env.BUCKET.put(fileName, file);
-        imageUrl = `/uploads/${fileName}`;
+        imageUrl = await storage.uploadFile('media', fileName, file);
     } else if (typeof body['imageUrl'] === 'string') {
         imageUrl = body['imageUrl'];
     }
@@ -130,8 +129,7 @@ app.put('/:id', requireAdmin, async (c) => {
 
     if (file && file instanceof File) {
         const fileName = `products/${Date.now()}_${file.name}`;
-        await c.env.BUCKET.put(fileName, file);
-        updateData.imageUrl = `/uploads/${fileName}`;
+        updateData.imageUrl = await storage.uploadFile('media', fileName, file);
     }
 
     const updatedProduct = await storage.updateProduct(id, updateData);

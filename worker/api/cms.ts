@@ -240,11 +240,7 @@ app.put('/settings/hero', requireAdmin, async (c) => {
         // Handle file upload if present
         if (imageFile && imageFile instanceof File) {
             const fileName = `hero/${Date.now()}_${imageFile.name}`;
-            await c.env.BUCKET.put(fileName, imageFile);
-            // Assuming R2 setup serves files at /uploads
-            // If you have a custom domain for R2, verify this path.
-            // For now, using logic similar to media upload.
-            imageUrl = `/uploads/${fileName}`;
+            imageUrl = await storage.uploadFile('media', fileName, imageFile);
         }
 
         const heroData = {
@@ -282,8 +278,7 @@ app.post('/media', requireAdmin, async (c) => {
     }
 
     const fileName = `media/${Date.now()}_${file.name}`;
-    await c.env.BUCKET.put(fileName, file);
-    const url = `/uploads/${fileName}`; // Or public URL if R2 connected to domain
+    const url = await storage.uploadFile('media', fileName, file);
 
     const mediaItem = await storage.createMediaItem({
         name: file.name,

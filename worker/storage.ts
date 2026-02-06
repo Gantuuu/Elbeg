@@ -177,6 +177,9 @@ export interface IStorage {
     createReview(review: InsertReview): Promise<Review>;
     updateReview(id: number, review: Partial<InsertReview & { isApproved: boolean }>): Promise<Review | undefined>;
     deleteReview(id: number): Promise<boolean>;
+
+    // Storage operations
+    uploadFile(bucket: string, path: string, file: File): Promise<string>;
 }
 
 export class D1Storage implements IStorage {
@@ -1250,5 +1253,9 @@ export class D1Storage implements IStorage {
     async deleteReview(id: number): Promise<boolean> {
         const result = await this.db.delete(reviews).where(eq(reviews.id, id));
         return result.rowCount ? result.rowCount > 0 : true;
+    }
+
+    async uploadFile(bucket: string, path: string, file: File): Promise<string> {
+        throw new Error("uploadFile not implemented for D1Storage. Use SupabaseStorage if R2 is not configured.");
     }
 }
