@@ -20,6 +20,7 @@ import { logMobileCookieDebug } from "@/utils/cookieUtils";
 import { calculateDeliveryDate, formatDeliveryDate, getDeliveryMessage, DeliverySettings, NonDeliveryDay } from "@/lib/delivery-date";
 import { Truck, Star, MessageSquare } from "lucide-react";
 import { Review } from "@shared/schema";
+import { getFullImageUrl } from "@/lib/image-utils";
 
 export default function HomePage() {
   const [location, setLocation] = useLocation();
@@ -63,7 +64,13 @@ export default function HomePage() {
     queryFn: async () => {
       const { data, error } = await supabase.from('delivery_settings').select('*').single();
       if (error) throw error;
-      return data as DeliverySettings;
+
+      // Map snake_case from Supabase to camelCase for the frontend
+      return {
+        cutoffHour: data.cutoff_hour,
+        cutoffMinute: data.cutoff_minute,
+        processingDays: data.processing_days
+      } as DeliverySettings;
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -247,7 +254,7 @@ export default function HomePage() {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
           <div className="h-32 overflow-hidden relative">
             <img
-              src={product.imageUrl}
+              src={getFullImageUrl(product.imageUrl)}
               alt={product.name}
               className="w-full h-full object-cover"
               loading="lazy"
@@ -484,7 +491,7 @@ export default function HomePage() {
                       >
                         <div className="aspect-square relative overflow-hidden bg-gray-50">
                           <img
-                            src={product.imageUrl}
+                            src={getFullImageUrl(product.imageUrl)}
                             alt={getLocalizedProductName(product, language)}
                             className="w-full h-full object-cover transition-opacity duration-300"
                             loading="lazy"

@@ -7,12 +7,12 @@
  */
 export function getFullImageUrl(src: string | null | undefined): string {
   if (!src) return '';
-  
+
   // 이미 절대 URL이거나 데이터 URL인 경우 그대로 반환
   if (src.startsWith('data:') || src.startsWith('http')) {
     return src;
   }
-  
+
   // 상대 경로인 경우 절대 경로로 변환
   // 마지막 쿼리 파라미터 추가로 캐시 방지
   const timestamp = new Date().getTime();
@@ -25,7 +25,12 @@ export function getFullImageUrl(src: string | null | undefined): string {
  * @param originalSrc 원본 이미지 URL (로깅용)
  */
 export function handleImageError(event: React.SyntheticEvent<HTMLImageElement, Event>, originalSrc?: string) {
-  console.error('Image failed to load:', originalSrc);
+  const currentSrc = event.currentTarget.src;
+  console.error('Image failed to load:', {
+    originalSrc,
+    currentSrc,
+    windowLocation: window.location.href
+  });
   // 몽골어로 기본 이미지 텍스트 변경 및 명확한 아이콘 사용
   const fallbackUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+PHJlY3Qgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjQ1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMzMzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0JfRg9GA0LDQsyDQsNC70LPQsDwvdGV4dD48cGF0aCBmaWxsPSIjNTU1IiBkPSJNNjUgNzBjMC04LjI4NCA2LjcxNi0xNSAxNS0xNSA4LjI4NCAwIDE1IDYuNzE2IDE1IDE1IDAgOC4yODQtNi43MTYgMTUtMTUgMTUtOC4yODQgMC0xNS02LjcxNi0xNS0xNXptNSAwYzAgNS41MjMgNC40NzcgMTAgMTAgMTAgNS41MjMgMCAxMC00LjQ3NyAxMC0xMCAwLTUuNTIzLTQuNDc3LTEwLTEwLTEwLTUuNTIzIDAtMTAgNC40NzctMTAgMTB6Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjQiIGQ9Ik01NSA5MGMwLTEzLjgwNyAxMS4xOTMtMjUgMjUtMjVzMjUgMTEuMTkzIDI1IDI1djEwSDU1VjkweiIvPjwvc3ZnPg==';
   event.currentTarget.src = fallbackUrl;
@@ -47,20 +52,20 @@ export function getCategoryFallbackImage(name: string, category?: string): strin
     "Загасны мах": "#60A5FA",  // 생선 - 파란계열
     "Бусад": "#D1D5DB"         // 기타 - 회색계열
   };
-  
+
   const color = category && colorMap[category] ? colorMap[category] : colorMap["Бусад"];
-  
+
   // 제품명이 너무 길면 자르기
   const displayName = name.length > 20 ? name.substring(0, 20) + '...' : name;
   const displayCategory = category || "Бүтээгдэхүүн"; // 카테고리가 없으면 '제품'으로 표시
-  
+
   // Base64 인코딩 전에 SVG 문자열 생성
   const svgContent = `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
     <rect width="800" height="600" fill="${color}" />
     <text x="400" y="280" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle">${displayName}</text>
     <text x="400" y="340" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">${displayCategory}</text>
   </svg>`;
-  
+
   // SVG를 Base64로 인코딩하여 데이터 URL 반환
   return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgContent)))}`;
 }
@@ -73,7 +78,7 @@ export function getCategoryFallbackImage(name: string, category?: string): strin
 export function addTimestampToUrl(url: string | null | undefined): string {
   if (!url) return '';
   if (url.startsWith('data:')) return url;
-  
+
   const timestamp = new Date().getTime();
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}t=${timestamp}`;
