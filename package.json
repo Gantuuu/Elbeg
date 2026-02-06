@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "npx concurrently \"vite\" \"wrangler dev\"",
+    "dev": "npx concurrently \"vite\" \"wrangler pages dev\"",
     "build": "vite build && esbuild worker/index.ts --bundle --format=esm --outfile=dist/public/_worker.js --platform=browser --external:node:*",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",

@@ -42,7 +42,70 @@ function authenticateAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // -------------------- Auth Sync Route --------------------
+  app.post("/api/auth/sync-session", async (req, res) => {
+    try {
+      const { access_token } = req.body;
+
+      if (!access_token) {
+        return res.status(400).json({ message: "Access token required" });
+      }
+
+      // Verify token with Supabase
+      const { data: { user }, error } = await supabase.auth.getUser(access_token);
+
+      if (error || !user) {
+        console.error("Supabase token verification failed:", error);
+        return res.status(401).json({ message: "Invalid token" });
+      }
+
+      // Check if user is admin (you might want to verify this against your own DB or Supabase metadata)
+      // For now, we assume if they can login to the admin panel via Supabase, they are admin
+      // OR we can check your local DB user table if you sync users there.
+      // Let's check local DB:
+      let existingUser = await storage.getUserByEmail(user.email || "");
+      
+      if (!existingUser) {
+          // Optional: Create user locally if not exists
+          // existingUser = await storage.createUser(...) 
+          // For now, let's strictly require the user to exist in our DB (or admin user)
+           return res.status(403).json({ message: "User not found in local database" });
+      }
+      
+      if (!existingUser.isAdmin) {
+          return res.status(403).json({ message: "Access denied. Not an admin." });
+      }
+
+      // Set session
+      if (req.session) {
+        req.session.adminLoggedIn = true;
+        req.session.adminId = existingUser.id;
+        // Also set passport session if mixing legacy
+        req.login(existingUser, (err) => {
+             if (err) {
+                 console.error("Login session error", err);
+                 return res.status(500).json({message: "Session error"});
+             }
+             return res.json({ success: true, user: existingUser });
+        });
+      } else {
+           res.status(500).json({ message: "Session not initialized" });
+      }
+
+    } catch (error) {
+      console.error("Session sync error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // -------------------- Product routes --------------------
   app.get("/api/products", async (req, res) => {
     try {

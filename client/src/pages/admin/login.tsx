@@ -17,11 +17,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/lib/supabase"; // Import Supabase client
 
 // Login form schema
 const loginFormSchema = z.object({
-  username: z.string().min(1, {
-    message: "Нэвтрэх нэр оруулна уу",
+  email: z.string().email({
+    message: "Зөв и-мэйл хаяг оруулна уу", // Correct email validation
   }),
   password: z.string().min(1, {
     message: "Нууц үг оруулна уу",
@@ -41,7 +42,7 @@ export default function AdminLogin() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -50,7 +51,25 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      await apiRequest("POST", "/api/admin/login", data);
+      // 1. Supabase Auth Login
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      if (!authData.session) {
+        throw new Error("No session created");
+      }
+
+      // 2. Sync Session with Backend
+      // Send the access token to the backend to create a secure session cookie
+      await apiRequest("POST", "/api/auth/sync-session", {
+        access_token: authData.session.access_token,
+      });
 
       toast({
         title: "Амжилттай нэвтэрлээ",
@@ -65,7 +84,6 @@ export default function AdminLogin() {
       }
 
       // Wait for session to be properly set before redirecting
-      // This helps with mobile browsers that may need extra time to handle cookies
       setTimeout(async () => {
         try {
           // Verify authentication status before redirecting
@@ -79,16 +97,16 @@ export default function AdminLogin() {
             }, 1000);
           }
         } catch (authError) {
-          // If auth check fails, still try to redirect
           console.log("Auth check failed, proceeding with redirect:", authError);
           setLocation("/admin");
         }
-      }, 1500); // 1.5 second delay for mobile compatibility
+      }, 1500);
 
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "Нэвтрэх үед алдаа гарлаа",
-        description: "Нэвтрэх нэр эсвэл нууц үг буруу байна. Дахин оролдоно уу.",
+        description: error.message || "Нэвтрэх нэр эсвэл нууц үг буруу байна.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -115,12 +133,12 @@ export default function AdminLogin() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Нэвтрэх нэр</FormLabel>
+                      <FormLabel>И-мэйл</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin" {...field} />
+                        <Input placeholder="admin@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
