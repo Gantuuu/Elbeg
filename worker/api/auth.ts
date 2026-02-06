@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { setSignedCookie, deleteCookie } from 'hono/cookie';
-import { createClient } from '@supabase/supabase-js';
 import { Bindings } from '../types';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage } from '../storage';
@@ -184,8 +183,7 @@ app.post('/sync-session', async (c) => {
 
         const { access_token } = body;
 
-        // Initialize Supabase client
-        // Note: Using VITE_ var fallback is quirky but trying to match potential env naming
+        // Initialize Supabase configuration
         const supabaseUrl = c.env.VITE_SUPABASE_URL || c.env.SUPABASE_URL;
         const supabaseKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
 
@@ -194,14 +192,25 @@ app.post('/sync-session', async (c) => {
             return c.json({ success: false, message: "Server configuration error" }, 500);
         }
 
-        const supabase = createClient(supabaseUrl, supabaseKey);
+        // Verify token using raw fetch instead of @supabase/supabase-js to avoid worker bundle issues
+        const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${access_token}`
+            }
+        });
 
-        // Verify token
-        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(access_token);
-
-        if (error || !supabaseUser || !supabaseUser.email) {
+        if (!response.ok) {
+            const error = await response.text();
             console.error("Supabase token verification failed:", error);
             return c.json({ success: false, message: "Invalid token" }, 401);
+        }
+
+        const data = await response.json() as { id: string, email?: string };
+        const supabaseUser = data;
+
+        if (!supabaseUser || !supabaseUser.email) {
+            return c.json({ success: false, message: "Invalid token data" }, 401);
         }
 
         // Check against local DB
