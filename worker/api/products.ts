@@ -2,13 +2,13 @@ import { Hono } from 'hono';
 import { Bindings } from '../types';
 import { requireAdmin } from '../middleware';
 import { UserWithNullablePhone } from '@shared/schema';
-import { D1Storage } from '../storage';
+import { D1Storage, IStorage } from '../storage';
 
 type Env = {
     Bindings: Bindings;
     Variables: {
         user: UserWithNullablePhone | null;
-        storage: D1Storage;
+        storage: IStorage;
     };
 };
 

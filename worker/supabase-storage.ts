@@ -113,13 +113,16 @@ export class SupabaseStorage implements IStorage {
     async uploadFile(bucket: string, path: string, file: File): Promise<string> {
         const url = `${this.supabaseUrl}/storage/v1/object/${bucket}/${path}`;
 
+        // Use ArrayBuffer for more reliable fetch in Worker environments
+        const arrayBuffer = await file.arrayBuffer();
+
         const response = await fetch(url, {
             method: 'POST',
-            body: file, // Supabase allows raw body for objects
+            body: arrayBuffer,
             headers: {
                 'apikey': this.supabaseKey,
                 'Authorization': `Bearer ${this.supabaseKey}`,
-                'Content-Type': file.type,
+                'Content-Type': file.type || 'application/octet-stream',
                 'x-upsert': 'true'
             }
         });

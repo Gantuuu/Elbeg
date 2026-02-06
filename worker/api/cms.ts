@@ -2,13 +2,13 @@ import { Hono } from 'hono';
 import { Bindings } from '../types';
 import { requireAdmin } from '../middleware';
 import { UserWithNullablePhone } from '@shared/schema';
-import { D1Storage } from '../storage';
+import { D1Storage, IStorage } from '../storage';
 
 type Env = {
     Bindings: Bindings;
     Variables: {
         user: UserWithNullablePhone | null;
-        storage: D1Storage;
+        storage: IStorage;
     };
 };
 
@@ -263,7 +263,12 @@ app.put('/settings/hero', requireAdmin, async (c) => {
         return c.json(heroData);
     } catch (error: any) {
         console.error("Error updating hero settings:", error);
-        return c.json({ message: "Failed to update hero settings", error: error.message }, 500);
+        // Include more details in the response for debugging
+        return c.json({
+            message: "Failed to update hero settings",
+            error: error.message,
+            stack: error.stack
+        }, 500);
     }
 });
 
