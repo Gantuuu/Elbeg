@@ -159,6 +159,22 @@ CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USI
 DROP POLICY IF EXISTS "Reviews are viewable if approved" ON reviews;
 CREATE POLICY "Reviews are viewable if approved" ON reviews FOR SELECT USING (is_approved = true);
 
+-- Users policies (Required for registration and login)
+DROP POLICY IF EXISTS "Enable read access for all users" ON users;
+CREATE POLICY "Enable read access for all users" ON users FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Enable insert for all users" ON users;
+CREATE POLICY "Enable insert for all users" ON users FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable update for all users" ON users;
+CREATE POLICY "Enable update for all users" ON users FOR UPDATE USING (true);
+
+-- Orders policies (Required for checkout)
+DROP POLICY IF EXISTS "Enable read access for all users" ON orders;
+CREATE POLICY "Enable read access for all users" ON orders FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Enable insert for all users" ON orders;
+CREATE POLICY "Enable insert for all users" ON orders FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable update for all users" ON orders;
+CREATE POLICY "Enable update for all users" ON orders FOR UPDATE USING (true);
+
 -- Create admin user
 INSERT INTO users (username, password, email, name, is_admin) 
 VALUES ('admin', '$2b$10$xxxxxxxxxxxxxxxxxxx', 'admin@elbeg.com', 'Admin', true)
