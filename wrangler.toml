@@ -1,0 +1,26 @@
+name = "elbeg-meat"
+main = "worker/index.ts"
+compatibility_date = "2024-04-05"
+compatibility_flags = [ "nodejs_compat" ]
+
+# R2 Bucket for image storage
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "elbeg-meat-assets"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "elbeg-meat-db"
+database_id = "elbeg-meat-db-id" # Will be updated after creation
+
+# Static assets (Frontend)
+[site]
+bucket = "./dist"
+
+[build]
+command = "npm run build"
+watch_dir = "worker"
+
+[observability]
+enabled = true
