@@ -60,7 +60,7 @@ export function Navbar() {
         return data as SiteNameSettings;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
-        return { value: "Nice Meat махны дэлгэри" }; // Default site name
+        return { value: "Элбэг мах хүнс" }; // Default site name
       }
     }
   });
@@ -93,7 +93,7 @@ export function Navbar() {
   return (
     <header className="shadow-sm relative z-10 bg-white">
       {/* Top bar - Red-Blue gradient */}
-      <div className="h-1 bg-[#9b1f24]"></div>
+      <div className="h-1 bg-[#0e5841]"></div>
 
       <div className="bg-white">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
@@ -102,7 +102,7 @@ export function Navbar() {
             <div className="flex items-center space-x-4">
               <Link href="/">
                 <div className="flex-shrink-0 flex items-center cursor-pointer">
-                  <span className="font-bold text-base md:text-lg text-[#9b1f24] hover:brightness-110 transition-all duration-300 whitespace-nowrap">
+                  <span className="font-bold text-base md:text-lg text-[#0e5841] hover:brightness-110 transition-all duration-300 whitespace-nowrap">
                     {t.siteTitle}
                   </span>
                 </div>
@@ -119,13 +119,13 @@ export function Navbar() {
                     className={cn(
                       "px-3 py-2 font-medium cursor-pointer transition-all duration-200 relative group",
                       (location === link.href || (link.href === "/" && location === "/"))
-                        ? "text-[#9b1f24] font-bold"
-                        : "text-gray-700 hover:text-[#9b1f24]"
+                        ? "text-[#0e5841] font-bold"
+                        : "text-gray-700 hover:text-[#0e5841]"
                     )}
                   >
                     {link.label}
                     <span className={cn(
-                      "absolute bottom-0 left-0 w-0 h-0.5 bg-[#9b1f24] transition-all duration-200 group-hover:w-full",
+                      "absolute bottom-0 left-0 w-0 h-0.5 bg-[#0e5841] transition-all duration-200 group-hover:w-full",
                       (location === link.href || (link.href === "/" && location === "/")) && "w-full"
                     )}></span>
                   </div>
@@ -140,7 +140,7 @@ export function Navbar() {
                 <div className="p-2 rounded-full hover:bg-gray-100 relative mr-1 transition-all duration-200">
                   <UserIcon className={cn(
                     "h-5 w-5 transition-all duration-200",
-                    user ? "text-[#9b1f24]" : "text-gray-700 hover:text-[#9b1f24]"
+                    user ? "text-[#0e5841]" : "text-gray-700 hover:text-[#0e5841]"
                   )} />
                 </div>
               </Link>
@@ -152,9 +152,9 @@ export function Navbar() {
                     className="p-2 rounded-full hover:bg-gray-100 relative transition-all duration-200 cursor-pointer"
                     aria-label={t.cart}
                   >
-                    <ShoppingCartIcon className="h-5 w-5 text-[#9b1f24] transition-all duration-200" />
+                    <ShoppingCartIcon className="h-5 w-5 text-[#0e5841] transition-all duration-200" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-[#9b1f24] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 bg-[#0e5841] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                         {cartItemCount}
                       </span>
                     )}
@@ -196,8 +196,8 @@ export function Navbar() {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 hover:bg-gray-50 border-l-2",
                 (location === link.href || (link.href === "/" && location === "/"))
-                  ? "text-[#9b1f24] border-[#9b1f24]"
-                  : "text-gray-700 hover:text-[#9b1f24] border-transparent hover:border-[#9b1f24]/50"
+                  ? "text-[#0e5841] border-[#0e5841]"
+                  : "text-gray-700 hover:text-[#0e5841] border-transparent hover:border-[#0e5841]/50"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -208,13 +208,13 @@ export function Navbar() {
           {/* Cart nav link for mobile */}
           <Link href="/cart">
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#9b1f24] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#9b1f24]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0e5841] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0e5841]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <ShoppingCartIcon className="h-5 w-5 mr-2" />
               {t.cart}
               {cartItemCount > 0 && (
-                <span className="ml-2 bg-[#9b1f24] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                <span className="ml-2 bg-[#0e5841] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                   {cartItemCount}
                 </span>
               )}
@@ -228,7 +228,7 @@ export function Navbar() {
           {/* User nav link for mobile */}
           <Link href={user ? "/my-page" : "/auth"}>
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#9b1f24] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#9b1f24]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0e5841] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0e5841]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserIcon className="h-5 w-5 mr-2" />

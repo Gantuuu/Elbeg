@@ -25,8 +25,6 @@ export interface Translations {
   contact: string;
   cart: string;
   profile: string;
-  login: string;
-  register: string;
   logout: string;
   menu: string;
   siteTitle: string;
@@ -144,18 +142,24 @@ export interface Translations {
   password: string;
   confirmPassword: string;
   username: string;
+  signup: string;
   signUp: string;
   signIn: string;
+  login: string;
+  register: string;
+  loggingIn: string;
   signingIn: string;
   signingUp: string;
   alreadyHaveAccount: string;
   noAccount: string;
   phoneFormat: string;
+  phoneHint: string;
   authHeroTitle: string;
   authHeroDesc: string;
   directDelivery: string;
   viewOrderHistory: string;
   fastPayment: string;
+  or: string;
   orContinueWith: string;
   continueWithGoogle: string;
 
@@ -218,17 +222,15 @@ const translations: Record<Language, Translations> = {
     contact: 'Холбоо барих',
     cart: 'Сагс',
     profile: 'Миний мэдээлэл',
-    login: 'Нэвтрэх',
-    register: 'Бүртгүүлэх',
     logout: 'Гарах',
     menu: 'Цэс',
-    siteTitle: 'Nice Meat махны дэлгүүр',
+    siteTitle: 'Элбэг мах хүнс',
 
     // 홈페이지
-    heroTitle: 'Nice Meat махны дэлгүүр',
-    heroSubtitle: 'Өнөөдөр идэх махаа маргааш гэж бүү хойшлуул',
-    featuredProducts: 'Бүх төрлийн мах махан бүтээгдэхүүн',
-    featuredProductsDesc: 'Манай дэлгүүрийн хамгийн сайн чанарын махны бүтээгдэхүүн',
+    heroTitle: 'Элбэг мах хүнс',
+    heroSubtitle: 'Амт чанар болон найдвартай үйлчилгээ нэг дор',
+    featuredProducts: 'Манай бүтээгдэхүүнүүд',
+    featuredProductsDesc: 'Хамгийн амтлаг чанартайг та бүхэндээ',
     categories: {
       all: 'Бүгд',
       beef: 'Үхрийн мах',
@@ -291,7 +293,7 @@ const translations: Record<Language, Translations> = {
 
     // 푸터
     adminLogin: 'Админ нэвтрэх',
-    copyright: '© 2025 Nice Meat махны дэлгүүр. Бүх эрх хуулиар хамгаалагдсан.',
+    copyright: '© 2025 Элбэг мах хүнс. Бүх эрх хуулиар хамгаалагдсан.',
     visitPage: 'Хаяг руу очих',
 
     // 마이페이지
@@ -337,18 +339,24 @@ const translations: Record<Language, Translations> = {
     password: 'Нууц үг',
     confirmPassword: 'Нууц үг баталгаажуулах',
     username: 'Хэрэглэгчийн нэр',
+    signup: 'Бүртгүүлэх',
     signUp: 'Бүртгүүлэх',
     signIn: 'Нэвтрэх',
+    login: 'Нэвтрэх',
+    register: 'Бүртгүүлэх',
+    loggingIn: 'Нэвтэрч байна...',
     signingIn: 'Нэвтэрч байна...',
     signingUp: 'Бүртгэж байна...',
     alreadyHaveAccount: 'Хэдийн бүртгэлтэй юу?',
     noAccount: 'Бүртгэлгүй юу?',
     phoneFormat: 'Солонгос утасны дугаар хэлбэр: 010-0000-0000',
-    authHeroTitle: 'АРВИЖИХ МАХНЫ ДЭЛГҮҮР',
+    phoneHint: 'Солонгос утасны дугаар хэлбэр: 010-0000-0000',
+    authHeroTitle: 'Элбэг мах хүнс',
     authHeroDesc: 'Хэрэглэгчийн бүртгэл үүсгээд захиалгынхаа түүхийг хянаарай',
     directDelivery: 'Үсэхсэн зах руу шууд хүргэлт',
     viewOrderHistory: 'Захиалгын түүхээ харах',
     fastPayment: 'Хурдан, найдвартай төлбөр тооцоо',
+    or: 'Эсвэл',
     orContinueWith: 'Эсвэл',
     continueWithGoogle: 'Google-ээр нэвтрэх',
 
@@ -409,8 +417,6 @@ const translations: Record<Language, Translations> = {
     contact: 'Контакты',
     cart: 'Корзина',
     profile: 'Мой профиль',
-    login: 'Войти',
-    register: 'Регистрация',
     logout: 'Выйти',
     menu: 'Меню',
     siteTitle: 'Мясной магазин Арвижих',
@@ -528,18 +534,24 @@ const translations: Record<Language, Translations> = {
     password: 'Пароль',
     confirmPassword: 'Подтвердить пароль',
     username: 'Имя пользователя',
+    signup: 'Регистрация',
     signUp: 'Регистрация',
     signIn: 'Войти',
+    login: 'Войти',
+    register: 'Регистрация',
+    loggingIn: 'Вход...',
     signingIn: 'Вход...',
     signingUp: 'Регистрация...',
     alreadyHaveAccount: 'Уже есть аккаунт?',
     noAccount: 'Нет аккаунта?',
     phoneFormat: 'Формат корейского номера: 010-0000-0000',
+    phoneHint: 'Формат корейского номера: 010-0000-0000',
     authHeroTitle: 'МЯСНОЙ МАГАЗИН АРВИЖИХ',
     authHeroDesc: 'Создайте учетную запись и отслеживайте историю заказов',
     directDelivery: 'Прямая доставка на рынок',
     viewOrderHistory: 'Просмотр истории заказов',
     fastPayment: 'Быстрая и надежная оплата',
+    or: 'Или',
     orContinueWith: 'Или',
     continueWithGoogle: 'Войти через Google',
 
@@ -600,8 +612,6 @@ const translations: Record<Language, Translations> = {
     contact: 'Contact',
     cart: 'Cart',
     profile: 'My Profile',
-    login: 'Login',
-    register: 'Register',
     logout: 'Logout',
     menu: 'Menu',
     siteTitle: 'Arvijikh Meat Store',
@@ -719,18 +729,24 @@ const translations: Record<Language, Translations> = {
     password: 'Password',
     confirmPassword: 'Confirm Password',
     username: 'Username',
-    signUp: 'Sign Up',
+    signup: 'Register',
+    signUp: 'Register',
     signIn: 'Sign In',
+    login: 'Login',
+    register: 'Register',
+    loggingIn: 'Logging in...',
     signingIn: 'Signing in...',
     signingUp: 'Signing up...',
     alreadyHaveAccount: 'Already have an account?',
     noAccount: 'Don\'t have an account?',
     phoneFormat: 'Korean phone format: 010-0000-0000',
+    phoneHint: 'Korean phone format: 010-0000-0000',
     authHeroTitle: 'ARVIJIKH MEAT STORE',
     authHeroDesc: 'Create an account and track your order history',
     directDelivery: 'Direct delivery to market',
     viewOrderHistory: 'View order history',
     fastPayment: 'Fast and reliable payment',
+    or: 'Or',
     orContinueWith: 'Or',
     continueWithGoogle: 'Continue with Google',
 

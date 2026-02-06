@@ -42,8 +42,8 @@ export function SelectableProductCard({
   return (
     <motion.div
       className={`bg-white rounded-lg overflow-hidden transition-all duration-300 border-2 ${isSelected
-          ? "border-primary shadow-lg shadow-primary/20"
-          : "border-transparent shadow-md hover:shadow-xl hover:border-primary/10"
+        ? "border-primary shadow-lg shadow-primary/20"
+        : "border-transparent shadow-md hover:shadow-xl hover:border-primary/10"
         }`}
       initial={{ scale: 1 }}
       whileHover={{
@@ -66,7 +66,7 @@ export function SelectableProductCard({
             transition={{ duration: 0.5 }}
           />
           <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-[#9b1f24]/70 via-transparent to-[#9b1f24]/30"
+            className="absolute inset-0 bg-gradient-to-t from-[#0e5841]/70 via-transparent to-[#0e5841]/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered || isSelected ? 1 : 0 }}
             transition={{ duration: 0.4 }}
@@ -89,13 +89,13 @@ export function SelectableProductCard({
             <div>
               <h3 className="font-bold text-lg mb-1">{name}</h3>
               <motion.span
-                className="inline-block bg-[#9b1f24]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#9b1f24]/20 text-[#9b1f24]"
+                className="inline-block bg-[#0e5841]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#0e5841]/20 text-[#0e5841]"
               >
                 {category}
               </motion.span>
             </div>
             <motion.span
-              className="font-bold text-lg text-[#9b1f24]"
+              className="font-bold text-lg text-[#0e5841]"
               animate={isHovered ? {
                 scale: 1.1
               } : {
@@ -112,7 +112,7 @@ export function SelectableProductCard({
       {isSelected && (
         <div className="p-4 pt-0">
           <div className="flex items-center">
-            <label className="text-sm mr-2 text-[#9b1f24] font-medium">Хэмжээ:</label>
+            <label className="text-sm mr-2 text-[#0e5841] font-medium">Хэмжээ:</label>
             <input
               type="number"
               min="1"

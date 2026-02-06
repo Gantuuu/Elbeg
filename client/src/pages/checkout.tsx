@@ -82,7 +82,7 @@ export default function Checkout() {
         description: "Захиалга хийхийн тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
         variant: "default",
       });
-      setLocation("/auth");
+      setLocation("/auth?tab=signup");
     }
   }, [user, isAuthLoading, setLocation, toast]);
 
@@ -336,7 +336,7 @@ export default function Checkout() {
           </div>
         </div>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#9b1f24] rounded-full"></div>
+          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#0e5841] rounded-full"></div>
         </div>
         <Footer />
       </div>
@@ -350,12 +350,12 @@ export default function Checkout() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center py-10 bg-white rounded-xl shadow-sm">
-            <span className="material-icons text-5xl text-[#9b1f24] mb-4">shopping_cart</span>
+            <span className="material-icons text-5xl text-[#0e5841] mb-4">shopping_cart</span>
             <h2 className="text-2xl font-bold text-foreground mb-4">Сагс хоосон байна</h2>
             <p className="text-muted-foreground mb-6">Захиалга хийхийн тулд сагсандаа бүтээгдэхүүн нэмнэ үү.</p>
             <Button
               onClick={() => setLocation("/")}
-              className="bg-[#9b1f24] hover:brightness-105 text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-[#0e5841] hover:brightness-105 text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
             >
               Бүтээгдэхүүн харах
               <span className="material-icons ml-2">arrow_forward</span>
@@ -373,8 +373,8 @@ export default function Checkout() {
 
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#9b1f24] inline-block mb-3">{t.checkout}</h1>
-          <div className="w-20 h-1 bg-[#9b1f24] mx-auto rounded-full"></div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#0e5841] inline-block mb-3">{t.checkout}</h1>
+          <div className="w-20 h-1 bg-[#0e5841] mx-auto rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -475,7 +475,7 @@ export default function Checkout() {
                 />
 
                 <div className="space-y-4 rounded-lg p-5 border-2 border-blue-400/70 bg-white shadow-md">
-                  <div className="flex items-center bg-[#9b1f24] px-4 py-2 rounded-md -mt-2 -mx-1 shadow-sm">
+                  <div className="flex items-center bg-[#0e5841] px-4 py-2 rounded-md -mt-2 -mx-1 shadow-sm">
                     <span className="material-icons mr-2 text-xl text-white">account_balance</span>
                     <h3 className="font-bold text-md text-white">{t.paymentInfo}</h3>
                   </div>
@@ -494,7 +494,7 @@ export default function Checkout() {
                   />
 
                   <div className="mb-6">
-                    <h3 className="text-lg font-bold text-[#9b1f24] inline-block mb-3">{t.bankTransfer}</h3>
+                    <h3 className="text-lg font-bold text-[#0e5841] inline-block mb-3">{t.bankTransfer}</h3>
                     <p className="text-sm text-gray-600 mb-4">{t.bankTransferDesc}</p>
 
                     <FormField
@@ -504,7 +504,7 @@ export default function Checkout() {
                         <FormItem className="mb-4">
                           <div className="flex items-center justify-between mb-2">
                             <FormLabel className="text-gray-800 font-medium flex items-center">
-                              <span className="material-icons text-[#9b1f24] mr-1 text-lg">account_balance</span>
+                              <span className="material-icons text-[#0e5841] mr-1 text-lg">account_balance</span>
                               {t.bank}
                             </FormLabel>
                             <span className="text-xs text-gray-500">
@@ -517,15 +517,15 @@ export default function Checkout() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#9b1f24]/20 focus:border-[#9b1f24]">
+                              <SelectTrigger className="bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0e5841]/20 focus:border-[#0e5841]">
                                 <SelectValue placeholder={t.selectBank} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl border-2 border-gray-200 shadow-lg bg-white">
                               {isBankAccountsLoading ? (
                                 <div className="p-4 text-center">
-                                  <div className="h-4 w-24 bg-[#9b1f24]/10 animate-pulse rounded-full mx-auto mb-2"></div>
-                                  <div className="h-4 w-36 bg-[#9b1f24]/10 animate-pulse rounded-full mx-auto"></div>
+                                  <div className="h-4 w-24 bg-[#0e5841]/10 animate-pulse rounded-full mx-auto mb-2"></div>
+                                  <div className="h-4 w-36 bg-[#0e5841]/10 animate-pulse rounded-full mx-auto"></div>
                                 </div>
                               ) : bankAccounts.length > 0 ? (
                                 bankAccounts.map((account) => (
@@ -570,7 +570,7 @@ export default function Checkout() {
                           if (accountData) {
                             return (
                               <>
-                                <div className="bg-[#9b1f24] p-3 text-white">
+                                <div className="bg-[#0e5841] p-3 text-white">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                       <span className="material-icons mr-2">account_balance</span>
@@ -596,7 +596,7 @@ export default function Checkout() {
                                     <button
                                       type="button"
                                       onClick={() => navigator.clipboard.writeText(accountData.accountNumber)}
-                                      className="flex items-center justify-center py-2 px-4 rounded-lg bg-[#9b1f24] text-white hover:brightness-110 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md mt-2"
+                                      className="flex items-center justify-center py-2 px-4 rounded-lg bg-[#0e5841] text-white hover:brightness-110 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md mt-2"
                                     >
                                       <span className="material-icons text-sm mr-1">content_copy</span>
                                       {t.copyAccountNumber}
@@ -638,7 +638,7 @@ export default function Checkout() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#9b1f24] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="w-full bg-[#0e5841] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-sm hover:shadow-md"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -685,7 +685,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-gray-100">
                   <span className="text-foreground">{t.totalAmount}:</span>
-                  <span className="text-[#9b1f24] font-bold">{formatPrice(totalPrice + shippingFee)}</span>
+                  <span className="text-[#0e5841] font-bold">{formatPrice(totalPrice + shippingFee)}</span>
                 </div>
               </div>
             </div>

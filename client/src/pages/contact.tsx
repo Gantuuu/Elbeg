@@ -73,9 +73,9 @@ export default function Contact() {
     {
       icon: Phone,
       title: "Утас",
-      value: "010 6884 9193",
+      value: "010 5940 0081",
       description: "Өдөр бүр 09:00 - 22:00",
-      href: "tel:010-6884-9193"
+      href: "tel:010-5940-0081"
     },
     {
       icon: FaFacebookF,
@@ -87,9 +87,9 @@ export default function Contact() {
     {
       icon: MapPin,
       title: "Хаяг",
-      value: "청주시 흥덕구 봉명동 1091",
+      value: "대전광역시 동구 계족로 489번길 상가동 112호 용전동 한숲아파트",
       description: "Солонгос, Чөнжү хот",
-      href: "https://maps.google.com?q=청주시+흥덕구+봉명동+1091"
+      href: "https://maps.google.com?q=대전광역시+동구+계족로+489번길+상가동+112호+용전동+한숲아파트"
     },
     {
       icon: Clock,
@@ -106,7 +106,7 @@ export default function Contact() {
       <Navbar />
 
       {/* Hero Section with Back Button */}
-      <section className="relative overflow-hidden bg-[#9b1f24] text-white">
+      <section className="relative overflow-hidden bg-[#0e5841] text-white">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           {/* Back Button */}
@@ -158,21 +158,21 @@ export default function Contact() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
-                <div className="w-16 h-16 bg-[#9b1f24] rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-[#0e5841] rounded-full flex items-center justify-center mx-auto mb-4">
                   <item.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
                 {item.href ? (
                   <a
                     href={item.href}
-                    className="text-gray-800 font-medium hover:text-[#9b1f24] transition-colors duration-200 block"
+                    className="text-gray-800 font-medium hover:text-[#0e5841] transition-colors duration-200 block"
                     target={item.href.startsWith('http') ? '_blank' : undefined}
                     rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                   >
                     {item.value}
                   </a>
                 ) : (
-                  <p className="text-gray-800 font-medium">{item.value}</p>
+                  <p className="text-gray-800 font-medium break-keep">{item.value}</p>
                 )}
               </motion.div>
             ))}

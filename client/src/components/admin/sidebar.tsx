@@ -69,7 +69,7 @@ export function AdminSidebar() {
 
   // Mobile menu toggle button displayed at the top of the screen
   const mobileMenuToggle = (
-    <div className="md:hidden fixed top-0 left-0 z-50 w-full bg-[#9b1f24] p-3 shadow-md flex justify-between items-center">
+    <div className="md:hidden fixed top-0 left-0 z-50 w-full bg-[#0e5841] p-3 shadow-md flex justify-between items-center">
       <div className="flex items-center">
         <span className="material-icons text-white text-2xl mr-2">admin_panel_settings</span>
         <span className="font-bold text-white">Админ Удирдлага</span>
@@ -91,7 +91,7 @@ export function AdminSidebar() {
 
       {/* Mobile Sidebar - Drawer that slides in from left */}
       <div className={cn(
-        "fixed md:relative inset-y-0 left-0 z-40 w-80 md:w-64 bg-[#9b1f24] text-white shadow-xl transform transition-transform duration-300",
+        "fixed md:relative inset-y-0 left-0 z-40 w-80 md:w-64 bg-[#0e5841] text-white shadow-xl transform transition-transform duration-300",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         {/* Fixed height for desktop, scrollable for mobile */}

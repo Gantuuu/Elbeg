@@ -27,7 +27,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
 
   useEffect(() => {
     if (isPressed) {
-      controls.start({ color: "#9b1f24" });
+      controls.start({ color: "#0e5841" });
     } else {
       controls.start({ color: "#333333" });
     }
@@ -48,7 +48,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
         });
 
         // 회원가입 탭을 먼저 보여줌
-        setLocation("/auth");
+        setLocation("/auth?tab=signup");
         setIsLoading(false);
         return;
       }
@@ -117,7 +117,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
 
           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-300 flex items-end justify-end">
             <button
-              className="m-2 bg-[#9b1f24] text-white text-xs py-1.5 px-3 rounded-md flex items-center justify-center shadow-md font-bold"
+              className="m-2 bg-[#0e5841] text-white text-xs py-1.5 px-3 rounded-md flex items-center justify-center shadow-md font-bold"
               onClick={handleAddToCart}
               disabled={isLoading}
             >
@@ -134,7 +134,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
             {name}
           </h3>
           <div className="flex justify-end items-center mt-1">
-            <p className="font-bold text-sm text-[#9b1f24]">
+            <p className="font-bold text-sm text-[#0e5841]">
               {formatPrice(price)}
             </p>
           </div>

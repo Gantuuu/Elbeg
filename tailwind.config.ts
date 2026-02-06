@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        'glow-sm': '0 0 5px rgba(155, 31, 36, 0.5), 0 0 10px rgba(155, 31, 36, 0.3)',
-        'glow': '0 0 10px rgba(155, 31, 36, 0.5), 0 0 20px rgba(155, 31, 36, 0.3)',
-        'glow-lg': '0 0 15px rgba(155, 31, 36, 0.5), 0 0 30px rgba(155, 31, 36, 0.3)',
+        'glow-sm': '0 0 5px rgba(14, 88, 65, 0.5), 0 0 10px rgba(14, 88, 65, 0.3)',
+        'glow': '0 0 10px rgba(14, 88, 65, 0.5), 0 0 20px rgba(14, 88, 65, 0.3)',
+        'glow-lg': '0 0 15px rgba(14, 88, 65, 0.5), 0 0 30px rgba(14, 88, 65, 0.3)',
       },
       borderRadius: {
         lg: "var(--radius)",

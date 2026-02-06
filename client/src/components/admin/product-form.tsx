@@ -468,7 +468,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full md:w-auto order-1 md:order-2 bg-[#9b1f24] hover:bg-[#9b1f24]/90 text-white h-11 md:h-10"
+            className="w-full md:w-auto order-1 md:order-2 bg-[#0e5841] hover:bg-[#0e5841]/90 text-white h-11 md:h-10"
           >
             {isSubmitting && (
               <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>

@@ -77,10 +77,10 @@ export function Footer() {
 
   // Set default values if data hasn't loaded yet
   const {
-    companyName = "Nice Meat махны дэлгүүр",
+    companyName = "Элбэг мах хүнс",
     description = "Чанартай махны бүтээгдэхүүн",
-    address = "청주시 흥덕구 봉명동 1091",
-    phone = "010 6884 9193",
+    address = "대전광역시 동구 계족로 489번길 상가동 112호 용전동 한숲아파트",
+    phone = "010 5940 0081",
     email = "",
     copyright = t.copyright,
     socialLinks = {},
@@ -159,7 +159,7 @@ export function Footer() {
             <div className="flex items-center space-x-2">
               <FaFacebook className="text-gray-600 text-sm" />
               <a
-                href="https://www.facebook.com/otgonbyambahoy/"
+                href="https://www.facebook.com/groups/533004020966357/?ref=share&mibextid=NSMWBT"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-200"
@@ -175,9 +175,9 @@ export function Footer() {
           </div>
 
           {/* Address on separate line */}
-          <div className="flex items-center justify-center space-x-2">
-            <span className="material-icons text-gray-600 text-sm">location_on</span>
-            <p className="text-gray-600 text-sm">{address}</p>
+          <div className="flex items-start justify-center space-x-2">
+            <span className="material-icons text-gray-600 text-sm mt-0.5 flex-shrink-0">location_on</span>
+            <p className="text-gray-600 text-sm text-left break-keep leading-relaxed">{address}</p>
           </div>
         </div>
 

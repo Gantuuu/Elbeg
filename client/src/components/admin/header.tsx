@@ -30,7 +30,7 @@ export function AdminHeader({ title, description, icon, showBackButton = true }:
   const pendingOrdersCount = pendingCount || pendingData?.count || 0;
 
   return (
-    <header className="bg-[#9b1f24] shadow">
+    <header className="bg-[#0e5841] shadow">
       <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-4">
         <div className="flex items-center">
           {showBackButton && (
@@ -69,7 +69,7 @@ export function AdminHeader({ title, description, icon, showBackButton = true }:
               "absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center",
               pendingOrdersCount > 0
                 ? "bg-red-500 animate-pulse"
-                : "bg-[#9b1f24]"
+                : "bg-[#0e5841]"
             )}>
               {pendingOrdersCount}
             </span>

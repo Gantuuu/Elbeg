@@ -39,7 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
         });
 
         // 회원가입 탭을 먼저 보여줌
-        setLocation("/auth");
+        setLocation("/auth?tab=signup");
         setIsLoading(false);
         return;
       }
@@ -108,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
 
           </div>
-          <span className="font-bold text-lg text-[#9b1f24]">
+          <span className="font-bold text-lg text-[#0e5841]">
             {formatPrice(price)}
           </span>
         </div>
@@ -127,7 +127,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
         <button
-          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#9b1f24] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
+          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#0e5841] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
           onClick={handleAddToCart}
           disabled={isLoading}
         >

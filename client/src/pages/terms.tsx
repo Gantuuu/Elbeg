@@ -38,7 +38,7 @@ export default function Terms() {
                   <h2 className="text-xl font-semibold text-gray-900">1. Ерөнхий нөхцөл</h2>
                 </div>
                 <p>
-                  Энэхүү вэбсайтыг ашигласнаар та эдгээр үйлчилгээний нөхцөлийг хүлээн зөвшөөрч байна гэж үзнэ. 
+                  Энэхүү вэбсайтыг ашигласнаар та эдгээр үйлчилгээний нөхцөлийг хүлээн зөвшөөрч байна гэж үзнэ.
                   Хэрэв та эдгээр нөхцөлтэй санал нийлэхгүй бол вэбсайтыг ашиглахаа зогсооно уу.
                 </p>
               </section>
@@ -116,7 +116,7 @@ export default function Terms() {
                 </p>
                 <p className="mt-2">
                   <strong>Имэйл:</strong> arvijix@gmail.com<br />
-                  <strong>Утас:</strong> 010 6884 9193
+                  <strong>Утас:</strong> 010 5940 0081
                 </p>
               </section>
             </div>

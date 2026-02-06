@@ -53,7 +53,7 @@ export function Hero() {
   const imageUrl = heroContent?.imageUrl || "/uploads/1746355234137-26887706.jpg";
 
   return (
-    <section className="bg-[#9b1f24] pt-3 pb-4">
+    <section className="bg-[#0e5841] pt-3 pb-4">
       <div className="container mx-auto px-6">
         {/* Scrolling delivery message */}
         <motion.div

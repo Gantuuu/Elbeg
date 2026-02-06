@@ -43,7 +43,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         style={{ maxWidth: "85vw" }}
       >
         {/* Basic header bar */}
-        <div className="bg-[#9b1f24] p-4 flex justify-between items-center text-white">
+        <div className="bg-[#0e5841] p-4 flex justify-between items-center text-white">
           <h2 className="text-xl font-bold flex items-center">
             <span className="material-icons mr-2">shopping_cart</span>
             Таны сагс
@@ -61,14 +61,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <div className="w-20 h-20 rounded-full gradient-card flex items-center justify-center mb-6 shadow-md">
-                <span className="material-icons text-5xl text-[#9b1f24]">shopping_cart</span>
+                <span className="material-icons text-5xl text-[#0e5841]">shopping_cart</span>
               </div>
               <p className="text-lg font-medium">Таны сагс хоосон байна</p>
               <p className="mt-2 text-sm text-center">
                 Бүтээгдэхүүн сонгоод "Сагсанд нэмэх" товчийг дарна уу.
               </p>
               <Button
-                className="mt-6 bg-[#9b1f24] hover:bg-[#9b1f24]/90 text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                className="mt-6 bg-[#0e5841] hover:bg-[#0e5841]/90 text-white transition-all duration-300 shadow-md hover:shadow-lg"
                 onClick={onClose}
               >
                 Бүтээгдэхүүн харах
@@ -86,10 +86,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         <div className="p-5 border-t">
           <div className="flex justify-between mb-4">
             <span className="text-lg">Нийт дүн:</span>
-            <span className="font-bold text-lg text-[#9b1f24]">{formatPrice(totalPrice)}</span>
+            <span className="font-bold text-lg text-[#0e5841]">{formatPrice(totalPrice)}</span>
           </div>
           <Button
-            className="w-full bg-[#9b1f24] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-md hover:shadow-lg"
+            className="w-full bg-[#0e5841] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-md hover:shadow-lg"
             disabled={isEmpty}
             asChild
           >

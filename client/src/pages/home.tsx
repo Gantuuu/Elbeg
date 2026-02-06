@@ -181,7 +181,7 @@ export default function HomePage() {
         description: t.toast.loginRequiredDesc,
         variant: "default",
       });
-      setLocation("/auth");
+      setLocation("/auth?tab=signup");
       return;
     }
 
@@ -225,8 +225,8 @@ export default function HomePage() {
           <svg xmlns="http://www.w3.org/2000/svg" width="180" height="128" viewBox="0 0 180 128">
             <defs>
               <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#9b1f24;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#9b1f24;stop-opacity:0.8" />
+                <stop offset="0%" style="stop-color:#0e5841;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#0e5841;stop-opacity:0.8" />
               </linearGradient>
             </defs>
             <rect width="180" height="128" fill="url(#grad)"/>
@@ -263,12 +263,12 @@ export default function HomePage() {
             </p>
             <div className="space-y-1">
               <div className="text-center">
-                <span className="font-bold text-xs text-[#9b1f24]">
+                <span className="font-bold text-xs text-[#0e5841]">
                   {price.toLocaleString()}₩
                 </span>
               </div>
               <button
-                className="w-full bg-[#9b1f24] hover:brightness-105 text-white text-[9px] px-1 py-1.5 rounded-md font-bold"
+                className="w-full bg-[#0e5841] hover:brightness-105 text-white text-[9px] px-1 py-1.5 rounded-md font-bold"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -347,7 +347,7 @@ export default function HomePage() {
                     data-testid={`review-card-${review.id}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#9b1f24] flex items-center justify-center text-white font-bold flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[#0e5841] flex items-center justify-center text-white font-bold flex-shrink-0">
                         {review.customerName.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1">
@@ -378,7 +378,7 @@ export default function HomePage() {
                       data-testid={`review-card-mobile-${review.id}-${index}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#9b1f24] flex items-center justify-center text-white font-bold flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-[#0e5841] flex items-center justify-center text-white font-bold flex-shrink-0">
                           {review.customerName.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -426,7 +426,7 @@ export default function HomePage() {
                   <button
                     onClick={() => setSelectedCategory("all")}
                     className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${selectedCategory === "all"
-                      ? "bg-[#9b1f24] text-white"
+                      ? "bg-[#0e5841] text-white"
                       : "bg-gray-100/80 text-gray-700"
                       }`}
                   >
@@ -442,7 +442,7 @@ export default function HomePage() {
                         key={category.id}
                         onClick={() => setSelectedCategory(category.name)}
                         className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${selectedCategory === category.name
-                          ? "bg-[#9b1f24] text-white"
+                          ? "bg-[#0e5841] text-white"
                           : "bg-gray-100/80 text-gray-700"
                           }`}
                       >
@@ -495,7 +495,7 @@ export default function HomePage() {
                               const parent = target.parentElement;
                               if (parent && !parent.querySelector('.fallback-bg')) {
                                 const fallback = document.createElement('div');
-                                fallback.className = 'fallback-bg absolute inset-0 bg-[#9b1f24] flex items-center justify-center';
+                                fallback.className = 'fallback-bg absolute inset-0 bg-[#0e5841] flex items-center justify-center';
                                 fallback.innerHTML = `<span class="text-white font-bold text-xs text-center px-2">${product.name}</span>`;
                                 parent.appendChild(fallback);
                               }
@@ -520,7 +520,7 @@ export default function HomePage() {
                           <div className="mt-auto space-y-2">
                             {/* Price display - centered */}
                             <div className="text-center">
-                              <span className="font-bold text-sm text-[#9b1f24]">
+                              <span className="font-bold text-sm text-[#0e5841]">
                                 {(() => {
                                   const price = parseFloat(product.price.toString());
 
@@ -533,7 +533,7 @@ export default function HomePage() {
                             {/* Cart button - full width and centered */}
                             <Button
                               size="sm"
-                              className="w-full bg-[#9b1f24] hover:brightness-105 text-white h-8 text-xs font-medium"
+                              className="w-full bg-[#0e5841] hover:brightness-105 text-white h-8 text-xs font-medium"
                               onClick={() => handleAddToCartClick(product)}
                             >
                               {t.addToCart}
@@ -541,7 +541,7 @@ export default function HomePage() {
 
                             {/* Delivery date badge - mobile optimized */}
                             {deliveryDate && (
-                              <div className="flex flex-col items-center justify-center bg-[#9b1f24] text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg" data-testid={`delivery-badge-${product.id}`}>
+                              <div className="flex flex-col items-center justify-center bg-[#0e5841] text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg" data-testid={`delivery-badge-${product.id}`}>
                                 <div className="flex items-center gap-0.5 sm:gap-1">
                                   <Truck className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                                   <span>{formatDeliveryDate(deliveryDate, language)}</span>
@@ -559,7 +559,7 @@ export default function HomePage() {
                   {displayedCount < filteredProducts.length && (
                     <div className="text-center mt-8">
                       <div className="inline-flex items-center gap-2 text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#9b1f24] rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#0e5841] rounded-full animate-spin"></div>
                         {t.loading}
                       </div>
                     </div>
@@ -576,7 +576,7 @@ export default function HomePage() {
                   </p>
                   <Button
                     onClick={() => setSelectedCategory("all")}
-                    className="bg-[#9b1f24] text-white"
+                    className="bg-[#0e5841] text-white"
                   >
                     Бүх бүтээгдэхүүн үзэх
                   </Button>

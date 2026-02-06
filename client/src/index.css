@@ -83,35 +83,35 @@
 
   /* Overrides for previous gradient classes to use the new brand color */
   .gradient-red-blue {
-    @apply bg-[#9b1f24] !important;
-    background: #9b1f24 !important;
+    @apply bg-[#0e5841] !important;
+    background: #0e5841 !important;
   }
 
   .gradient-nav {
-    @apply bg-[#9b1f24] !important;
-    background: #9b1f24 !important;
+    @apply bg-[#0e5841] !important;
+    background: #0e5841 !important;
   }
 
   .text-gradient-red-blue {
-    @apply text-[#9b1f24] !important;
+    @apply text-[#0e5841] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .gradient-text {
-    @apply text-[#9b1f24] !important;
+    @apply text-[#0e5841] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .text-gradient-text {
-    @apply text-[#9b1f24] !important;
+    @apply text-[#0e5841] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .bg-gradient-to-r.from-\[\#FF2D2D\].to-\[\#2D55FF\] {
-    @apply bg-[#9b1f24] !important;
+    @apply bg-[#0e5841] !important;
     background-image: none !important;
   }
 }

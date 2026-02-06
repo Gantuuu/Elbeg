@@ -149,7 +149,7 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-base truncate">{product.name}</h3>
               <p className="text-sm text-gray-600 truncate">{product.description}</p>
-              <p className="font-bold text-lg text-[#9b1f24]">
+              <p className="font-bold text-lg text-[#0e5841]">
                 {productPrice.toLocaleString()}₩
               </p>
             </div>
@@ -205,7 +205,7 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 {t.currentOrderTotal.split('{total}')[0]}
-                <span className="font-bold text-lg text-[#9b1f24]">
+                <span className="font-bold text-lg text-[#0e5841]">
                   {totalWithCurrentProduct.toLocaleString()}
                 </span>
                 {t.currentOrderTotal.split('{total}')[1]}
@@ -216,7 +216,7 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
-            className="w-full bg-[#9b1f24] hover:brightness-105 text-white py-2.5 text-base font-bold"
+            className="w-full bg-[#0e5841] hover:brightness-105 text-white py-2.5 text-base font-bold"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             {t.addToCart} ({quantity}{t.pieces})

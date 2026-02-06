@@ -101,8 +101,8 @@ export default function AdminLogin() {
         <Card>
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-2">
-              <span className="material-icons text-3xl mr-2 text-[#9b1f24]">admin_panel_settings</span>
-              <CardTitle className="text-2xl font-bold text-[#9b1f24]">Админ нэвтрэх</CardTitle>
+              <span className="material-icons text-3xl mr-2 text-[#0e5841]">admin_panel_settings</span>
+              <CardTitle className="text-2xl font-bold text-[#0e5841]">Админ нэвтрэх</CardTitle>
             </div>
             {isRedirected && (
               <div className="bg-yellow-100 text-yellow-800 p-3 rounded text-sm">
@@ -143,7 +143,7 @@ export default function AdminLogin() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#9b1f24] hover:brightness-105 text-white"
+                  className="w-full bg-[#0e5841] hover:brightness-105 text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -160,7 +160,7 @@ export default function AdminLogin() {
                   <Button
                     variant="link"
                     onClick={() => setLocation("/")}
-                    className="text-[#9b1f24] font-medium"
+                    className="text-[#0e5841] font-medium"
                   >
                     Нүүр хуудас руу буцах
                   </Button>

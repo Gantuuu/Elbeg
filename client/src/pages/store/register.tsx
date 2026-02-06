@@ -79,7 +79,7 @@ export default function StoreRegisterPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as { message: string };
         throw new Error(errorData.message || "Дэлгүүр үүсгэх үед алдаа гарлаа");
       }
 
@@ -304,7 +304,7 @@ export default function StoreRegisterPage() {
                       </Button>
                       <Button
                         type="submit"
-                        className="bg-[#9b1f24] text-white"
+                        className="bg-[#0e5841] text-white"
                         disabled={createStoreMutation.isPending}
                       >
                         {createStoreMutation.isPending ? "Бүртгэж байна..." : "Дэлгүүр бүртгүүлэх"}

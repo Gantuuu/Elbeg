@@ -361,7 +361,7 @@ export default function HeroSettings() {
                         {form.watch("text") || heroSettings?.text || "Монголын хамгийн чанартай, шинэ махыг танд хүргэж байна."}
                       </p>
                       <button
-                        className="bg-[#9b1f24] text-white font-bold py-2 px-4 rounded-lg inline-flex items-center"
+                        className="bg-[#0e5841] text-white font-bold py-2 px-4 rounded-lg inline-flex items-center"
                         disabled
                       >
                         Дэлгэрэнгүй
