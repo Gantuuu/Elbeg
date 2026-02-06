@@ -10,7 +10,8 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
-  
+  const [, setLocation] = useLocation();
+
   // Check if user is authenticated
   const { data, isLoading } = useQuery({
     queryKey: ['/api/admin/check-auth'],
@@ -20,7 +21,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     }
   });
 
-  // If checking auth and not on login page, show loading
+  useEffect(() => {
+    if (data && !data.authenticated && !location.includes('/admin/login')) {
+      setLocation('/admin/login');
+    }
+  }, [data, location, setLocation]);
+
+  // Early return for loading state MUST come after all use* hook declarations
   if (isLoading && !location.includes('/admin/login')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -32,15 +39,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // If not authenticated and not on login page, redirect to login
-  const [, setLocation] = useLocation();
-  
-  useEffect(() => {
-    if (data && !data.authenticated && !location.includes('/admin/login')) {
-      setLocation('/admin/login');
-    }
-  }, [data, location, setLocation]);
-  
   if (data && !data.authenticated && !location.includes('/admin/login')) {
     return null;
   }
@@ -49,7 +47,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="flex flex-col md:flex-row min-h-screen bg-background relative">
       {/* Sidebar */}
       <AdminSidebar />
-      
+
       {/* Main content area - Make sure it has a top margin on mobile to account for the fixed mobile header */}
       <div className="flex-1 mt-16 md:mt-0 w-full">
         {/* Content wrapper with padding */}

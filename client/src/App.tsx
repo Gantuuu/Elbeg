@@ -137,7 +137,7 @@ function AppContent() {
               {() => <AdminRoute component={AdminOrders} />}
             </Route>
             <Route path="/admin/users">
-              {() => <AdminRoute component={AdminUsers} />}
+              {(params) => <AdminRoute component={AdminUsers} {...params} />}
             </Route>
 
             {/* CMS Admin Routes */}
