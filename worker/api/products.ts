@@ -82,9 +82,13 @@ app.post('/', requireAdmin, async (c) => {
 
         const newProduct = await storage.createProduct(productData);
         return c.json(newProduct, 201);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating product:", error);
-        return c.json({ message: "Error creating product" }, 500);
+        return c.json({
+            message: "Error creating product",
+            error: error.message,
+            stack: error.stack
+        }, 500);
     }
 });
 
@@ -127,18 +131,22 @@ app.put('/:id', requireAdmin, async (c) => {
         updateData.storeId = parseInt(parsedData.storeId || body['storeId'] as string);
     }
 
-    if (file && file instanceof File) {
-        const fileName = `products/${Date.now()}_${file.name}`;
-        updateData.imageUrl = await storage.uploadFile('media', fileName, file);
+    try {
+        const updatedProduct = await storage.updateProduct(id, updateData);
+
+        if (!updatedProduct) {
+            return c.json({ message: "Product not found" }, 404);
+        }
+
+        return c.json(updatedProduct);
+    } catch (error: any) {
+        console.error("Error updating product:", error);
+        return c.json({
+            message: "Error updating product",
+            error: error.message,
+            stack: error.stack
+        }, 500);
     }
-
-    const updatedProduct = await storage.updateProduct(id, updateData);
-
-    if (!updatedProduct) {
-        return c.json({ message: "Product not found" }, 404);
-    }
-
-    return c.json(updatedProduct);
 });
 
 app.delete('/:id', requireAdmin, async (c) => {
