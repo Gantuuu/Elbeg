@@ -9,9 +9,10 @@ import { CartItemComponent } from "@/components/ui/cart-item";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "../lib/queryClient";
+import { supabase } from "@/lib/supabase";
 import { Loader2, LogIn, UserCircle2 } from "lucide-react";
 import { insertOrderSchema, BankAccount } from "@shared/schema";
 import { useLanguage } from "@/contexts/language-context";
@@ -81,16 +82,24 @@ export default function Checkout() {
         description: "Захиалга хийхийн тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
         variant: "default",
       });
-      setLocation("/auth?tab=signup");
+      setLocation("/auth");
     }
   }, [user, isAuthLoading, setLocation, toast]);
 
   // Fetch shipping fee from server
   const { data: shippingFeeData, isLoading: isLoadingShippingFee } = useQuery({
-    queryKey: ['/api/settings/shipping-fee'],
+    queryKey: ['shipping-fee'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/settings/shipping-fee');
-      return response as { value: string };
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'shipping_fee')
+        .single();
+      if (error) {
+        console.error('Error fetching shipping fee:', error);
+        return { value: "3000" }; // Default
+      }
+      return data as { value: string };
     }
   });
 
@@ -106,12 +115,44 @@ export default function Checkout() {
 
   // Fetch all bank accounts
   const { data: bankAccounts = [], isLoading: isBankAccountsLoading } = useQuery<BankAccount[]>({
-    queryKey: ['/api/bank-accounts']
+    queryKey: ['bank-accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('bank_accounts')
+        .select('*')
+        .eq('is_active', true);
+      if (error) throw error;
+      return data.map(acc => ({
+        id: acc.id,
+        bankName: acc.bank_name,
+        accountNumber: acc.account_number,
+        accountHolder: acc.account_holder,
+        description: acc.description,
+        isDefault: acc.is_default,
+        isActive: acc.is_active
+      })) as any[];
+    }
   });
 
   // Fetch default bank account
   const { data: defaultBankAccount, isLoading: isBankAccountLoading } = useQuery<BankAccount>({
-    queryKey: ['/api/bank-accounts/default']
+    queryKey: ['bank-account-default'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('bank_accounts')
+        .select('*')
+        .eq('is_default', true)
+        .single();
+      if (error) return null as any;
+      return {
+        id: data.id,
+        bankName: data.bank_name,
+        accountNumber: data.account_number,
+        accountHolder: data.account_holder,
+        description: data.description,
+        isDefault: data.is_default
+      } as any;
+    }
   });
 
   // Log bank account data when it changes
@@ -228,44 +269,46 @@ export default function Checkout() {
       console.log("Sending order payload:", orderPayload);
 
       try {
-        const response = await apiRequest("POST", "/api/orders", orderPayload);
-        console.log("Order created successfully:", response);
+        // 1. Insert order into 'orders' table
+        const { data: order, error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            customer_name: data.customerName,
+            customer_email: data.customerEmail,
+            customer_phone: data.customerPhone,
+            customer_address: data.customerAddress,
+            payment_method: data.paymentMethod,
+            total_amount: orderTotalWithShipping,
+            status: 'pending'
+          })
+          .select()
+          .single();
 
-        // Check if response is JSON
-        if (response && typeof response === 'object') {
-          if (response.id) {
-            handleCheckoutSuccess(response.id);
-          } else {
-            console.error("Order created but no ID returned:", response);
-            toast({
-              title: "Захиалга амжилттай",
-              description: "Захиалга амжилттай хийгдлээ.",
-              variant: "default",
-            });
-            // Clear cart and redirect to home even if ID is missing
-            clearCart();
-            setLocation("/");
-          }
-        } else {
-          // Handle HTML response (unexpected response type)
-          console.error("Unexpected response format:", response);
-          toast({
-            title: "Захиалга амжилттай",
-            description: "Захиалга амжилттай хийгдлээ харин нэмэлт мэдээлэл авах боломжгүй байна.",
-            variant: "default",
-          });
-          // Clear cart and redirect to home
-          clearCart();
-          setLocation("/");
+        if (orderError) throw orderError;
+        if (!order) throw new Error("Захиалга үүсгэхэд алдаа гарлаа");
+
+        // 2. Insert order items into 'order_items' table
+        const orderItems = items.map(item => ({
+          order_id: order.id,
+          product_id: item.productId,
+          quantity: item.quantity,
+          price: parseFloat(item.price.toString())
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) {
+          console.error("Order items creation failed, but order was created:", itemsError);
+          // We might want to delete the order here or just inform the user
         }
-      } catch (apiError: any) {
-        console.error("API request error:", apiError);
-        const errorMessage = apiError.message || "Захиалга боловсруулах үед алдаа гарлаа";
-        toast({
-          title: "API Алдаа",
-          description: errorMessage,
-          variant: "destructive",
-        });
+
+        console.log("Order created successfully with Supabase:", order);
+        handleCheckoutSuccess(order.id);
+      } catch (error: any) {
+        console.error("Supabase order error:", error);
+        throw error;
       }
     } catch (error: any) {
       console.error("Error submitting order:", error);

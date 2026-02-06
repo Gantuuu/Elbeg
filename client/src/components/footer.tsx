@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import { useLanguage } from "../contexts/language-context";
+import { supabase } from "@/lib/supabase";
 
 // Define a type for our footer settings data
 interface FooterSettings {
@@ -31,7 +32,33 @@ export function Footer() {
 
   // Fetch footer settings from API
   const { data: footerData, isLoading } = useQuery<FooterSettings>({
-    queryKey: ['/api/settings/footer'],
+    queryKey: ['footer-settings'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('footer_settings')
+          .select('*')
+          .single();
+
+        if (error) throw error;
+
+        // Map snake_case to camelCase
+        return {
+          companyName: data.company_name,
+          description: data.description,
+          address: data.address,
+          phone: data.phone,
+          email: data.email,
+          logoUrl: data.logo_url,
+          socialLinks: data.social_links as any,
+          quickLinks: data.quick_links as any,
+          copyright: data.copyright_text
+        };
+      } catch (error) {
+        console.error('Error fetching footer settings:', error);
+        return {} as FooterSettings;
+      }
+    },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 

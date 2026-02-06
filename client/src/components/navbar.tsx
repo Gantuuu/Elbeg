@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { UserIcon, ShoppingCartIcon, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 
 // Site name interface
 interface SiteNameSettings {
@@ -25,14 +26,18 @@ export function Navbar() {
 
   // Fetch navigation items from API
   const { data: navigationItems = [] } = useQuery({
-    queryKey: ['/api/navigation'],
+    queryKey: ['navigation'],
     queryFn: async () => {
       try {
-        const data = await apiRequest('GET', '/api/navigation');
-        // Filter only active items and sort by order
-        return data
-          .filter((item: any) => item.isActive && !item.parentId) // Only root level, active items
-          .sort((a: any, b: any) => a.order - b.order);
+        const { data, error } = await supabase
+          .from('navigation_items')
+          .select('*')
+          .eq('is_active', true)
+          .is('parent_id', null)
+          .order('order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
       } catch (error) {
         console.error('Error fetching navigation:', error);
         return [];
@@ -42,23 +47,20 @@ export function Navbar() {
 
   // Fetch site name settings
   const { data: siteSettings } = useQuery<SiteNameSettings>({
-    queryKey: ['/api/settings/site-name'],
+    queryKey: ['site-settings', 'site-name'],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/settings/site-name', {
-          credentials: 'include',
-          cache: 'no-cache',
-          mode: 'same-origin'
-        });
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'site_name')
+          .single();
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch site name settings');
-        }
-
-        return await response.json();
+        if (error) throw error;
+        return data as SiteNameSettings;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
-        return { siteName: "Nice Meat махны дэлгүүр" }; // Default site name
+        return { value: "Nice Meat махны дэлгэри" }; // Default site name
       }
     }
   });

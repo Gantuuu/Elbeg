@@ -181,7 +181,7 @@ export default function HomePage() {
         description: t.toast.loginRequiredDesc,
         variant: "default",
       });
-      setLocation("/auth?tab=signup");
+      setLocation("/auth");
       return;
     }
 

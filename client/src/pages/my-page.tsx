@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/language-context";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Order, OrderItem, Product } from "@shared/schema";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -56,34 +56,97 @@ export default function MyPage() {
 
   // Fetch user orders
   const { data: orders, isLoading: isOrdersLoading, error: ordersError } = useQuery<OrderWithItems[]>({
-    queryKey: ["/api/user/orders"],
+    queryKey: ["orders", user?.id],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/user/orders");
-      return response as OrderWithItems[];
+      try {
+        if (!user?.id) return [];
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*, items:order_items(*, product:products(*))')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Map snake_case to camelCase if necessary (matching OrderWithItems type)
+        return (data || []).map(order => ({
+          ...order,
+          createdAt: order.created_at,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          customerPhone: order.customer_phone,
+          customerAddress: order.customer_address,
+          totalAmount: order.total_amount,
+          paymentMethod: order.payment_method,
+          // Items already mapped by 'items:order_items'
+        })) as any;
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        return [];
+      }
     },
-    enabled: !!user, // Only fetch if user is logged in
-    refetchOnMount: true, // Ensure it refetches when component mounts
-    staleTime: 0 // Always treat data as stale to force refetch
+    enabled: !!user,
+    refetchOnMount: true,
+    staleTime: 0
   });
 
   // Fetch user's generated meal kits
   const { data: mealKits, isLoading: isMealKitsLoading, error: mealKitsError } = useQuery<GeneratedMealKit[]>({
-    queryKey: ["/api/generated-meal-kits"],
+    queryKey: ["generated-meal-kits", user?.id],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/generated-meal-kits");
-      return response as GeneratedMealKit[];
+      try {
+        if (!user?.id) return [];
+        const { data, error } = await supabase
+          .from('generated_meal_kits')
+          .select('*, components:generated_meal_kit_components(*, product:products(*))')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        return (data || []).map(kit => ({
+          id: kit.id,
+          userId: kit.user_id,
+          name: kit.name,
+          totalPrice: kit.total_price.toString(),
+          isAddedToCart: kit.is_added_to_cart,
+          createdAt: kit.created_at,
+          components: kit.components.map((c: any) => ({
+            id: c.id,
+            productId: c.product_id,
+            quantity: c.quantity.toString(),
+            price: c.price.toString(),
+            product: c.product
+          }))
+        })) as any;
+      } catch (err) {
+        console.error("Error fetching meal kits:", err);
+        return [];
+      }
     },
-    enabled: !!user, // Only fetch if user is logged in
+    enabled: !!user,
     refetchOnMount: true,
     staleTime: 0
   });
 
   // Fetch bank account settings
   const { data: bankAccounts } = useQuery({
-    queryKey: ["/api/bank-accounts"],
+    queryKey: ["bank-accounts"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/bank-accounts");
-      return response;
+      try {
+        const { data, error } = await supabase
+          .from('bank_accounts')
+          .select('*')
+          .eq('is_active', true);
+        if (error) throw error;
+        return data.map(acc => ({
+          bankName: acc.bank_name,
+          accountNumber: acc.account_number,
+          accountHolder: acc.account_holder
+        }));
+      } catch (err) {
+        console.error("Error fetching bank accounts:", err);
+        return [];
+      }
     }
   });
 

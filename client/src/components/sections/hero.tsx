@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
+import { supabase } from "@/lib/supabase";
 
 export function Hero() {
   const [location, setLocation] = useLocation();
@@ -15,7 +16,26 @@ export function Hero() {
     subtitle?: string;
     imageUrl?: string;
   }>({
-    queryKey: ['/api/settings/hero']
+    queryKey: ['hero-content'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_content')
+          .select('*')
+          .eq('key', 'hero')
+          .single();
+
+        if (error) throw error;
+        return {
+          title: data.title,
+          subtitle: data.content,
+          imageUrl: data.image_url
+        };
+      } catch (error) {
+        console.error('Error fetching hero content:', error);
+        return {};
+      }
+    }
   });
 
   // Auto scroll animation effect for delivery message

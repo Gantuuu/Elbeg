@@ -152,8 +152,11 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for public read access
+DROP POLICY IF EXISTS "Products are viewable by everyone" ON products;
 CREATE POLICY "Products are viewable by everyone" ON products FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Categories are viewable by everyone" ON categories;
 CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Reviews are viewable if approved" ON reviews;
 CREATE POLICY "Reviews are viewable if approved" ON reviews FOR SELECT USING (is_approved = true);
 
 -- Create admin user
@@ -282,19 +285,29 @@ ALTER TABLE meal_kits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE generated_meal_kits ENABLE ROW LEVEL SECURITY;
 
 -- Public read policies for new tables
+DROP POLICY IF EXISTS "Public can read non_delivery_days" ON non_delivery_days;
 CREATE POLICY "Public can read non_delivery_days" ON non_delivery_days FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public can read delivery_settings" ON delivery_settings;
 CREATE POLICY "Public can read delivery_settings" ON delivery_settings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public can read site_content" ON site_content;
 CREATE POLICY "Public can read site_content" ON site_content FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public can read navigation_items" ON navigation_items;
 CREATE POLICY "Public can read navigation_items" ON navigation_items FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public can read meal_kits" ON meal_kits;
 CREATE POLICY "Public can read meal_kits" ON meal_kits FOR SELECT USING (true);
 
 -- Generated meal kits policies
+DROP POLICY IF EXISTS "Users can create generated_meal_kits" ON generated_meal_kits;
 CREATE POLICY "Users can create generated_meal_kits" ON generated_meal_kits FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Users can read own generated_meal_kits" ON generated_meal_kits;
 CREATE POLICY "Users can read own generated_meal_kits" ON generated_meal_kits FOR SELECT USING (true); -- Simplified for now
+DROP POLICY IF EXISTS "Users can update own generated_meal_kits" ON generated_meal_kits;
 CREATE POLICY "Users can update own generated_meal_kits" ON generated_meal_kits FOR UPDATE USING (true);
 
 -- Generated meal kit components policies
 ALTER TABLE generated_meal_kit_components ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can insert components" ON generated_meal_kit_components;
 CREATE POLICY "Users can insert components" ON generated_meal_kit_components FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Users can read components" ON generated_meal_kit_components;
 CREATE POLICY "Users can read components" ON generated_meal_kit_components FOR SELECT USING (true);
 

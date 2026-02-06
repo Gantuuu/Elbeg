@@ -156,6 +156,8 @@ export interface Translations {
   directDelivery: string;
   viewOrderHistory: string;
   fastPayment: string;
+  orContinueWith: string;
+  continueWithGoogle: string;
 
   // 기타
   loading: string;
@@ -347,6 +349,8 @@ const translations: Record<Language, Translations> = {
     directDelivery: 'Үсэхсэн зах руу шууд хүргэлт',
     viewOrderHistory: 'Захиалгын түүхээ харах',
     fastPayment: 'Хурдан, найдвартай төлбөр тооцоо',
+    orContinueWith: 'Эсвэл',
+    continueWithGoogle: 'Google-ээр нэвтрэх',
 
     // 기타
     loading: 'Ачааллаж байна...',
@@ -536,6 +540,8 @@ const translations: Record<Language, Translations> = {
     directDelivery: 'Прямая доставка на рынок',
     viewOrderHistory: 'Просмотр истории заказов',
     fastPayment: 'Быстрая и надежная оплата',
+    orContinueWith: 'Или',
+    continueWithGoogle: 'Войти через Google',
 
     // 기타
     loading: 'Загрузка...',
@@ -725,6 +731,8 @@ const translations: Record<Language, Translations> = {
     directDelivery: 'Direct delivery to market',
     viewOrderHistory: 'View order history',
     fastPayment: 'Fast and reliable payment',
+    orContinueWith: 'Or',
+    continueWithGoogle: 'Continue with Google',
 
     // 기타
     loading: 'Loading...',

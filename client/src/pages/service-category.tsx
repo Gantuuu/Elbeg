@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
 import { Store, ServiceCategory } from "@shared/schema";
+import { supabase } from "@/lib/supabase";
 
 // Interface for the route parameters
 interface ServiceCategoryParams {
@@ -20,15 +21,35 @@ export default function ServiceCategoryPage() {
   const categorySlug = params?.slug;
 
   // Fetch service category
-  const { data: category, isLoading: categoryLoading } = useQuery<ServiceCategory>({
-    queryKey: [`/api/service-categories/${categorySlug}`],
+  const { data: category, isLoading: categoryLoading } = useQuery<ServiceCategory | null>({
+    queryKey: ['service-category', categorySlug],
+    queryFn: async () => {
+      if (!categorySlug) return null;
+      const { data, error } = await supabase
+        .from('service_categories')
+        .select('*')
+        .eq('slug', categorySlug)
+        .maybeSingle(); // Use maybeSingle to avoid 406 error if not found
+      if (error) throw error;
+      return data as ServiceCategory | null;
+    },
     enabled: !!categorySlug,
   });
 
   // Fetch stores in this category
   const { data: stores, isLoading: storesLoading } = useQuery<Store[]>({
-    queryKey: [`/api/service-categories/${categorySlug}/stores`],
-    enabled: !!categorySlug,
+    queryKey: ['service-category-stores', category?.id],
+    queryFn: async () => {
+      if (!category?.id) return [];
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('category_id', category.id)
+        .eq('is_active', true);
+      if (error) throw error;
+      return data as Store[];
+    },
+    enabled: !!category?.id,
   });
 
   const isLoading = categoryLoading || storesLoading;
@@ -48,8 +69,8 @@ export default function ServiceCategoryPage() {
               </div>
             ) : (
               <>
-                <h1 className="text-3xl font-bold mb-2">{category?.name}</h1>
-                <p className="text-white/90 max-w-3xl">{category?.description}</p>
+                <h1 className="text-3xl font-bold mb-2">{category?.name || ""}</h1>
+                <p className="text-white/90 max-w-3xl">{category?.description || ""}</p>
               </>
             )}
           </div>

@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
+import { supabase } from "@/lib/supabase";
 
 export default function CartPage() {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
@@ -28,13 +29,27 @@ export default function CartPage() {
         description: "Сагс руу орохын тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
         variant: "default",
       });
-      setLocation("/auth?tab=signup");
+      setLocation("/auth");
     }
   }, [user, isLoadingAuth, setLocation, toast]);
 
   // Fetch shipping fee from the server
   const { data: shippingFeeData, isLoading: isLoadingShippingFee } = useQuery<{ value: string }>({
-    queryKey: ["/api/settings/shipping-fee"],
+    queryKey: ["shipping-fee"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'shipping_fee')
+          .single();
+        if (error) throw error;
+        return data as { value: string };
+      } catch (error) {
+        console.error('Error fetching shipping fee:', error);
+        return { value: "3000" }; // Default shipping fee
+      }
+    },
     enabled: !isEmpty && !!user,
   });
 

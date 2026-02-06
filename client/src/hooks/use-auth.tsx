@@ -16,9 +16,8 @@ type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<User, Error, RegisterData>;
+  googleLogin: () => Promise<void>;
 };
 
 // Types for login and registration data
@@ -55,132 +54,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.email) return null;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return null;
 
-      // Fetch user profile from public table using email
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', session.user.email)
-        .single();
+        const email = session.user.email;
+        if (!email) return null;
 
-      if (error) {
-        console.error("Error fetching user profile:", error);
+        // Fetch user profile from public table using email
+        const { data: profile, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching user profile:", error);
+          return null;
+        }
+
+        if (!profile) {
+          // If profile doesn't exist (e.g. just logged in via OAuth), 
+          // we might need to create it here or handle it in callback
+          return null;
+        }
+
+        // Map snake_case to camelCase for the User type
+        return {
+          ...profile,
+          isAdmin: profile.is_admin,
+          createdAt: profile.created_at,
+          googleId: profile.google_id,
+          profileImageUrl: profile.profile_image_url
+        } as User;
+      } catch (err) {
+        console.error("Auth query error:", err);
         return null;
       }
-
-      return profile as User;
     },
     staleTime: Infinity, // Rely on auth state changes
-  });
-
-  // Login mutation
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      // We assume username field contains email for Supabase Auth
-      // If it's not an email, this might fail unless we implement username lookup
-      const email = credentials.username.includes('@')
-        ? credentials.username
-        : undefined; // Fail if not email for now, or implement logic to find email by username
-
-      if (!email) {
-        throw new Error("Please use your email to log in.");
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: credentials.password,
-      });
-
-      if (error) throw error;
-
-      // Fetch the user profile to return it
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (profileError) throw profileError;
-
-      return profile as User;
-    },
-    onSuccess: (user) => {
-      const name = user.name || user.username;
-      toast({
-        title: t.toast.loginSuccess,
-        description: name ? `${t.toast.loginSuccessWelcome}, ${name}!` : t.toast.loginSuccessDesc,
-      });
-      queryClient.setQueryData(["/api/user"], user);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Login Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Registration mutation
-  const registerMutation = useMutation({
-    mutationFn: async (userData: RegisterData) => {
-      // 1. Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            username: userData.username,
-            name: userData.username, // Default name to username
-          }
-        }
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Registration failed");
-
-      // 2. Create profile in public users table
-      // Note: In production, this is safer in a Postgres Trigger
-      const newUserProfile = {
-        username: userData.username,
-        email: userData.email,
-        password: "hashed_by_supabase", // We don't need the real password here
-        name: userData.username,
-        phone: userData.phone,
-        is_admin: false
-      };
-
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .insert([newUserProfile])
-        .select()
-        .single();
-
-      if (profileError) {
-        // If profile creation fails, we should probably delete the auth user or handle it
-        console.error("Profile creation failed:", profileError);
-        throw new Error("Failed to create user profile");
-      }
-
-      return profile as User;
-    },
-    onSuccess: (user) => {
-      toast({
-        title: t.toast.registerSuccess,
-        description: t.toast.registerSuccessDesc,
-      });
-      queryClient.setQueryData(["/api/user"], user);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: t.toast.registerFailed,
-        description: error.message,
-        variant: "default",
-        className: "bg-[#02C75A] text-white border-[#02C75A]",
-      });
-    },
   });
 
   // Logout mutation
@@ -206,15 +118,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Google Login function
+  const googleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      toast({
+        title: "Google Login Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user: user || null,
         isLoading,
         error,
-        loginMutation,
         logoutMutation,
-        registerMutation,
+        googleLogin,
       }}
     >
       {children}

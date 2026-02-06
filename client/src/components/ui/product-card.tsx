@@ -39,7 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
         });
 
         // 회원가입 탭을 먼저 보여줌
-        setLocation("/auth?tab=signup");
+        setLocation("/auth");
         setIsLoading(false);
         return;
       }

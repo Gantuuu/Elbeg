@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 
 interface GeneratedMealKitComponent {
   id: number;
@@ -45,21 +45,22 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   const { addItem } = useCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // State to track loading for different actions
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  
+
   // Add meal kit to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("PATCH", `/api/generated-meal-kits/${mealKit.id}/add-to-cart`);
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to add meal kit to cart");
-      }
-      
-      return await response.json();
+      const { data, error } = await supabase
+        .from('generated_meal_kits')
+        .update({ is_added_to_cart: true })
+        .eq('id', mealKit.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       // Add all products to cart
@@ -72,13 +73,13 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
           imageUrl: component.product.imageUrl,
         });
       });
-      
+
       toast({
         title: "Сагсанд нэмлээ",
         description: `"${mealKit.name}" багцыг сагсанд нэмлээ.`,
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/generated-meal-kits"] });
+
+      queryClient.invalidateQueries({ queryKey: ["generated-meal-kits"] });
     },
     onError: (error: Error) => {
       toast({
@@ -91,17 +92,16 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
       setIsAddingToCart(false);
     }
   });
-  
+
   // Delete meal kit mutation
   const deleteMealKitMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("DELETE", `/api/generated-meal-kits/${mealKit.id}`);
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete meal kit");
-      }
-      
+      const { error } = await supabase
+        .from('generated_meal_kits')
+        .delete()
+        .eq('id', mealKit.id);
+
+      if (error) throw error;
       return true;
     },
     onSuccess: () => {
@@ -109,8 +109,8 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
         title: "Амжилттай устгалаа",
         description: `"${mealKit.name}" багцыг устгалаа.`,
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/generated-meal-kits"] });
+
+      queryClient.invalidateQueries({ queryKey: ["generated-meal-kits"] });
     },
     onError: (error: Error) => {
       toast({
@@ -120,32 +120,32 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
       });
     }
   });
-  
+
   // Handle add to cart
   const handleAddToCart = () => {
     setIsAddingToCart(true);
     addToCartMutation.mutate();
   };
-  
+
   // Handle delete
   const handleDelete = () => {
     if (confirm("Та энэ хоолны багцыг устгахдаа итгэлтэй байна уу?")) {
       deleteMealKitMutation.mutate();
     }
   };
-  
+
   // Calculate total quantity of items
   const totalItems = mealKit.components.reduce((sum, component) => sum + parseInt(component.quantity), 0);
-  
+
   // Format created date
   const formattedDate = new Date(mealKit.createdAt).toLocaleDateString("mn-MN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -162,16 +162,16 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
           <div className="text-xl font-bold gradient-text">{formatPrice(mealKit.totalPrice)}</div>
         </div>
       </div>
-      
+
       {/* Preview of meal kit contents */}
       <div className="p-4 bg-gray-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center -space-x-2">
             {mealKit.components.slice(0, 3).map((component) => (
               <div key={component.id} className="w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm">
-                <img 
-                  src={component.product.imageUrl} 
-                  alt={component.product.name} 
+                <img
+                  src={component.product.imageUrl}
+                  alt={component.product.name}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -182,7 +182,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
               </div>
             )}
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
@@ -197,7 +197,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
           </Button>
         </div>
       </div>
-      
+
       {/* Expanded meal kit details */}
       {isExpanded && (
         <div className="p-4 border-t border-gray-100">
@@ -206,9 +206,9 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
             {mealKit.components.map((component) => (
               <li key={component.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                 <div className="flex items-center">
-                  <img 
-                    src={component.product.imageUrl} 
-                    alt={component.product.name} 
+                  <img
+                    src={component.product.imageUrl}
+                    alt={component.product.name}
                     className="w-8 h-8 rounded object-cover mr-2"
                   />
                   <div>
@@ -225,7 +225,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
           </ul>
         </div>
       )}
-      
+
       {/* Actions */}
       <div className="p-4 border-t border-gray-100 flex justify-between">
         <Button
@@ -242,7 +242,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
           )}
           Устгах
         </Button>
-        
+
         <div className="flex space-x-2">
           <Link href={`/meal-kit-generator`}>
             <Button
@@ -252,7 +252,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
               Шинэ багц үүсгэх
             </Button>
           </Link>
-          
+
           <Button
             variant="default"
             size="sm"

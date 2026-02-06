@@ -15,6 +15,7 @@ import CartPage from "@/pages/cart-page";
 import Checkout from "@/pages/checkout";
 import OrderConfirmation from "@/pages/order-confirmation";
 import AuthPage from "@/pages/auth-page";
+import AuthCallback from "@/pages/auth-callback";
 
 // Lazy loaded pages (less critical, loaded on demand)
 const ProductsPage = lazy(() => import("@/pages/products"));
@@ -115,6 +116,7 @@ function AppContent() {
             <Route path="/privacy" component={Privacy} />
             <Route path="/terms" component={Terms} />
             <Route path="/auth" component={AuthPage} />
+            <Route path="/auth/callback" component={AuthCallback} />
 
             {/* Store routes */}
             <Route path="/store/register" component={StoreRegister} />
