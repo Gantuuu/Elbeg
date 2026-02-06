@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,16 @@ export default function ProductDetails() {
     isLoading: isProductLoading,
     error: productError,
   } = useQuery<Product>({
-    queryKey: [`/api/products/${numericId}`],
+    queryKey: [`products`, numericId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', numericId)
+        .single();
+      if (error) throw error;
+      return data as Product;
+    },
     enabled: !isNaN(numericId),
   });
 
@@ -34,7 +44,12 @@ export default function ProductDetails() {
     data: allProducts = [],
     isLoading: isAllProductsLoading,
   } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      return data as Product[];
+    },
     enabled: !!product,
   });
 
@@ -216,8 +231,8 @@ export default function ProductDetails() {
                 <button
                   key={category}
                   className={`min-w-[80px] px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedCategory === category
-                      ? "bg-[#9b1f24] text-white"
-                      : "bg-gray-100/80 text-gray-700"
+                    ? "bg-[#9b1f24] text-white"
+                    : "bg-gray-100/80 text-gray-700"
                     }`}
                   onClick={() => setSelectedCategory(category)}
                 >

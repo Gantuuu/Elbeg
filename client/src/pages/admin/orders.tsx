@@ -11,14 +11,14 @@ import { formatOrderId, formatPrice, formatDate } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/constants";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue
 } from "@/components/ui/select";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -45,13 +45,13 @@ const SMS_TEMPLATES: Record<string, (amount: string) => string> = {
 export default function AdminOrders() {
   const { t } = useLanguage();
   const { toast } = useToast();
-  
+
   // Parse URL parameters to see if we need to open a specific order
   const urlParams = new URLSearchParams(
     typeof window !== "undefined" ? window.location.search : ""
   );
   const orderIdParam = urlParams.get("id");
-  
+
   // State for filtering and order details
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -61,16 +61,16 @@ export default function AdminOrders() {
     orderIdParam ? parseInt(orderIdParam) : null
   );
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(!!orderIdParam);
-  
+
   // SMS dialog state
   const [smsDialogOpen, setSmsDialogOpen] = useState(false);
   const [smsOrder, setSmsOrder] = useState<Order | null>(null);
-  
+
   // Format dates for API queries
   const formatDateForQuery = (date?: Date) => {
     return date ? format(date, 'yyyy-MM-dd') : undefined;
   };
-  
+
   // Define types for orders and items
   interface OrderItem {
     id: number;
@@ -101,50 +101,86 @@ export default function AdminOrders() {
     userId: number | null;
     items: OrderItem[];
   }
-  
+
   // Fetch orders with date filters and improved refresh settings
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: [
-      '/api/orders', 
-      formatDateForQuery(startDate), 
+      'orders',
+      formatDateForQuery(startDate),
       formatDateForQuery(endDate)
     ],
-    queryFn: async ({ queryKey }) => {
-      const [endpoint, start, end] = queryKey;
-      let url = endpoint as string;
-      
-      // Add query parameters if dates are set
-      const params = new URLSearchParams();
-      if (start) params.append('startDate', start as string);
-      if (end) params.append('endDate', end as string);
-      
-      // Append params to URL if any exist
-      if (params.toString()) {
-        url = `${url}?${params.toString()}`;
+    queryFn: async () => {
+      const { supabase } = await import("@/lib/supabase");
+      let query = supabase
+        .from('orders')
+        .select(`
+          *,
+          items:order_items (
+            *,
+            product:products (*)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (startDate) {
+        query = query.gte('created_at', startDate.toISOString());
       }
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+
+      if (endDate) {
+        // Add one day to end date to include the whole day
+        const nextDay = new Date(endDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        query = query.lt('created_at', nextDay.toISOString());
       }
-      return response.json();
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Map to match Order interface
+      return data.map((order: any) => ({
+        id: order.id,
+        customerName: order.customer_name,
+        customerEmail: order.customer_email,
+        customerPhone: order.customer_phone,
+        customerAddress: order.customer_address,
+        totalAmount: order.total_amount,
+        status: order.status,
+        createdAt: order.created_at,
+        userId: order.user_id,
+        items: (order.items || []).map((item: any) => ({
+          id: item.id,
+          orderId: item.order_id,
+          productId: item.product_id,
+          quantity: item.quantity,
+          price: item.price,
+          product: {
+            id: item.product?.id,
+            name: item.product?.name,
+            description: item.product?.description,
+            category: item.product?.category,
+            price: item.product?.price,
+            imageUrl: item.product?.image_url,
+            stock: item.product?.stock
+          }
+        }))
+      }));
     },
     refetchInterval: 15000, // Refresh every 15 seconds for orders page
     refetchOnWindowFocus: true, // Refetch when window gains focus
     refetchOnMount: true, // Always refetch when component mounts
     staleTime: 5000, // Consider data stale after 5 seconds
   });
-  
+
   // Selected order for detailed view
   const selectedOrder = orders.find(order => order.id === selectedOrderId);
-  
+
   // Filtered orders based on search and status
   const filteredOrders = orders.filter(order => {
     // Apply status filter
     if (statusFilter !== "all" && order.status !== statusFilter) {
       return false;
     }
-    
+
     // Apply search filter (on order ID or customer name)
     if (searchQuery) {
       const orderIdString = formatOrderId(order.id);
@@ -154,42 +190,42 @@ export default function AdminOrders() {
         order.customerName.toLowerCase().includes(searchLower)
       );
     }
-    
+
     return true;
   });
-  
+
   // Open order details
   const handleViewOrder = (orderId: number) => {
     setSelectedOrderId(orderId);
     setOrderDetailsOpen(true);
-    
+
     // Update URL without full navigation
     const newUrl = window.location.pathname + `?id=${orderId}`;
     window.history.pushState({ path: newUrl }, "", newUrl);
   };
-  
+
   // Close order details
   const handleCloseDetails = () => {
     setOrderDetailsOpen(false);
-    
+
     // Update URL without full navigation
     const newUrl = window.location.pathname;
     window.history.pushState({ path: newUrl }, "", newUrl);
   };
-  
+
   return (
     <div className="min-h-screen bg-neutral flex">
       <AdminSidebar />
-      
+
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Захиалгын удирдлага" />
-        
+
         <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
           <Card>
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h2 className="font-bold text-lg">Захиалгын жагсаалт</h2>
             </div>
-            
+
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {/* Search Input */}
@@ -205,7 +241,7 @@ export default function AdminOrders() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                
+
                 {/* Start Date Picker */}
                 <div>
                   <Popover>
@@ -233,9 +269,9 @@ export default function AdminOrders() {
                       />
                       {startDate && (
                         <div className="p-2 border-t border-gray-100">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="w-full justify-center"
                             onClick={() => setStartDate(undefined)}
                           >
@@ -246,7 +282,7 @@ export default function AdminOrders() {
                     </PopoverContent>
                   </Popover>
                 </div>
-                
+
                 {/* End Date Picker */}
                 <div>
                   <Popover>
@@ -265,15 +301,15 @@ export default function AdminOrders() {
                         selected={endDate}
                         onSelect={setEndDate}
                         initialFocus
-                        disabled={(date) => 
+                        disabled={(date) =>
                           startDate ? date < startDate : false
                         }
                       />
                       {endDate && (
                         <div className="p-2 border-t border-gray-100">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             className="w-full justify-center"
                             onClick={() => setEndDate(undefined)}
                           >
@@ -284,7 +320,7 @@ export default function AdminOrders() {
                     </PopoverContent>
                   </Popover>
                 </div>
-                
+
                 {/* Status Filter */}
                 <div>
                   <Select
@@ -305,7 +341,7 @@ export default function AdminOrders() {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -353,10 +389,10 @@ export default function AdminOrders() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              <OrderStatusBadge 
-                                status={order.status} 
-                                orderId={order.id} 
-                                isEditable={true} 
+                              <OrderStatusBadge
+                                status={order.status}
+                                orderId={order.id}
+                                isEditable={true}
                                 forceLanguage="mn"
                               />
                               <Button
@@ -392,7 +428,7 @@ export default function AdminOrders() {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Pagination (if needed) */}
               {filteredOrders.length > 0 && (
                 <div className="mt-4 flex justify-between items-center">
@@ -403,14 +439,14 @@ export default function AdminOrders() {
               )}
             </div>
           </Card>
-          
+
           {/* Order Details Modal */}
           <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
             <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle>Захиалгын дэлгэрэнгүй</DialogTitle>
               </DialogHeader>
-              
+
               {selectedOrder ? (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -420,10 +456,10 @@ export default function AdminOrders() {
                         <div className="grid grid-cols-2 gap-2">
                           <p className="text-sm text-gray-500">Захиалгын ID:</p>
                           <p className="text-sm font-medium">{formatOrderId(selectedOrder.id)}</p>
-                          
+
                           <p className="text-sm text-gray-500">Огноо:</p>
                           <p className="text-sm font-medium">{formatDate(selectedOrder.createdAt)}</p>
-                          
+
                           <p className="text-sm text-gray-500">Захиалсан цаг:</p>
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-bold">
@@ -434,7 +470,7 @@ export default function AdminOrders() {
                               const orderHour = orderDate.getHours();
                               const orderMinute = orderDate.getMinutes();
                               const isBeforeCutoff = orderHour < 18 || (orderHour === 18 && orderMinute <= 30);
-                              
+
                               return isBeforeCutoff ? (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                   18:30 өмнө → Маргааш хүргэнэ
@@ -446,43 +482,43 @@ export default function AdminOrders() {
                               );
                             })()}
                           </div>
-                          
+
                           <p className="text-sm text-gray-500">Төлөв:</p>
                           <div>
-                            <OrderStatusBadge 
-                              status={selectedOrder.status} 
-                              orderId={selectedOrder.id} 
-                              isEditable={true} 
+                            <OrderStatusBadge
+                              status={selectedOrder.status}
+                              orderId={selectedOrder.id}
+                              isEditable={true}
                               forceLanguage="mn"
                             />
                           </div>
-                          
+
                           <p className="text-sm text-gray-500">Нийт дүн:</p>
                           <p className="text-sm font-medium">{formatPrice(selectedOrder.totalAmount)}</p>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h3 className="font-medium mb-2">Харилцагчийн мэдээлэл</h3>
                       <div className="bg-gray-50 p-4 rounded-md">
                         <div className="grid grid-cols-2 gap-2">
                           <p className="text-sm text-gray-500">Нэр:</p>
                           <p className="text-sm font-medium">{selectedOrder.customerName}</p>
-                          
+
                           <p className="text-sm text-gray-500">И-мэйл:</p>
                           <p className="text-sm font-medium">{selectedOrder.customerEmail}</p>
-                          
+
                           <p className="text-sm text-gray-500">Утас:</p>
                           <p className="text-sm font-medium">{selectedOrder.customerPhone}</p>
-                          
+
                           <p className="text-sm text-gray-500">Хаяг:</p>
                           <p className="text-sm font-medium">{selectedOrder.customerAddress}</p>
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-medium mb-2">Захиалсан бүтээгдэхүүн</h3>
                     <div className="overflow-x-auto">
@@ -500,8 +536,8 @@ export default function AdminOrders() {
                             <tr key={item.id}>
                               <td className="px-4 py-3 whitespace-nowrap">
                                 <div className="flex items-center">
-                                  <img 
-                                    src={item.product.imageUrl} 
+                                  <img
+                                    src={item.product.imageUrl}
                                     alt={item.product.name}
                                     className="w-10 h-10 rounded object-cover mr-3"
                                   />
@@ -536,7 +572,7 @@ export default function AdminOrders() {
                       </table>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-2">
                     <Button onClick={handleCloseDetails}>
                       Хаах
@@ -550,7 +586,7 @@ export default function AdminOrders() {
               )}
             </DialogContent>
           </Dialog>
-          
+
           {/* SMS Message Dialog */}
           <Dialog open={smsDialogOpen} onOpenChange={setSmsDialogOpen}>
             <DialogContent className="max-w-md">
@@ -563,7 +599,7 @@ export default function AdminOrders() {
                   Доорх мессежийг хуулж, харилцагчид илгээнэ үү
                 </DialogDescription>
               </DialogHeader>
-              
+
               {smsOrder && (
                 <div className="space-y-4">
                   {/* Customer Info */}
@@ -574,7 +610,7 @@ export default function AdminOrders() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="material-icons text-gray-500 text-sm">phone</span>
-                      <a 
+                      <a
                         href={`tel:${smsOrder.customerPhone}`}
                         className="text-blue-600 hover:underline font-medium"
                       >
@@ -582,13 +618,13 @@ export default function AdminOrders() {
                       </a>
                     </div>
                   </div>
-                  
+
                   {/* Order Info */}
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Захиалга: {formatOrderId(smsOrder.id)}</span>
                     <span className="font-bold text-primary">{formatPrice(smsOrder.totalAmount)}</span>
                   </div>
-                  
+
                   {/* SMS Message Selection */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-700">Мессеж сонгох:</label>
@@ -602,18 +638,17 @@ export default function AdminOrders() {
                         delivered: "Хүргэгдсэн",
                         cancelled: "Цуцлагдсан",
                       };
-                      
+
                       return (
-                        <div 
+                        <div
                           key={status}
-                          className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${
-                            smsOrder.status === status ? 'border-green-500 bg-green-50' : 'border-gray-200'
-                          }`}
+                          className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${smsOrder.status === status ? 'border-green-500 bg-green-50' : 'border-gray-200'
+                            }`}
                           onClick={() => {
                             const encodedMessage = encodeURIComponent(message);
                             // Use different format for iOS vs Android
                             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                            const smsUrl = isIOS 
+                            const smsUrl = isIOS
                               ? `sms:${smsOrder.customerPhone}&body=${encodedMessage}`
                               : `sms:${smsOrder.customerPhone}?body=${encodedMessage}`;
                             window.location.href = smsUrl;
@@ -644,7 +679,7 @@ export default function AdminOrders() {
                       );
                     })}
                   </div>
-                  
+
                   {/* Direct SMS Link (for mobile) */}
                   <div className="pt-2 border-t">
                     <a

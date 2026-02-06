@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { Link } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -18,7 +19,12 @@ export default function ProductsPage() {
 
   // Fetch products
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      return data as Product[];
+    },
   });
 
   // Get unique categories from products

@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue
 } from "@/components/ui/select";
 import { ProductForm } from "@/components/admin/product-form";
 import { formatPrice } from "@/lib/utils";
@@ -38,56 +39,63 @@ export default function AdminProducts() {
   const urlParams = new URLSearchParams(
     typeof window !== "undefined" ? window.location.search : ""
   );
-  
+
   // State for product management
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(urlParams.get("new") === "true");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  
+
   // State for filtering and search
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  
+
   // Fetch products
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      return data as Product[];
+    },
   });
-  
+
   // Filtered products based on search and category
   const filteredProducts = products.filter(product => {
     // Apply category filter
     if (categoryFilter !== "all" && product.category !== categoryFilter) {
       return false;
     }
-    
+
     // Apply search filter
     if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
-    
+
     return true;
   });
-  
+
   // Handlers
   const handleAddNewProduct = () => {
     setEditingProduct(null);
     setIsAddingProduct(true);
-    
+
     // Update URL without full navigation
     const newUrl = window.location.pathname + "?new=true";
     window.history.pushState({ path: newUrl }, "", newUrl);
   };
-  
+
   const handleEditProduct = async (product: Product) => {
     try {
       // Fetch the latest product data to ensure we have the most up-to-date information
-      const response = await fetch(`/api/products/${product.id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch product details');
-      }
-      const updatedProduct = await response.json();
-      
+      const { data: updatedProduct, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', product.id)
+        .single();
+
+      if (error) throw error;
+
       // Set the product for editing with the fresh data
       setEditingProduct(updatedProduct);
       setIsAddingProduct(true);
@@ -100,49 +108,54 @@ export default function AdminProducts() {
       console.error("Error fetching product details:", error);
     }
   };
-  
+
   const handleFormSuccess = () => {
     setIsAddingProduct(false);
     setEditingProduct(null);
-    
+
     // Update URL without full navigation
     const newUrl = window.location.pathname;
     window.history.pushState({ path: newUrl }, "", newUrl);
   };
-  
+
   const handleFormCancel = () => {
     setIsAddingProduct(false);
     setEditingProduct(null);
-    
+
     // Update URL without full navigation
     const newUrl = window.location.pathname;
     window.history.pushState({ path: newUrl }, "", newUrl);
   };
-  
+
   const openDeleteConfirm = (product: Product) => {
     setProductToDelete(product);
     setDeleteConfirmOpen(true);
   };
-  
+
   const closeDeleteConfirm = () => {
     setDeleteConfirmOpen(false);
     setProductToDelete(null);
   };
-  
+
   const deleteProduct = async () => {
     if (!productToDelete) return;
-    
+
     try {
-      await apiRequest("DELETE", `/api/products/${productToDelete.id}`, null);
-      
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productToDelete.id);
+
+      if (error) throw error;
+
       // Invalidate queries to reload product list
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
       toast({
         title: "Бүтээгдэхүүн устгагдлаа",
         description: `"${productToDelete.name}" бүтээгдэхүүн амжилттай устгагдлаа.`,
       });
-      
+
       closeDeleteConfirm();
     } catch (error) {
       toast({
@@ -152,14 +165,14 @@ export default function AdminProducts() {
       });
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-neutral flex">
       <AdminSidebar />
-      
+
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Бүтээгдэхүүний удирдлага" />
-        
+
         <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
           {/* Product Form (Add/Edit) */}
           {isAddingProduct && (
@@ -176,7 +189,7 @@ export default function AdminProducts() {
               </div>
             </Card>
           )}
-          
+
           {/* Product List */}
           <Card>
             <div className="px-6 py-4 border-b flex justify-between items-center">
@@ -191,7 +204,7 @@ export default function AdminProducts() {
                 </Button>
               )}
             </div>
-            
+
             <div className="p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <div className="relative mb-4 md:mb-0 md:w-64">
@@ -225,7 +238,7 @@ export default function AdminProducts() {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -296,7 +309,7 @@ export default function AdminProducts() {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Pagination (if needed) */}
               {filteredProducts.length > 0 && (
                 <div className="mt-4 flex justify-between items-center">
@@ -307,7 +320,7 @@ export default function AdminProducts() {
               )}
             </div>
           </Card>
-          
+
           {/* Delete Confirmation Dialog */}
           <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
             <DialogContent>
@@ -322,8 +335,8 @@ export default function AdminProducts() {
                 <Button variant="outline" onClick={closeDeleteConfirm}>
                   Цуцлах
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   onClick={deleteProduct}
                 >
                   Устгах

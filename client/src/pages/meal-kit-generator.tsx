@@ -9,50 +9,57 @@ import { Input } from "@/components/ui/input";
 import { SelectableProductCard } from "@/components/ui/selectable-product-card";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/hooks/use-cart";
+import { useAuth } from "@/hooks/use-auth";
 import { Product, CartItem } from "@shared/schema";
 import { formatPrice } from "@/lib/utils";
 import { Loader2, ShoppingCart, CheckCircle2, PackageOpen, ChefHat } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { supabase } from "@/lib/supabase";
 
 export default function MealKitGenerator() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { addItem } = useCart();
-  
+  const { user } = useAuth();
+
   const [mealKitName, setMealKitName] = useState("Миний хоолны багц");
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [step, setStep] = useState(1);
   const [isNameValid, setIsNameValid] = useState(true);
-  
+
   // Fetch all meat products
   const { data: products, isLoading, error } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      return data as Product[];
+    },
     staleTime: 1000 * 30, // 30 seconds
   });
-  
+
   // Calculate total price
   const totalPrice = selectedProducts.reduce((total, productId) => {
     const product = products?.find(p => p.id === productId);
     const quantity = quantities[productId] || 1;
-    
+
     if (product) {
       return total + (parseFloat(product.price.toString()) * quantity);
     }
     return total;
   }, 0);
-  
+
   // Calculate total weight (simplified - assuming 100g per quantity)
   const totalWeight = selectedProducts.reduce((total, productId) => {
     const quantity = quantities[productId] || 1;
     return total + (quantity * 100);
   }, 0);
-  
+
   // Handle product selection
   const handleProductSelect = (productId: number) => {
     setSelectedProducts(prev => [...prev, productId]);
-    
+
     // Initialize quantity to 1 if not already set
     if (!quantities[productId]) {
       setQuantities(prev => ({
@@ -61,12 +68,12 @@ export default function MealKitGenerator() {
       }));
     }
   };
-  
+
   // Handle product deselection
   const handleProductDeselect = (productId: number) => {
     setSelectedProducts(prev => prev.filter(id => id !== productId));
   };
-  
+
   // Handle quantity change
   const handleQuantityChange = (productId: number, quantity: number) => {
     setQuantities(prev => ({
@@ -74,7 +81,7 @@ export default function MealKitGenerator() {
       [productId]: quantity
     }));
   };
-  
+
   // Next step
   const goToNextStep = () => {
     if (step === 1 && selectedProducts.length === 0) {
@@ -85,20 +92,20 @@ export default function MealKitGenerator() {
       });
       return;
     }
-    
+
     if (step === 2 && !mealKitName.trim()) {
       setIsNameValid(false);
       return;
     }
-    
+
     setStep(current => current + 1);
   };
-  
+
   // Previous step
   const goToPreviousStep = () => {
     setStep(current => current - 1);
   };
-  
+
   // Reset meal kit
   const resetMealKit = () => {
     setSelectedProducts([]);
@@ -106,33 +113,54 @@ export default function MealKitGenerator() {
     setMealKitName("Миний хоолны багц");
     setStep(1);
   };
-  
+
   // Generate meal kit mutation
   const generateMealKitMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/generate-meal-kit", {
-        name: mealKitName,
-        productIds: selectedProducts,
-        quantities
+      // 1. Create Meal Kit
+      const { data: mealKit, error: mealKitError } = await supabase
+        .from('generated_meal_kits')
+        .insert([{
+          name: mealKitName,
+          total_price: totalPrice,
+          user_id: user?.id ? parseInt(user.id.toString()) : null,
+          is_added_to_cart: false
+        }])
+        .select()
+        .single();
+
+      if (mealKitError) throw mealKitError;
+
+      // 2. Create Components
+      const components = selectedProducts.map(productId => {
+        const product = products?.find(p => p.id === productId);
+        return {
+          generated_meal_kit_id: mealKit.id,
+          product_id: productId,
+          quantity: quantities[productId] || 1,
+          price: product ? parseFloat(product.price.toString()) : 0
+        };
       });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to generate meal kit");
-      }
-      
-      return await response.json();
+
+      const { error: componentsError } = await supabase
+        .from('generated_meal_kit_components')
+        .insert(components);
+
+      if (componentsError) throw componentsError;
+
+      return mealKit;
     },
     onSuccess: (data) => {
       toast({
         title: "Хоолны багц амжилттай үүслээ!",
         description: `"${data.name}" багцыг амжилттай үүсгэлээ.`,
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/generated-meal-kits"] });
+
+      queryClient.invalidateQueries({ queryKey: ["generated-meal-kits"] });
       setStep(3);
     },
     onError: (error: Error) => {
+      console.error(error);
       toast({
         title: "Алдаа гарлаа",
         description: error.message || "Хоолны багц үүсгэхэд алдаа гарлаа. Дахин оролдоно уу.",
@@ -140,18 +168,19 @@ export default function MealKitGenerator() {
       });
     }
   });
-  
+
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (generatedMealKitId: number) => {
-      const response = await apiRequest("PATCH", `/api/generated-meal-kits/${generatedMealKitId}/add-to-cart`);
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to add meal kit to cart");
-      }
-      
-      return await response.json();
+      const { data, error } = await supabase
+        .from('generated_meal_kits')
+        .update({ is_added_to_cart: true })
+        .eq('id', generatedMealKitId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
     },
     onSuccess: (data) => {
       // Add all products to cart
@@ -167,12 +196,12 @@ export default function MealKitGenerator() {
           });
         }
       });
-      
+
       toast({
         title: "Сагсанд нэмлээ",
         description: `"${data.name}" багцыг сагсанд нэмлээ.`,
       });
-      
+
       // Redirect to cart page
       setLocation("/cart");
     },
@@ -184,119 +213,116 @@ export default function MealKitGenerator() {
       });
     }
   });
-  
+
   // Handle form submission
   const handleSubmit = () => {
     if (step === 2) {
       generateMealKitMutation.mutate();
     }
   };
-  
+
   // Handle add to cart
   const handleAddToCart = () => {
     if (generateMealKitMutation.data) {
       addToCartMutation.mutate(generateMealKitMutation.data.id);
     }
   };
-  
+
   // Reset validation state when name changes
   useEffect(() => {
     if (mealKitName.trim()) {
       setIsNameValid(true);
     }
   }, [mealKitName]);
-  
+
   // Filter products by category (only meat products)
   const filteredProducts = products?.filter(
-    product => 
-      product.category === "Үхрийн мах" || 
-      product.category === "Хонины мах" || 
-      product.category === "Тахианы мах" || 
-      product.category === "Гахайн мах" || 
+    product =>
+      product.category === "Үхрийн мах" ||
+      product.category === "Хонины мах" ||
+      product.category === "Тахианы мах" ||
+      product.category === "Гахайн мах" ||
       product.category === "Бусад"
   ) || [];
-  
+
   // Group products by category
   const productsByCategory: Record<string, Product[]> = {};
-  
+
   filteredProducts.forEach(product => {
     if (!productsByCategory[product.category]) {
       productsByCategory[product.category] = [];
     }
     productsByCategory[product.category].push(product);
   });
-  
+
   // Order categories
   const categoryOrder = [
     "Үхрийн мах",
-    "Хонины мах", 
-    "Тахианы мах", 
-    "Гахайн мах", 
+    "Хонины мах",
+    "Тахианы мах",
+    "Гахайн мах",
     "Бусад"
   ];
-  
+
   const orderedCategories = Object.keys(productsByCategory).sort(
     (a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
   );
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <div className="w-full gradient-nav py-8 mb-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-white text-center">
             Гэрийн Махны Хоолны Багц Үүсгэгч
           </h1>
           <p className="text-white/80 max-w-2xl mx-auto text-center mt-4">
-            Өөрийн дуртай махнуудаа сонгон багц үүсгэж, гэр бүлийнхэнд амттай хоол бэлдэнэ үү. 
+            Өөрийн дуртай махнуудаа сонгон багц үүсгэж, гэр бүлийнхэнд амттай хоол бэлдэнэ үү.
             Үүсгэсэн багцаа хадгалж, дараа дахин захиалах боломжтой.
           </p>
           <div className="w-20 h-1 bg-white/50 mx-auto mt-4 rounded-full"></div>
         </div>
       </div>
-      
+
       <main className="flex-1 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          
+
           {/* Progress indicators */}
           <div className="mt-8 flex items-center justify-center space-x-4">
             <div className={`flex flex-col items-center ${step >= 1 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                step >= 1 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= 1 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
+                }`}>
                 <PackageOpen className="h-5 w-5" />
               </div>
               <span className="mt-2 text-sm font-medium">Сонголт</span>
             </div>
-            
+
             <div className={`w-16 h-0.5 ${step >= 2 ? 'gradient-nav' : 'bg-gray-300'}`}></div>
-            
+
             <div className={`flex flex-col items-center ${step >= 2 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                step >= 2 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
+                }`}>
                 <ChefHat className="h-5 w-5" />
               </div>
               <span className="mt-2 text-sm font-medium">Багц Үүсгэх</span>
             </div>
-            
+
             <div className={`w-16 h-0.5 ${step >= 3 ? 'gradient-nav' : 'bg-gray-300'}`}></div>
-            
+
             <div className={`flex flex-col items-center ${step >= 3 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                step >= 3 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'border-primary gradient-nav text-white' : 'border-gray-300'
+                }`}>
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <span className="mt-2 text-sm font-medium">Дуусгах</span>
             </div>
           </div>
-          
+
           {/* Step 1: Product Selection */}
           {step === 1 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -304,13 +330,13 @@ export default function MealKitGenerator() {
             >
               <div className="mb-6 flex justify-between items-center">
                 <h2 className="text-2xl font-bold gradient-text">Махнуудаа сонгоно уу</h2>
-                
+
                 <div className="flex items-center space-x-2 text-gray-600">
                   <span>Сонгосон:</span>
                   <span className="font-bold text-primary">{selectedProducts.length}</span>
                 </div>
               </div>
-              
+
               {isLoading ? (
                 <div className="flex justify-center items-center py-20">
                   <div className="w-16 h-16 relative">
@@ -355,7 +381,7 @@ export default function MealKitGenerator() {
                   ))}
                 </div>
               )}
-              
+
               <div className="mt-12 flex justify-end">
                 <Button
                   className="btn-gradient text-white py-2 px-8 rounded-md text-lg font-medium"
@@ -367,10 +393,10 @@ export default function MealKitGenerator() {
               </div>
             </motion.div>
           )}
-          
+
           {/* Step 2: Meal Kit Customization */}
           {step === 2 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -382,7 +408,7 @@ export default function MealKitGenerator() {
                   <h2 className="text-2xl font-bold gradient-text mb-4">Хоолны багц үүсгэх</h2>
                   <p className="text-gray-600">Хоолны багцын нэр болон дэлгэрэнгүй мэдээллийг оруулна уу.</p>
                 </div>
-                
+
                 <div className="p-6">
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-2">Хоолны багцын нэр</label>
@@ -397,15 +423,15 @@ export default function MealKitGenerator() {
                       <p className="mt-1 text-sm text-red-600">Хоолны багцын нэрийг оруулна уу.</p>
                     )}
                   </div>
-                  
+
                   <div className="mb-6">
                     <h3 className="text-lg font-medium mb-3">Сонгосон бүтээгдэхүүнүүд</h3>
-                    
+
                     <div className="bg-gray-50 rounded-lg p-4">
                       {selectedProducts.map(productId => {
                         const product = products?.find(p => p.id === productId);
                         const quantity = quantities[productId] || 1;
-                        
+
                         if (product) {
                           return (
                             <div key={productId} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
@@ -426,7 +452,7 @@ export default function MealKitGenerator() {
                       })}
                     </div>
                   </div>
-                  
+
                   <div className="mb-8 bg-gray-50 rounded-lg p-4">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Нийт бүтээгдэхүүн:</span>
@@ -434,7 +460,7 @@ export default function MealKitGenerator() {
                     </div>
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Ойролцоо жин:</span>
-                      <span className="font-medium">{(totalWeight/1000).toFixed(1)} кг</span>
+                      <span className="font-medium">{(totalWeight / 1000).toFixed(1)} кг</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold">
                       <span className="gradient-text">Нийт үнэ:</span>
@@ -442,7 +468,7 @@ export default function MealKitGenerator() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="px-6 py-4 bg-gray-50 flex justify-between">
                   <Button
                     className="text-gray-600 font-medium bg-white border border-gray-200 hover:bg-gray-50"
@@ -450,7 +476,7 @@ export default function MealKitGenerator() {
                   >
                     Буцах
                   </Button>
-                  
+
                   <Button
                     className="btn-gradient text-white"
                     onClick={handleSubmit}
@@ -469,10 +495,10 @@ export default function MealKitGenerator() {
               </div>
             </motion.div>
           )}
-          
+
           {/* Step 3: Success */}
           {step === 3 && generateMealKitMutation.data && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
@@ -483,13 +509,13 @@ export default function MealKitGenerator() {
                   <div className="w-20 h-20 rounded-full gradient-nav flex items-center justify-center mx-auto mb-6">
                     <CheckCircle2 className="h-10 w-10 text-white" />
                   </div>
-                  
+
                   <h2 className="text-2xl font-bold gradient-text mb-2">Багц амжилттай үүслээ!</h2>
                   <p className="text-gray-600 mb-6">
-                    "{generateMealKitMutation.data.name}" хоолны багцыг амжилттай үүсгэлээ. 
+                    "{generateMealKitMutation.data.name}" хоолны багцыг амжилттай үүсгэлээ.
                     Одоо захиалгаа өгч амттай хоол бэлдэх боломжтой!
                   </p>
-                  
+
                   <div className="flex justify-center space-x-4">
                     <Button
                       className="bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
@@ -497,7 +523,7 @@ export default function MealKitGenerator() {
                     >
                       Шинэ багц үүсгэх
                     </Button>
-                    
+
                     <Button
                       className="btn-gradient text-white"
                       onClick={handleAddToCart}
@@ -522,7 +548,7 @@ export default function MealKitGenerator() {
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

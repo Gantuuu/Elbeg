@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/use-order-notifications";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -18,17 +19,46 @@ export default function AdminDashboard() {
 
   // Fetch orders for display in the dashboard
   const { data: orders = [], isLoading: isOrdersLoading } = useQuery<any[]>({
-    queryKey: ['/api/orders'],
+    queryKey: ['orders'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          items:order_items (
+            *,
+            product:products (*)
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
   });
 
   // Fetch products to count total products
-  const { data: products = [], isLoading: isProductsLoading } = useQuery<any[]>({
-    queryKey: ['/api/products'],
+  const { data: productsCount = 0, isLoading: isProductsLoading } = useQuery({
+    queryKey: ['products-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true });
+      if (error) throw error;
+      return count || 0;
+    }
   });
 
   // Fetch all users to count total registered users
-  const { data: users = [], isLoading: isUsersLoading } = useQuery<any[]>({
-    queryKey: ['/api/admin/users'],
+  const { data: usersCount = 0, isLoading: isUsersLoading } = useQuery({
+    queryKey: ['users-count'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
+      if (error) throw error;
+      return count || 0;
+    }
   });
 
 
@@ -37,10 +67,11 @@ export default function AdminDashboard() {
   const recentOrders = orders.slice(0, 5);
 
   // Calculate statistics
+  // Calculate statistics
   const totalOrders = orders.length;
-  const totalSales = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount.toString()), 0);
-  const totalProducts = products.length;
-  const totalCustomers = users.length; // 전체 가입 사용자 수
+  const totalSales = orders.reduce((sum, order) => sum + parseFloat(order.total_amount?.toString() || "0"), 0);
+  const totalProducts = productsCount;
+  const totalCustomers = usersCount; // 전체 가입 사용자 수
 
   return (
     <div className="min-h-screen bg-white flex">
@@ -182,19 +213,19 @@ export default function AdminDashboard() {
                           {formatOrderId(order.id)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {order.customerName}
+                          {order.customer_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {order.items.map((item: any) => item.product.name).join(', ')}
+                          {order.items?.map((item: any) => item.product?.name).join(', ')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatPrice(order.totalAmount)}
+                          {formatPrice(order.total_amount)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <OrderStatusBadge status={order.status} orderId={order.id} isEditable={true} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatDate(order.createdAt)}
+                          {formatDate(order.created_at)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link href={`/admin/orders?id=${order.id}`}>

@@ -1,39 +1,62 @@
-import { useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Custom hook for managing order notifications
- * Monitors pending order count and triggers browser notifications when new orders arrive
+ * Monitors pending order count using Supabase Realtime
  */
 export function useOrderNotifications() {
-  const previousCountRef = useRef<number | null>(null);
-  const isInitializedRef = useRef(false);
-
-  // Query pending orders count every 10 seconds
-  const { data: pendingData, isLoading } = useQuery<{ count: number }>({
-    queryKey: ['/api/admin/pending-orders-count'],
-    refetchInterval: 10000, // Check every 10 seconds
-    refetchIntervalInBackground: true,
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache this data
-  });
-
-  const currentCount = pendingData?.count ?? 0;
+  const [pendingCount, setPendingCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Skip on first load to prevent false alerts
-    if (!isInitializedRef.current) {
-      previousCountRef.current = currentCount;
-      isInitializedRef.current = true;
-      return;
-    }
+    let mounted = true;
 
-    // Update previous count (browser notifications removed, but other functionality preserved)
-    previousCountRef.current = currentCount;
-  }, [currentCount]);
+    const fetchPendingCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+
+        if (error) throw error;
+        if (mounted) {
+          setPendingCount(count || 0);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching pending orders count:", error);
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    fetchPendingCount();
+
+    // Subscribe to changes in the orders table
+    const channel = supabase
+      .channel('orders_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders'
+        },
+        () => {
+          // Re-fetch count on any change (insert, update, delete)
+          fetchPendingCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return {
-    pendingCount: currentCount,
+    pendingCount,
     isLoading
   };
 }

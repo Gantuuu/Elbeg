@@ -63,7 +63,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     form.setValue('name', name);
-    
+
     // Only auto-generate slug if we're creating a new category or the slug hasn't been manually edited
     if (!isEditing || form.getValues('slug') === generateSlug(category?.name || '')) {
       form.setValue('slug', generateSlug(name));
@@ -72,24 +72,47 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
 
   const onSubmit = async (data: CategoryFormValues) => {
     try {
+      const { supabase } = await import("@/lib/supabase");
+
+      const payload = {
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        image_url: data.imageUrl,
+        "order": data.order,
+        is_active: data.isActive
+      };
+
       if (isEditing && category.id) {
-        await apiRequest('PUT', `/api/categories/${category.id}`, data);
+        const { error } = await supabase
+          .from('categories')
+          .update(payload)
+          .eq('id', category.id);
+
+        if (error) throw error;
+
         toast({
           title: 'Ангилал шинэчлэгдлээ',
           description: 'Ангилал амжилттай шинэчлэгдлээ.',
         });
       } else {
-        await apiRequest('POST', '/api/categories', data);
+        const { error } = await supabase
+          .from('categories')
+          .insert([payload]);
+
+        if (error) throw error;
+
         toast({
           title: 'Ангилал үүсгэгдлээ',
           description: 'Шинэ ангилал амжилттай нэмэгдлээ.',
         });
       }
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error submitting category:", error);
       toast({
         title: 'Алдаа гарлаа',
-        description: 'Ангилал хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
+        description: error.message || 'Ангилал хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
         variant: 'destructive',
       });
     }
@@ -113,9 +136,9 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                   <FormItem>
                     <FormLabel>Нэр</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Ангилалын нэр" 
-                        {...field} 
+                      <Input
+                        placeholder="Ангилалын нэр"
+                        {...field}
                         onChange={handleNameChange}
                       />
                     </FormControl>
@@ -146,10 +169,11 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                 <FormItem>
                   <FormLabel>Тайлбар</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Ангилалын тайлбар..." 
+                    <Textarea
+                      placeholder="Ангилалын тайлбар..."
                       className="resize-none"
-                      {...field} 
+                      {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -164,7 +188,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                 <FormItem>
                   <FormLabel>Зурган хаяг (URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                    <Input placeholder="https://example.com/image.jpg" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,8 +203,8 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                   <FormItem>
                     <FormLabel>Эрэмбэ</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                       />

@@ -1,14 +1,15 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   useQuery,
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
 import { User, loginSchema, signupSchema } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { z } from "zod";
+import { supabase } from "../lib/supabase";
 
 // Types for our context
 type AuthContextType = {
@@ -32,63 +33,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  // Listen for auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      } else if (event === 'SIGNED_OUT') {
+        queryClient.setQueryData(["/api/user"], null);
+        queryClient.clear();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Query to fetch the current user
   const {
     data: user,
     error,
     isLoading,
-    refetch: refetchUser
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: 1,         // Retry once in case of network issues
-    retryDelay: 1000, // 1 second delay between retries
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email) return null;
+
+      // Fetch user profile from public table using email
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', session.user.email)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+      }
+
+      return profile as User;
+    },
+    staleTime: Infinity, // Rely on auth state changes
   });
 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      try {
-        console.log("API Request: POST /api/login");
-        console.log("Request data:", credentials);
-        console.log("Sending fetch request...");
+      // We assume username field contains email for Supabase Auth
+      // If it's not an email, this might fail unless we implement username lookup
+      const email = credentials.username.includes('@')
+        ? credentials.username
+        : undefined; // Fail if not email for now, or implement logic to find email by username
 
-        // apiRequest already handles JSON parsing
-        const response = await apiRequest("POST", "/api/login", credentials);
-        console.log("Response data:", response);
-
-        return response;
-      } catch (error) {
-        console.error("Login error:", error);
-        throw error;
+      if (!email) {
+        throw new Error("Please use your email to log in.");
       }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: credentials.password,
+      });
+
+      if (error) throw error;
+
+      // Fetch the user profile to return it
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+
+      if (profileError) throw profileError;
+
+      return profile as User;
     },
-    onSuccess: (response: any) => {
-      console.log("Login successful:", response);
-      const user = response.user || response;
-
-      // Update user data in the cache
-      queryClient.setQueryData(["/api/user"], user);
-
-      // Invalidate and refetch user data to ensure we have the latest state
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-        refetchUser();
-        console.log("Refetching user data after login");
-      }, 300);
-
+    onSuccess: (user) => {
+      const name = user.name || user.username;
       toast({
         title: t.toast.loginSuccess,
-        description: response.message || (user.name ? `${t.toast.loginSuccessWelcome}, ${user.name}!` : t.toast.loginSuccessDesc),
+        description: name ? `${t.toast.loginSuccessWelcome}, ${name}!` : t.toast.loginSuccessDesc,
       });
+      queryClient.setQueryData(["/api/user"], user);
     },
     onError: (error: Error) => {
-      console.error("API Request error:", error);
-
       toast({
-        title: "Login Error (Debug)",
-        description: `Raw: ${error.message}`, // Force raw message
+        title: "Login Error",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -97,45 +126,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Registration mutation
   const registerMutation = useMutation({
     mutationFn: async (userData: RegisterData) => {
-      try {
-        console.log("API Request: POST /api/register");
-        console.log("Request data:", userData);
-        console.log("Sending fetch request...");
+      // 1. Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            username: userData.username,
+            name: userData.username, // Default name to username
+          }
+        }
+      });
 
-        // apiRequest already handles JSON parsing
-        const response = await apiRequest("POST", "/api/register", userData);
-        console.log("Response data:", response);
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Registration failed");
 
-        return response;
-      } catch (error) {
-        console.error("Registration error:", error);
-        throw error;
+      // 2. Create profile in public users table
+      // Note: In production, this is safer in a Postgres Trigger
+      const newUserProfile = {
+        username: userData.username,
+        email: userData.email,
+        password: "hashed_by_supabase", // We don't need the real password here
+        name: userData.username,
+        phone: userData.phone,
+        is_admin: false
+      };
+
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .insert([newUserProfile])
+        .select()
+        .single();
+
+      if (profileError) {
+        // If profile creation fails, we should probably delete the auth user or handle it
+        console.error("Profile creation failed:", profileError);
+        throw new Error("Failed to create user profile");
       }
+
+      return profile as User;
     },
-    onSuccess: (response: any) => {
-      console.log("Registration successful:", response);
-      const user = response.user || response;
-
-      // Update user data in the cache
-      queryClient.setQueryData(["/api/user"], user);
-
-      // Invalidate and refetch user data to ensure we have the latest state
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-        refetchUser();
-        console.log("Refetching user data after registration");
-      }, 300);
-
+    onSuccess: (user) => {
       toast({
         title: t.toast.registerSuccess,
-        description: response.message || t.toast.registerSuccessDesc,
+        description: t.toast.registerSuccessDesc,
       });
+      queryClient.setQueryData(["/api/user"], user);
     },
     onError: (error: Error) => {
-      console.error("API Request error:", error);
       toast({
         title: t.toast.registerFailed,
-        description: error.message || t.toast.registerFailedDesc,
+        description: error.message,
         variant: "default",
         className: "bg-[#02C75A] text-white border-[#02C75A]",
       });
@@ -145,40 +186,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      try {
-        console.log("API Request: POST /api/logout");
-        console.log("Sending logout request...");
-        await apiRequest("POST", "/api/logout");
-        console.log("Logout request successful");
-      } catch (error) {
-        console.error("Logout error:", error);
-        throw error;
-      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     },
     onSuccess: () => {
-      console.log("Logout successful, clearing all cache data");
-
-      // Clear the user data in cache
-      queryClient.setQueryData(["/api/user"], null);
-
-      // Invalidate all queries to ensure fresh data on login
-      queryClient.removeQueries({ queryKey: ["/api/user"] });
-      queryClient.removeQueries({ queryKey: ["/api/user/orders"] });
-      queryClient.removeQueries({ queryKey: ["/api/generated-meal-kits"] });
-
-      // Clear the entire cache to prevent any stale data
       queryClient.clear();
-
       toast({
         title: t.toast.logoutSuccess,
         description: t.toast.logoutSuccessDesc,
       });
     },
     onError: (error: Error) => {
-      console.error("Logout error:", error);
       toast({
         title: t.toast.logoutFailed,
-        description: error.message || t.toast.logoutFailedDesc,
+        description: error.message,
         variant: "default",
         className: "bg-[#02C75A] text-white border-[#02C75A]",
       });

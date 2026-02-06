@@ -57,14 +57,18 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   // Fetch categories from categories management
   const { data: categoryItems = [] } = useQuery({
-    queryKey: ['/api/categories'],
+    queryKey: ['categories'],
     queryFn: async () => {
       try {
-        const data = await apiRequest('GET', '/api/categories');
-        // Filter only active categories
-        return data
-          .filter((item: any) => item.isActive !== false)
-          .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+        const { supabase } = await import("@/lib/supabase");
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('is_active', true)
+          .order('order', { ascending: true });
+
+        if (error) throw error;
+        return data;
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -125,134 +129,77 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         throw new Error("Бүтээгдэхүүний нэр, ангилал, үнэ заавал оруулна уу");
       }
 
-      // Create FormData object for file upload
-      const formData = new FormData();
+      let imageUrl = data.imageUrl;
 
-      // Add the file if one was selected
+      // Upload image if selected
       if (selectedFile) {
-        console.log("Selected file:", selectedFile);
-        formData.append("image", selectedFile);
-      } else {
-        console.log("No file selected for upload");
+        try {
+          const { uploadImage } = await import("@/lib/supabase");
+          imageUrl = await uploadImage(selectedFile, 'products'); // Use 'products' bucket
+        } catch (uploadError) {
+          console.error("Image upload failed:", uploadError);
+          throw new Error("Зураг хуулахад алдаа гарлаа");
+        }
       }
 
-      // Prepare the product data (make sure all required fields are present)
+      // Prepare the product data
       const productData = {
         name: data.name,
-        nameRu: data.nameRu || "",
-        nameEn: data.nameEn || "",
+        name_ru: data.nameRu || null,
+        name_en: data.nameEn || null,
         description: data.description || "",
-        descriptionRu: data.descriptionRu || "",
-        descriptionEn: data.descriptionEn || "",
+        description_ru: data.descriptionRu || null,
+        description_en: data.descriptionEn || null,
         category: data.category,
-        price: data.price,
+        price: parseFloat(data.price),
         stock: data.stock || 999,
-        minOrderQuantity: data.minOrderQuantity || "1",
-        imageUrl: data.imageUrl || ""
+        min_order_quantity: parseFloat(data.minOrderQuantity || "1"),
+        image_url: imageUrl || "",
       };
 
-      console.log("Product data before sending:", productData);
+      const { supabase } = await import("@/lib/supabase");
 
-      // Add product data as JSON string
-      formData.append("productData", JSON.stringify(productData));
-
-      // Use fetch directly to send FormData
       if (product) {
         console.log("Updating product ID:", product.id);
-        console.log("FormData contents:", Object.fromEntries(formData.entries()));
 
-        // Update existing product
-        const response = await fetch(`/api/products/${product.id}`, {
-          method: "PUT",
-          credentials: "include",
-          body: formData,
-        });
+        const { data: updatedProduct, error } = await supabase
+          .from('products')
+          .update(productData)
+          .eq('id', product.id)
+          .select()
+          .single();
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          console.error("Server error response:", errorData);
-          console.error("Response status:", response.status);
-          console.error("Response headers:", response.headers);
-
-          let errorMessage = "Бүтээгдэхүүн шинэчлэхэд алдаа гарлаа";
-          if (response.status === 401) {
-            errorMessage = "Админ эрх шаардлагатай";
-          } else if (response.status === 404) {
-            errorMessage = "Бүтээгдэхүүн олдсонгүй";
-          } else if (response.status === 403) {
-            errorMessage = "Хандах эрх хүрэлцэхгүй";
-          } else if (response.status === 502) {
-            errorMessage = "Серверийн алдаа. Зураг форматыг шалгана уу.";
-          } else if (errorData?.message) {
-            errorMessage = errorData.message;
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        const updatedProduct = await response.json();
+        if (error) throw error;
         console.log("Updated product:", updatedProduct);
 
         toast({
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
           description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ.",
         });
-        console.log("Product updated successfully");
-
-        // Clear the selected file after successful upload
-        setSelectedFile(null);
-        setImagePreview(null);
-
-        // Reset the file input
-        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-        if (fileInput) {
-          fileInput.value = '';
-        }
-
-        // Update image preview if new image was uploaded
-        if (updatedProduct.imageUrl) {
-          setImagePreview(updatedProduct.imageUrl);
-        }
       } else {
         // Create new product
-        const response = await fetch("/api/products", {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        });
+        const { data: createdProduct, error } = await supabase
+          .from('products')
+          .insert([productData])
+          .select()
+          .single();
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          console.error("Server error response:", errorData);
-          console.error("Response status:", response.status);
-          console.error("Response headers:", response.headers);
-
-          let errorMessage = "Бүтээгдэхүүн үүсгэхэд алдаа гарлаа";
-          if (response.status === 401) {
-            errorMessage = "Админ эрх шаардлагатай";
-          } else if (response.status === 403) {
-            errorMessage = "Хандах эрх хүрэлцэхгүй";
-          } else if (response.status === 502) {
-            errorMessage = "Серверийн алдаа. Зураг форматыг шалгана уу.";
-          } else if (errorData?.message) {
-            errorMessage = errorData.message;
-          }
-
-          throw new Error(errorMessage);
-        }
-
-        const createdProduct = await response.json();
+        if (error) throw error;
         console.log("Created product:", createdProduct);
 
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",
           description: "Шинэ бүтээгдэхүүн амжилттай нэмэгдлээ.",
         });
-        console.log("New product created successfully");
+      }
 
-        // Clear the selected file after successful upload
-        setSelectedFile(null);
+      // Invalidate queries to reload product list
+      queryClient.invalidateQueries({ queryKey: ['products'] });
 
+      // Clear filtering
+      setSelectedFile(null);
+      if (!product) {
+        setImagePreview(null);
         // Reset the file input
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         if (fileInput) {
@@ -260,8 +207,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         }
       }
 
-      // Invalidate queries to reload product list
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       onSuccess();
     } catch (error: any) {
       console.error("Error submitting product form:", error);

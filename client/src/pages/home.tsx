@@ -1,5 +1,6 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Hero } from "@/components/sections/hero";
@@ -33,41 +34,79 @@ export default function HomePage() {
 
   // Fetch service categories for the homepage
   const { data: serviceCategories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['/api/service-categories'],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    queryKey: ['service-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('service_categories')
+        .select('*')
+        .eq('is_active', true);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
   // Fetch featured products
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products'],
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('products').select('*');
+      if (error) throw error;
+      return data as Product[];
+    },
+    staleTime: 2 * 60 * 1000,
   });
 
   // Fetch delivery settings and non-delivery days
   const { data: deliverySettings } = useQuery<DeliverySettings>({
-    queryKey: ['/api/delivery-settings'],
+    queryKey: ['delivery-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('delivery_settings').select('*').single();
+      if (error) throw error;
+      return data as DeliverySettings;
+    },
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: nonDeliveryDays = [] } = useQuery<NonDeliveryDay[]>({
-    queryKey: ['/api/non-delivery-days'],
+    queryKey: ['non-delivery-days'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('non_delivery_days').select('*');
+      if (error) throw error;
+      return data as NonDeliveryDay[];
+    },
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch approved reviews
   const { data: reviewsData = [] } = useQuery<Review[]>({
-    queryKey: ['/api/reviews'],
+    queryKey: ['reviews'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('is_approved', true)
+        .order('rating', { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return data as Review[];
+    },
     staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
   // Fetch product categories from category management
   const { data: productCategories = [] } = useQuery<any[]>({
-    queryKey: ['/api/categories'],
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
     staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
   });
 
   // Calculate delivery date

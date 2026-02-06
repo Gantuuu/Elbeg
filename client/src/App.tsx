@@ -1,4 +1,4 @@
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider, useCart } from "@/hooks/use-cart";
@@ -56,47 +56,21 @@ interface AuthCheckResponse {
 }
 
 // Enhanced AdminRoute component to check admin authentication
+// Enhanced AdminRoute component to check admin authentication
 function AdminRoute({ component: Component, ...rest }: any) {
+  const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Improved auth check with better error handling and proper typing
-  const { data, error, isError } = useQuery<AuthCheckResponse>({
-    queryKey: ['/api/admin/check-auth'],
-    retry: 1,
-    refetchInterval: 0,
-    refetchOnWindowFocus: false,
-    staleTime: 10000, // 10 seconds
-  });
-
-  console.log("Admin auth check:", data, error);
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (isError || (data && !data.authenticated)) {
-        console.log("Not authenticated, redirecting to login");
-        setLocation('/admin/login?redirect=true');
-      }
-    }
-  }, [data, isError, isLoading, setLocation]);
-
-  // Set loading to false after initial data fetch
-  useEffect(() => {
-    if (data !== undefined || isError) {
-      setIsLoading(false);
-    }
-  }, [data, isError]);
 
   if (isLoading) {
     return <LoadingScreen text="Verifying admin access..." />;
   }
 
-  if (data?.authenticated) {
-    console.log("User is authenticated, rendering admin component");
+  if (user && user.isAdmin) {
     return <Component {...rest} />;
   }
 
-  return null;
+  // Redirect to login if not authenticated or not admin
+  return <Redirect to="/admin/login?redirect=true" />;
 }
 
 function App() {

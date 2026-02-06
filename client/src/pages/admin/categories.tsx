@@ -6,6 +6,7 @@ import { AdminLayout } from '@/components/admin/layout';
 import { CategoryForm } from '@/components/admin/category-form';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import {
   Button,
   Card,
@@ -40,9 +41,14 @@ export default function AdminCategories() {
   const queryClient = useQueryClient();
 
   const { data: categories = [], isLoading } = useQuery({
-    queryKey: ['/api/categories'],
+    queryKey: ['categories'],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/categories');
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('order', { ascending: true });
+
+      if (error) throw error;
       return data as Category[];
     }
   });
@@ -54,21 +60,27 @@ export default function AdminCategories() {
 
   const handleDelete = async () => {
     if (!categoryToDelete) return;
-    
+
     try {
-      await apiRequest('DELETE', `/api/categories/${categoryToDelete.id}`);
-      
+      const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', categoryToDelete.id);
+
+      if (error) throw error;
+
       toast({
         title: 'Ангилал устгагдлаа',
         description: 'Ангилал амжилттай устгагдлаа.',
       });
-      
+
       // Refresh categories list
-      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
-      
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
     } catch (error) {
+      console.error(error);
       toast({
         title: 'Алдаа гарлаа',
         description: 'Ангилал устгах үед алдаа гарлаа. Дахин оролдоно уу.',
@@ -80,9 +92,9 @@ export default function AdminCategories() {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedCategory(null);
-    
+
     // Refresh categories list
-    queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
   return (

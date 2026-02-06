@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 import { NonDeliveryDay, DeliverySetting } from "@shared/schema";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths } from "date-fns";
 import { mn } from "date-fns/locale";
@@ -49,17 +50,57 @@ export default function DeliverySettings() {
   const [reason, setReason] = useState("");
   const [isRecurringYearly, setIsRecurringYearly] = useState(false);
   const [dayToDelete, setDayToDelete] = useState<NonDeliveryDay | null>(null);
-  
+
   const [cutoffHour, setCutoffHour] = useState(18);
   const [cutoffMinute, setCutoffMinute] = useState(30);
   const [processingDays, setProcessingDays] = useState(1);
 
   const { data: nonDeliveryDays = [], isLoading: isLoadingDays } = useQuery<NonDeliveryDay[]>({
-    queryKey: ["/api/non-delivery-days"],
+    queryKey: ["non-delivery-days"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('non_delivery_days')
+        .select('*');
+      if (error) throw error;
+      return data.map((day: any) => ({
+        id: day.id,
+        date: new Date(day.date),
+        reason: day.reason,
+        isRecurringYearly: day.is_recurring_yearly,
+        createdAt: day.created_at ? new Date(day.created_at) : null
+      }));
+    }
   });
 
   const { data: deliverySettings, isLoading: isLoadingSettings } = useQuery<DeliverySetting>({
-    queryKey: ["/api/delivery-settings"],
+    queryKey: ["delivery-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_settings')
+        .select('*')
+        .single();
+
+      if (error) {
+        // If no settings, return default (can happen if none inserted yet)
+        if (error.code === 'PGRST116') {
+          return {
+            cutoffHour: 18,
+            cutoffMinute: 30,
+            processingDays: 1,
+            id: 0,
+            updatedAt: null
+          };
+        }
+        throw error;
+      }
+      return {
+        id: data.id,
+        cutoffHour: data.cutoff_hour,
+        cutoffMinute: data.cutoff_minute,
+        processingDays: data.processing_days,
+        updatedAt: data.updated_at ? new Date(data.updated_at) : null
+      };
+    }
   });
 
   useEffect(() => {
@@ -72,10 +113,17 @@ export default function DeliverySettings() {
 
   const createNonDeliveryDayMutation = useMutation({
     mutationFn: async (data: { date: string; reason: string; isRecurringYearly: boolean }) => {
-      return apiRequest("POST", "/api/non-delivery-days", data);
+      const { error } = await supabase
+        .from('non_delivery_days')
+        .insert([{
+          date: data.date,
+          reason: data.reason,
+          is_recurring_yearly: data.isRecurringYearly
+        }]);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/non-delivery-days"] });
+      queryClient.invalidateQueries({ queryKey: ["non-delivery-days"] });
       toast({
         title: "Хүргэлтгүй өдөр нэмэгдлээ",
         description: "Шинэ хүргэлтгүй өдөр амжилттай тохируулагдлаа.",
@@ -96,10 +144,14 @@ export default function DeliverySettings() {
 
   const deleteNonDeliveryDayMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/non-delivery-days/${id}`);
+      const { error } = await supabase
+        .from('non_delivery_days')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/non-delivery-days"] });
+      queryClient.invalidateQueries({ queryKey: ["non-delivery-days"] });
       toast({
         title: "Хүргэлтгүй өдөр устгагдлаа",
         description: "Хүргэлтгүй өдөр амжилттай устгагдлаа.",
@@ -117,10 +169,18 @@ export default function DeliverySettings() {
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: { cutoffHour: number; cutoffMinute: number; processingDays: number }) => {
-      return apiRequest("PUT", "/api/delivery-settings", data);
+      const { error } = await supabase
+        .from('delivery_settings')
+        .upsert({
+          id: 1, // Assume single row with ID 1
+          cutoff_hour: data.cutoffHour,
+          cutoff_minute: data.cutoffMinute,
+          processing_days: data.processingDays
+        });
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/delivery-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["delivery-settings"] });
       toast({
         title: "Тохиргоо хадгалагдлаа",
         description: "Хүргэлтийн тохиргоо амжилттай шинэчлэгдлээ.",
@@ -266,8 +326,8 @@ export default function DeliverySettings() {
             <div className="p-3 bg-green-50 rounded-lg text-sm text-green-700">
               Одоогийн тохиргоо: Захиалгаас {processingDays} хоногийн дараа хүргэгдэнэ
             </div>
-            <Button 
-              onClick={handleSaveSettings} 
+            <Button
+              onClick={handleSaveSettings}
               className="w-full"
               disabled={updateSettingsMutation.isPending}
               data-testid="button-save-settings"
@@ -333,13 +393,12 @@ export default function DeliverySettings() {
                 <button
                   key={date.toISOString()}
                   onClick={() => handleDateClick(date)}
-                  className={`h-10 rounded-lg text-sm font-medium transition-colors ${
-                    isNonDelivery
-                      ? "bg-red-500 text-white hover:bg-red-600"
-                      : isToday
+                  className={`h-10 rounded-lg text-sm font-medium transition-colors ${isNonDelivery
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : isToday
                       ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
                       : "hover:bg-gray-100"
-                  }`}
+                    }`}
                   data-testid={`calendar-day-${format(date, "yyyy-MM-dd")}`}
                 >
                   {format(date, "d")}
