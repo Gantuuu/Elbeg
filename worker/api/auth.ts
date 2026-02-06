@@ -174,7 +174,7 @@ app.get('/admin/check-auth', (c) => {
     return c.json({ authenticated: false }, 401);
 });
 
-app.post('/sync-session', async (c) => {
+app.post('/auth/sync-session', async (c) => {
     try {
         const body = await c.req.json().catch(e => null);
         if (!body || !body.access_token) {
