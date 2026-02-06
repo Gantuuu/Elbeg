@@ -11,31 +11,12 @@ export function Hero() {
   const { t } = useLanguage();
 
   // Fetch hero content from the server
-  const { data: heroContent, isLoading } = useQuery<{
+  const { data: heroSettings, isLoading } = useQuery<{
     title?: string;
-    subtitle?: string;
+    text?: string;
     imageUrl?: string;
   }>({
-    queryKey: ['hero-content'],
-    queryFn: async () => {
-      try {
-        const { data, error } = await supabase
-          .from('site_content')
-          .select('*')
-          .eq('key', 'hero')
-          .single();
-
-        if (error) throw error;
-        return {
-          title: data.title,
-          subtitle: data.content,
-          imageUrl: data.image_url
-        };
-      } catch (error) {
-        console.error('Error fetching hero content:', error);
-        return {};
-      }
-    }
+    queryKey: ['/api/settings/hero'],
   });
 
   // Auto scroll animation effect for delivery message
@@ -47,10 +28,10 @@ export function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  // Use localized title and subtitle, fallback to server data for title and image
-  const title = heroContent?.title || t.heroTitle;
-  const subtitle = t.heroSubtitle; // Always use localized subtitle
-  const imageUrl = heroContent?.imageUrl || "/uploads/1746355234137-26887706.jpg";
+  // Locally derived content
+  const title = heroSettings?.title || t.heroTitle;
+  const subtitle = heroSettings?.text || t.heroSubtitle;
+  const imageUrl = heroSettings?.imageUrl || "/uploads/1746355234137-26887706.jpg";
 
   return (
     <section className="bg-[#0e5841] pt-3 pb-4">
