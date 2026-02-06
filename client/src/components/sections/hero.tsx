@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
+import { getFullImageUrl } from "@/lib/image-utils";
 
 export function Hero() {
   const [location, setLocation] = useLocation();
@@ -11,13 +12,25 @@ export function Hero() {
   const { t } = useLanguage();
 
   // Fetch hero content from the server
-  const { data: heroSettings, isLoading } = useQuery<{
+  const { data: heroSettings, isLoading, error } = useQuery<{
     title?: string;
     text?: string;
     imageUrl?: string;
   }>({
     queryKey: ['/api/settings/hero'],
+    queryFn: () => apiRequest('GET', '/api/settings/hero'),
+    staleTime: 60000,
   });
+
+  // Debug log
+  useEffect(() => {
+    if (heroSettings) {
+      console.log("Hero Settings fetched successfully:", heroSettings);
+    }
+    if (error) {
+      console.error("Error fetching Hero Settings:", error);
+    }
+  }, [heroSettings, error]);
 
   // Auto scroll animation effect for delivery message
   useEffect(() => {
@@ -31,7 +44,7 @@ export function Hero() {
   // Locally derived content
   const title = heroSettings?.title || t.heroTitle;
   const subtitle = heroSettings?.text || t.heroSubtitle;
-  const imageUrl = heroSettings?.imageUrl || "/uploads/1746355234137-26887706.jpg";
+  const imageUrl = getFullImageUrl(heroSettings?.imageUrl) || "/uploads/1746355234137-26887706.jpg";
 
   return (
     <section className="bg-[#0e5841] pt-3 pb-4">
