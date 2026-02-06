@@ -192,40 +192,57 @@ app.post('/auth/sync-session', async (c) => {
             return c.json({ success: false, message: "Server configuration error" }, 500);
         }
 
-        // Verify token using raw fetch instead of @supabase/supabase-js to avoid worker bundle issues
-        const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        // Step 1: Verify token using Supabase Auth API
+        const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
             headers: {
                 'apikey': supabaseKey,
                 'Authorization': `Bearer ${access_token}`
             }
         });
 
-        if (!response.ok) {
-            const error = await response.text();
+        if (!authResponse.ok) {
+            const error = await authResponse.text();
             console.error("Supabase token verification failed:", error);
             return c.json({ success: false, message: "Invalid token" }, 401);
         }
 
-        const data = await response.json() as { id: string, email?: string };
-        const supabaseUser = data;
+        const authData = await authResponse.json() as { id: string, email?: string };
 
-        if (!supabaseUser || !supabaseUser.email) {
+        if (!authData || !authData.email) {
             return c.json({ success: false, message: "Invalid token data" }, 401);
         }
 
-        // Check against local DB
-        const storage = c.get('storage');
-        const localUser = await storage.getUserByEmail(supabaseUser.email);
+        // Step 2: Query Supabase database (PostgREST) to check if user exists and is admin
+        const dbResponse = await fetch(
+            `${supabaseUrl}/rest/v1/users?email=eq.${encodeURIComponent(authData.email)}&select=id,username,email,name,is_admin`,
+            {
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': `Bearer ${supabaseKey}`, // Use service key for DB access
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
 
-        if (!localUser) {
-            return c.json({ success: false, message: "User not found in local system" }, 401);
+        if (!dbResponse.ok) {
+            const error = await dbResponse.text();
+            console.error("Supabase DB query failed:", error);
+            return c.json({ success: false, message: "Database error" }, 500);
         }
 
-        if (!localUser.isAdmin) {
+        const users = await dbResponse.json() as Array<{ id: number, username: string, email: string, name: string, is_admin: boolean }>;
+
+        if (!users || users.length === 0) {
+            return c.json({ success: false, message: "User not found in system" }, 401);
+        }
+
+        const localUser = users[0];
+
+        if (!localUser.is_admin) {
             return c.json({ success: false, message: "Not authorized as admin" }, 403);
         }
 
-        // Success - Set Local Session
+        // Step 3: Success - Set Local Session Cookie
         await setUserSession(c, localUser.id);
 
         return c.json({ success: true, user: localUser });
