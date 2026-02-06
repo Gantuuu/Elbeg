@@ -6,4 +6,9 @@ export type Bindings = {
     GOOGLE_CLIENT_SECRET?: string;
     BASE_URL?: string;
     ASSETS: Fetcher;
+    // Supabase
+    SUPABASE_URL?: string;
+    SUPABASE_ANON_KEY?: string;
+    VITE_SUPABASE_URL?: string;
+    VITE_SUPABASE_ANON_KEY?: string;
 };

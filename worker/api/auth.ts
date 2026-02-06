@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { setSignedCookie, deleteCookie } from 'hono/cookie';
+import { createClient } from '@supabase/supabase-js';
 import { Bindings } from '../types';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage } from '../storage';
@@ -172,6 +173,58 @@ app.get('/admin/check-auth', (c) => {
         return c.json({ authenticated: true, user });
     }
     return c.json({ authenticated: false }, 401);
+});
+
+app.post('/sync-session', async (c) => {
+    try {
+        const body = await c.req.json().catch(e => null);
+        if (!body || !body.access_token) {
+            return c.json({ success: false, message: "Missing access token" }, 400);
+        }
+
+        const { access_token } = body;
+
+        // Initialize Supabase client
+        // Note: Using VITE_ var fallback is quirky but trying to match potential env naming
+        const supabaseUrl = c.env.VITE_SUPABASE_URL || c.env.SUPABASE_URL;
+        const supabaseKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseKey) {
+            console.error("Supabase credentials missing in Worker env");
+            return c.json({ success: false, message: "Server configuration error" }, 500);
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Verify token
+        const { data: { user: supabaseUser }, error } = await supabase.auth.getUser(access_token);
+
+        if (error || !supabaseUser || !supabaseUser.email) {
+            console.error("Supabase token verification failed:", error);
+            return c.json({ success: false, message: "Invalid token" }, 401);
+        }
+
+        // Check against local DB
+        const storage = c.get('storage');
+        const localUser = await storage.getUserByEmail(supabaseUser.email);
+
+        if (!localUser) {
+            return c.json({ success: false, message: "User not found in local system" }, 401);
+        }
+
+        if (!localUser.isAdmin) {
+            return c.json({ success: false, message: "Not authorized as admin" }, 403);
+        }
+
+        // Success - Set Local Session
+        await setUserSession(c, localUser.id);
+
+        return c.json({ success: true, user: localUser });
+
+    } catch (e: any) {
+        console.error("Sync session error:", e);
+        return c.json({ success: false, message: "Internal Error", error: e.message }, 500);
+    }
 });
 
 app.post('/register', async (c) => {
