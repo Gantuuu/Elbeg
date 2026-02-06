@@ -24,11 +24,17 @@ import { IStorage } from "./storage";
 
 export class SupabaseStorage implements IStorage {
     supabaseUrl: string;
-    supabaseKey: string;
+    supabaseAnonKey: string;
+    supabaseServiceKey?: string;
 
-    constructor(supabaseUrl: string, supabaseKey: string) {
+    constructor(supabaseUrl: string, supabaseAnonKey: string, supabaseServiceKey?: string) {
         this.supabaseUrl = supabaseUrl;
-        this.supabaseKey = supabaseKey;
+        this.supabaseAnonKey = supabaseAnonKey;
+        this.supabaseServiceKey = supabaseServiceKey;
+    }
+
+    private get supabaseKey(): string {
+        return this.supabaseServiceKey || this.supabaseAnonKey;
     }
 
     private isPlainObject(obj: any): boolean {

@@ -65,20 +65,25 @@ app.post('/', requireAdmin, async (c) => {
         }
 
         // Merge parsed data with direct form fields (for backward compatibility)
+        // Handle both camelCase from API and snake_case from direct components
         const productData = {
             name: parsedData.name || body['name'] as string,
-            nameRu: parsedData.nameRu || body['nameRu'] as string || '',
-            nameEn: parsedData.nameEn || body['nameEn'] as string || '',
+            nameRu: parsedData.nameRu || parsedData.name_ru || body['nameRu'] as string || body['name_ru'] as string || '',
+            nameEn: parsedData.nameEn || parsedData.name_en || body['nameEn'] as string || body['name_en'] as string || '',
             description: parsedData.description || body['description'] as string || '',
-            descriptionRu: parsedData.descriptionRu || body['descriptionRu'] as string || '',
-            descriptionEn: parsedData.descriptionEn || body['descriptionEn'] as string || '',
-            price: parseFloat(parsedData.price || body['price'] as string),
+            descriptionRu: parsedData.descriptionRu || parsedData.description_ru || body['descriptionRu'] as string || body['description_ru'] as string || '',
+            descriptionEn: parsedData.descriptionEn || parsedData.description_en || body['descriptionEn'] as string || body['description_en'] as string || '',
+            price: parseFloat(parsedData.price || body['price'] as string || '0'),
             category: parsedData.category || body['category'] as string,
-            imageUrl: imageUrl || parsedData.imageUrl || '',
+            imageUrl: imageUrl || parsedData.imageUrl || parsedData.image_url || body['imageUrl'] as string || body['image_url'] as string || '',
             stock: parseInt(parsedData.stock || body['stock'] as string || '999'),
-            minOrderQuantity: parseFloat(parsedData.minOrderQuantity || body['minOrderQuantity'] as string || '1'),
-            storeId: parsedData.storeId ? parseInt(parsedData.storeId) : (body['storeId'] ? parseInt(body['storeId'] as string) : undefined)
+            minOrderQuantity: parseFloat(parsedData.minOrderQuantity || parsedData.min_order_quantity || body['minOrderQuantity'] as string || body['min_order_quantity'] as string || '1'),
+            storeId: parsedData.storeId ? parseInt(parsedData.storeId) : (parsedData.store_id ? parseInt(parsedData.store_id) : (body['storeId'] ? parseInt(body['storeId'] as string) : (body['store_id'] ? parseInt(body['store_id'] as string) : undefined)))
         };
+
+        if (!productData.name || !productData.category) {
+            return c.json({ message: "Product name and category are required" }, 400);
+        }
 
         const newProduct = await storage.createProduct(productData);
         return c.json(newProduct, 201);
@@ -124,11 +129,11 @@ app.put('/:id', requireAdmin, async (c) => {
     if (parsedData.stock || body['stock']) {
         updateData.stock = parseInt(parsedData.stock || body['stock'] as string);
     }
-    if (parsedData.minOrderQuantity || body['minOrderQuantity']) {
-        updateData.minOrderQuantity = parseFloat(parsedData.minOrderQuantity || body['minOrderQuantity'] as string);
+    if (parsedData.minOrderQuantity || parsedData.min_order_quantity || body['minOrderQuantity'] || body['min_order_quantity']) {
+        updateData.minOrderQuantity = parseFloat(parsedData.minOrderQuantity || parsedData.min_order_quantity || body['minOrderQuantity'] as string || body['min_order_quantity'] as string);
     }
-    if (parsedData.storeId || body['storeId']) {
-        updateData.storeId = parseInt(parsedData.storeId || body['storeId'] as string);
+    if (parsedData.storeId || parsedData.store_id || body['storeId'] || body['store_id']) {
+        updateData.storeId = parseInt(parsedData.storeId || parsedData.store_id || body['storeId'] as string || body['store_id'] as string);
     }
 
     try {

@@ -211,11 +211,11 @@ app.get('/settings/hero', async (c) => {
     const setting = await storage.getSiteSettingByKey('hero_settings');
 
     if (!setting) {
-        // Return defaults
+        // Return blank defaults
         return c.json({
-            title: "Шинэ, Шинэхэн, Чанартай Мах",
-            text: "Монголын хамгийн чанартай, шинэ махыг танд хүргэж байна.",
-            imageUrl: "https://images.unsplash.com/photo-1551024559-b33e1a0702e5?auto=format&fit=crop&w=1920&h=800&q=80"
+            title: "",
+            text: "",
+            imageUrl: ""
         });
     }
 

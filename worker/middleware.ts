@@ -23,18 +23,16 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
     // Fallback logic for VITE_ env vars vs standard
     const supabaseUrl = c.env.VITE_SUPABASE_URL || c.env.SUPABASE_URL;
     const supabaseKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
+    const supabaseServiceKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
         console.error("Missing Supabase credentials in middleware");
-        // We can't Initialize storage, but we can proceed with null user?
-        // Or throw error?
-        // Better to proceed and let subsequent calls fail or handle it.
         c.set('user', null);
         await next();
         return;
     }
 
-    const storage = new SupabaseStorage(supabaseUrl, supabaseKey);
+    const storage = new SupabaseStorage(supabaseUrl, supabaseKey, supabaseServiceKey);
     c.set('storage', storage);
 
     // Check for session cookie

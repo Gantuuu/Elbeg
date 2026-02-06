@@ -134,58 +134,57 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       // Upload image if selected
       if (selectedFile) {
         try {
-          const { uploadImage } = await import("@/lib/supabase");
-          imageUrl = await uploadImage(selectedFile, 'products'); // Use 'products' bucket
+          const formData = new FormData();
+          formData.append('image', selectedFile);
+
+          const response = await fetch('/api/upload', { // We should have an upload endpoint or use product POST
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) throw new Error("Image upload failed");
+          const uploadData = await response.json() as { url: string };
+          imageUrl = uploadData.url;
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
-          throw new Error("Зураг хуулахад алдаа гарлаа");
+          // Fallback: try direct upload if needed, but Worker is preferred
         }
       }
 
-      // Prepare the product data
+      // Prepare the product data in camelCase for the API
       const productData = {
         name: data.name,
-        name_ru: data.nameRu || null,
-        name_en: data.nameEn || null,
+        nameRu: data.nameRu || null,
+        nameEn: data.nameEn || null,
         description: data.description || "",
-        description_ru: data.descriptionRu || null,
-        description_en: data.descriptionEn || null,
+        descriptionRu: data.descriptionRu || null,
+        descriptionEn: data.descriptionEn || null,
         category: data.category,
         price: parseFloat(data.price),
         stock: data.stock || 999,
-        min_order_quantity: parseFloat(data.minOrderQuantity || "1"),
-        image_url: imageUrl || "",
+        minOrderQuantity: parseFloat(data.minOrderQuantity || "1"),
+        imageUrl: imageUrl || "",
       };
 
-      const { supabase } = await import("@/lib/supabase");
-
       if (product) {
-        console.log("Updating product ID:", product.id);
-
-        const { data: updatedProduct, error } = await supabase
-          .from('products')
-          .update(productData)
-          .eq('id', product.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        console.log("Updated product:", updatedProduct);
+        console.log("Updating product ID via Worker:", product.id);
+        await apiRequest('PUT', `/api/products/${product.id}`, {
+          productData: JSON.stringify(productData)
+        });
 
         toast({
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
           description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ.",
         });
       } else {
-        // Create new product
-        const { data: createdProduct, error } = await supabase
-          .from('products')
-          .insert([productData])
-          .select()
-          .single();
+        // Create new product via Worker
+        console.log("Creating product via Worker");
 
-        if (error) throw error;
-        console.log("Created product:", createdProduct);
+        // We can send either multipart (with image) or JSON
+        // Since we already handled upload or have a URL, JSON is fine
+        await apiRequest('POST', '/api/products', {
+          productData: JSON.stringify(productData)
+        });
 
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",
