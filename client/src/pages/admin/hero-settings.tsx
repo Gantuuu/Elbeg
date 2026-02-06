@@ -127,7 +127,9 @@ export default function HeroSettings() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update hero settings");
+        const errorData = await response.json().catch(() => ({})).then(data => data as any);
+        console.error("Backend error details:", errorData);
+        throw new Error(errorData.error || errorData.message || "Failed to update hero settings");
       }
 
       const updatedSettings = await response.json();
