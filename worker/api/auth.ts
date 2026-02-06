@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { setSignedCookie, deleteCookie } from 'hono/cookie';
 import { Bindings } from '../types';
 import { UserWithNullablePhone } from '@shared/schema';
-import { D1Storage } from '../storage';
+import { D1Storage, IStorage } from '../storage';
 import { hashPassword, comparePasswords } from '../utils';
 // import { sendWelcomeEmail } from '../../server/email'; // Removed currently incompatible import
 // validated: server/email uses nodemailer which uses 'net' etc. Might work with nodejs_compat.
@@ -13,7 +13,7 @@ type Env = {
     Bindings: Bindings;
     Variables: {
         user: UserWithNullablePhone | null;
-        storage: D1Storage;
+        storage: IStorage;
     };
 };
 
