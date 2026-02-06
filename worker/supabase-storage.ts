@@ -31,8 +31,50 @@ export class SupabaseStorage implements IStorage {
         this.supabaseKey = supabaseKey;
     }
 
+    private toCamel(obj: any): any {
+        if (Array.isArray(obj)) {
+            return obj.map(v => this.toCamel(v));
+        } else if (obj !== null && obj.constructor === Object) {
+            return Object.keys(obj).reduce(
+                (result, key) => ({
+                    ...result,
+                    [key.replace(/(_\w)/g, m => m[1].toUpperCase())]: this.toCamel(obj[key]),
+                }),
+                {},
+            );
+        }
+        return obj;
+    }
+
+    private toSnake(obj: any): any {
+        if (Array.isArray(obj)) {
+            return obj.map(v => this.toSnake(v));
+        } else if (obj !== null && obj.constructor === Object) {
+            return Object.keys(obj).reduce(
+                (result, key) => ({
+                    ...result,
+                    [key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)]: this.toSnake(obj[key]),
+                }),
+                {},
+            );
+        }
+        return obj;
+    }
+
     private async fetch<T>(path: string, options?: RequestInit): Promise<T> {
         const url = `${this.supabaseUrl}/rest/v1/${path}`;
+
+        // Convert body to snake_case if it exists
+        let body = options?.body;
+        if (body && typeof body === 'string') {
+            try {
+                const parsed = JSON.parse(body);
+                body = JSON.stringify(this.toSnake(parsed));
+            } catch (e) {
+                // Not JSON or already processed
+            }
+        }
+
         const headers = {
             'apikey': this.supabaseKey,
             'Authorization': `Bearer ${this.supabaseKey}`,
@@ -40,7 +82,7 @@ export class SupabaseStorage implements IStorage {
             ...(options?.headers || {})
         };
 
-        const response = await fetch(url, { ...options, headers });
+        const response = await fetch(url, { ...options, body, headers });
         if (!response.ok) {
             const text = await response.text();
             throw new Error(`Supabase error: ${response.status} ${text}`);
@@ -49,12 +91,13 @@ export class SupabaseStorage implements IStorage {
         // For HEAD or empty responses
         if (response.status === 204) return {} as T;
 
-        return await response.json() as T;
+        const data = await response.json();
+        return this.toCamel(data) as T;
     }
 
     // User operations
     async getAllUsers(): Promise<User[]> {
-        return await this.fetch<User[]>('users?select=*&order=createdAt.desc');
+        return await this.fetch<User[]>('users?select=*&order=created_at.desc');
     }
 
     async getUser(id: number): Promise<User | undefined> {
@@ -73,7 +116,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     async getUserByGoogleId(googleId: string): Promise<User | undefined> {
-        const users = await this.fetch<User[]>(`users?googleId=eq.${googleId}&select=*`);
+        const users = await this.fetch<User[]>(`users?google_id=eq.${googleId}&select=*`);
         return users[0];
     }
 
@@ -101,8 +144,8 @@ export class SupabaseStorage implements IStorage {
     async getUserOrders(userId: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
         // Complex query, implementing basic fetch for now
         // This requires joins which PostgREST handles via embedding
-        // url: orders?select=*,items:order_items(select=*,product:products(*))&userId=eq.1
-        const orders = await this.fetch<any[]>(`orders?select=*,items:order_items(*,product:products(*))&userId=eq.${userId}&order=createdAt.desc`);
+        // url: orders?select=*,items:order_items(select=*,product:products(*))&user_id=eq.1
+        const orders = await this.fetch<any[]>(`orders?select=*,items:order_items(*,product:products(*))&user_id=eq.${userId}&order=created_at.desc`);
         return orders;
     }
 
@@ -127,21 +170,21 @@ export class SupabaseStorage implements IStorage {
 
     // Bank Account operations
     async getBankAccounts(): Promise<BankAccount[]> {
-        return await this.fetch<BankAccount[]>('bankAccounts?select=*');
+        return await this.fetch<BankAccount[]>('bank_accounts?select=*');
     }
 
     async getDefaultBankAccount(): Promise<BankAccount | undefined> {
-        const accounts = await this.fetch<BankAccount[]>('bankAccounts?isDefault=eq.true&select=*');
+        const accounts = await this.fetch<BankAccount[]>('bank_accounts?is_default=eq.true&select=*');
         return accounts[0];
     }
 
     async getBankAccount(id: number): Promise<BankAccount | undefined> {
-        const accounts = await this.fetch<BankAccount[]>(`bankAccounts?id=eq.${id}&select=*`);
+        const accounts = await this.fetch<BankAccount[]>(`bank_accounts?id=eq.${id}&select=*`);
         return accounts[0];
     }
 
     async createBankAccount(bankAccount: InsertBankAccount): Promise<BankAccount> {
-        const accounts = await this.fetch<BankAccount[]>('bankAccounts', {
+        const accounts = await this.fetch<BankAccount[]>('bank_accounts', {
             method: 'POST',
             body: JSON.stringify(bankAccount),
             headers: { 'Prefer': 'return=representation' }
@@ -150,7 +193,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     async updateBankAccount(id: number, bankAccount: Partial<InsertBankAccount>): Promise<BankAccount | undefined> {
-        const accounts = await this.fetch<BankAccount[]>(`bankAccounts?id=eq.${id}`, {
+        const accounts = await this.fetch<BankAccount[]>(`bank_accounts?id=eq.${id}`, {
             method: 'PATCH',
             body: JSON.stringify(bankAccount),
             headers: { 'Prefer': 'return=representation' }
@@ -162,7 +205,7 @@ export class SupabaseStorage implements IStorage {
         const account = await this.getBankAccount(id);
         if (!account) return false; // Not found
 
-        await this.fetch(`bankAccounts?id=eq.${id}`, {
+        await this.fetch(`bank_accounts?id=eq.${id}`, {
             method: 'DELETE'
         });
         return true;
@@ -171,13 +214,13 @@ export class SupabaseStorage implements IStorage {
     async setDefaultBankAccount(id: number): Promise<boolean> {
         // Transaction not supported easily in one go, sequential update
         // 1. Set all to false
-        await this.fetch('bankAccounts?isDefault=eq.true', {
+        await this.fetch('bank_accounts?is_default=eq.true', {
             method: 'PATCH',
             body: JSON.stringify({ isDefault: false })
         });
 
         // 2. Set target to true
-        const accounts = await this.fetch<BankAccount[]>(`bankAccounts?id=eq.${id}`, {
+        const accounts = await this.fetch<BankAccount[]>(`bank_accounts?id=eq.${id}`, {
             method: 'PATCH',
             body: JSON.stringify({ isDefault: true }),
             headers: { 'Prefer': 'return=representation' }
@@ -238,7 +281,7 @@ export class SupabaseStorage implements IStorage {
     // Stubs for other methods (implement as needed/lazy)
     // Product operations
     async getProducts(): Promise<Product[]> {
-        return await this.fetch<Product[]>('products?select=*&order=createdAt.desc');
+        return await this.fetch<Product[]>('products?select=*&order=created_at.desc');
     }
 
     async getProductsByCategory(category: string): Promise<Product[]> {
@@ -274,23 +317,23 @@ export class SupabaseStorage implements IStorage {
     }
     // Order operations
     async getOrders(startDate?: Date, endDate?: Date): Promise<Order[]> {
-        let query = 'orders?select=*&order=createdAt.desc';
+        let query = 'orders?select=*&order=created_at.desc';
         if (startDate) {
-            query += `&createdAt=gte.${startDate.toISOString()}`;
+            query += `&created_at=gte.${startDate.toISOString()}`;
         }
         if (endDate) {
-            query += `&createdAt=lte.${endDate.toISOString()}`;
+            query += `&created_at=lte.${endDate.toISOString()}`;
         }
         return await this.fetch<Order[]>(query);
     }
 
     async getOrdersWithItems(startDate?: Date, endDate?: Date): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
-        let query = 'orders?select=*,items:order_items(*,product:products(*))&order=createdAt.desc';
+        let query = 'orders?select=*,items:order_items(*,product:products(*))&order=created_at.desc';
         if (startDate) {
-            query += `&createdAt=gte.${startDate.toISOString()}`;
+            query += `&created_at=gte.${startDate.toISOString()}`;
         }
         if (endDate) {
-            query += `&createdAt=lte.${endDate.toISOString()}`;
+            query += `&created_at=lte.${endDate.toISOString()}`;
         }
         return await this.fetch<any[]>(query);
     }
@@ -449,7 +492,7 @@ export class SupabaseStorage implements IStorage {
 
     // Media
     async getMediaItems(): Promise<MediaItem[]> {
-        return await this.fetch<MediaItem[]>('media_library?select=*&order=createdAt.desc');
+        return await this.fetch<MediaItem[]>('media_library?select=*&order=created_at.desc');
     }
 
     async getMediaItem(id: number): Promise<MediaItem | undefined> {
@@ -554,7 +597,7 @@ export class SupabaseStorage implements IStorage {
 
     // Meal Kit Components
     async getMealKitComponents(mealKitId: number): Promise<(MealKitComponent & { product: Product })[]> {
-        const items = await this.fetch<any[]>(`meal_kit_components?mealKitId=eq.${mealKitId}&select=*,product:products(*)`);
+        const items = await this.fetch<any[]>(`meal_kit_components?meal_kit_id=eq.${mealKitId}&select=*,product:products(*)`);
         return items;
     }
 
@@ -583,9 +626,9 @@ export class SupabaseStorage implements IStorage {
 
     // Generated Meal Kits (Simplifying for now, might need RPC for complexity)
     async getGeneratedMealKits(userId?: number, sessionId?: string): Promise<GeneratedMealKit[]> {
-        let query = 'generated_meal_kits?select=*&order=createdAt.desc';
-        if (userId) query += `&userId=eq.${userId}`;
-        if (sessionId) query += `&sessionId=eq.${sessionId}`;
+        let query = 'generated_meal_kits?select=*&order=created_at.desc';
+        if (userId) query += `&user_id=eq.${userId}`;
+        if (sessionId) query += `&session_id=eq.${sessionId}`;
         return await this.fetch<GeneratedMealKit[]>(query);
     }
 
@@ -635,7 +678,7 @@ export class SupabaseStorage implements IStorage {
     }
 
     async getStoresByCategory(categoryId: number): Promise<Store[]> {
-        return await this.fetch<Store[]>(`stores?categoryId=eq.${categoryId}`);
+        return await this.fetch<Store[]>(`stores?category_id=eq.${categoryId}`);
     }
 
     async getStoresByCategorySlug(slug: string): Promise<Store[]> {
@@ -767,11 +810,11 @@ export class SupabaseStorage implements IStorage {
     }
     // Reviews
     async getReviews(): Promise<Review[]> {
-        return await this.fetch<Review[]>('reviews?select=*&order=createdAt.desc');
+        return await this.fetch<Review[]>('reviews?select=*&order=created_at.desc');
     }
 
     async getApprovedReviews(): Promise<Review[]> {
-        return await this.fetch<Review[]>('reviews?isApproved=eq.true&select=*&order=createdAt.desc');
+        return await this.fetch<Review[]>('reviews?is_approved=eq.true&select=*&order=created_at.desc');
     }
 
     async getReview(id: number): Promise<Review | undefined> {
