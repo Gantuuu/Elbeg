@@ -135,9 +135,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       if (selectedFile) {
         try {
           const formData = new FormData();
-          formData.append('image', selectedFile);
+          formData.append('file', selectedFile);
 
-          const response = await fetch('/api/upload', { // We should have an upload endpoint or use product POST
+          const response = await fetch('/api/media', { // We should have an upload endpoint or use product POST
             method: 'POST',
             body: formData,
           });
@@ -168,9 +168,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
       if (product) {
         console.log("Updating product ID via Worker:", product.id);
-        await apiRequest('PUT', `/api/products/${product.id}`, {
-          productData: JSON.stringify(productData)
-        });
+        await apiRequest('PUT', `/api/products/${product.id}`, productData);
 
         toast({
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
@@ -180,11 +178,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         // Create new product via Worker
         console.log("Creating product via Worker");
 
-        // We can send either multipart (with image) or JSON
-        // Since we already handled upload or have a URL, JSON is fine
-        await apiRequest('POST', '/api/products', {
-          productData: JSON.stringify(productData)
-        });
+        // Send JSON data directly
+        await apiRequest('POST', '/api/products', productData);
 
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",

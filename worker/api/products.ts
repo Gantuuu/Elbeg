@@ -44,9 +44,14 @@ app.post('/', requireAdmin, async (c) => {
     const storage = c.get('storage');
 
     // Parse multipart form data
-    const body = await c.req.parseBody();
-    const file = body['image'];
+    let body: any = {};
+    try {
+        body = await c.req.parseBody();
+    } catch (e) {
+        // Not multipart
+    }
 
+    const file = body['image'];
     let imageUrl = '';
 
     // Handle file upload to R2 if present
@@ -60,7 +65,12 @@ app.post('/', requireAdmin, async (c) => {
     try {
         // Parse productData JSON if sent from frontend
         let parsedData: any = {};
-        if (body['productData'] && typeof body['productData'] === 'string') {
+
+        // Check if content-type is JSON
+        const contentType = c.req.header('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            parsedData = await c.req.json();
+        } else if (body['productData'] && typeof body['productData'] === 'string') {
             parsedData = JSON.parse(body['productData']);
         }
 
@@ -80,6 +90,8 @@ app.post('/', requireAdmin, async (c) => {
             minOrderQuantity: parseFloat(parsedData.minOrderQuantity || parsedData.min_order_quantity || body['minOrderQuantity'] as string || body['min_order_quantity'] as string || '1'),
             storeId: parsedData.storeId ? parseInt(parsedData.storeId) : (parsedData.store_id ? parseInt(parsedData.store_id) : (body['storeId'] ? parseInt(body['storeId'] as string) : (body['store_id'] ? parseInt(body['store_id'] as string) : undefined)))
         };
+
+        console.log("Creating product with data:", JSON.stringify(productData));
 
         if (!productData.name || !productData.category) {
             return c.json({ message: "Product name and category are required" }, 400);
@@ -101,12 +113,21 @@ app.put('/:id', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const id = parseInt(c.req.param('id'));
 
-    const body = await c.req.parseBody();
+    // Parse multipart form data
+    let body: any = {};
+    try {
+        body = await c.req.parseBody();
+    } catch (e) {
+        // Not multipart
+    }
     const file = body['image'];
 
     // Parse productData JSON if sent from frontend
     let parsedData: any = {};
-    if (body['productData'] && typeof body['productData'] === 'string') {
+    const contentType = c.req.header('content-type');
+    if (contentType && contentType.includes('application/json')) {
+        parsedData = await c.req.json();
+    } else if (body['productData'] && typeof body['productData'] === 'string') {
         parsedData = JSON.parse(body['productData']);
     }
 
