@@ -51,9 +51,9 @@ export default function HomePage() {
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      return data as Product[];
+      const response = await fetch('/api/products');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return await response.json() as Product[];
     },
     staleTime: 2 * 60 * 1000,
   });
@@ -89,14 +89,9 @@ export default function HomePage() {
   const { data: reviewsData = [] } = useQuery<Review[]>({
     queryKey: ['reviews'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('is_approved', true)
-        .order('rating', { ascending: false })
-        .limit(6);
-      if (error) throw error;
-      return data as Review[];
+      const response = await fetch('/api/reviews');
+      if (!response.ok) throw new Error('Failed to fetch reviews');
+      return await response.json() as Review[];
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -105,13 +100,9 @@ export default function HomePage() {
   const { data: productCategories = [] } = useQuery<any[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('order', { ascending: true });
-      if (error) throw error;
-      return data;
+      const response = await fetch('/api/categories');
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      return await response.json();
     },
     staleTime: 5 * 60 * 1000,
   });

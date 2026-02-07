@@ -28,13 +28,9 @@ export default function ProductDetails() {
   } = useQuery<Product>({
     queryKey: [`products`, numericId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', numericId)
-        .single();
-      if (error) throw error;
-      return data as Product;
+      const response = await fetch(`/api/products/${numericId}`);
+      if (!response.ok) throw new Error('Failed to fetch product');
+      return await response.json() as Product;
     },
     enabled: !isNaN(numericId),
   });
@@ -46,9 +42,9 @@ export default function ProductDetails() {
   } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      return data as Product[];
+      const response = await fetch('/api/products');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return await response.json() as Product[];
     },
     enabled: !!product,
   });
