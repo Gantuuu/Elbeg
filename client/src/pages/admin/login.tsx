@@ -21,8 +21,8 @@ import { supabase } from "@/lib/supabase"; // Import Supabase client
 
 // Login form schema
 const loginFormSchema = z.object({
-  email: z.string().email({
-    message: "Зөв и-мэйл хаяг оруулна уу", // Correct email validation
+  email: z.string().min(1, {
+    message: "И-мэйл эсвэл хэрэглэгчийн нэр оруулна уу", // Allow username
   }),
   password: z.string().min(1, {
     message: "Нууц үг оруулна уу",
@@ -49,6 +49,24 @@ export default function AdminLogin() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+
+    // CHECK FOR LOCAL ADMIN BYPASS (DEV ONLY)
+    if (import.meta.env.DEV && data.email === 'admin' && data.password === 'admin123') {
+      localStorage.setItem('mock_admin_session', 'true');
+
+      // Initializing query data for immediate feedback if queryClient is used elsewhere
+      // (Though admin panel likely refetches /api/user or checks auth)
+
+      toast({
+        title: "Амжилттай нэвтэрлээ (Local Admin)",
+        description: "Админ хэсэгт тавтай морил.",
+      });
+
+      setTimeout(() => {
+        setLocation("/admin");
+      }, 500);
+      return;
+    }
 
     try {
       // 1. Supabase Auth Login

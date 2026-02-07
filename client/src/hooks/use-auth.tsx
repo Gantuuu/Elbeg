@@ -56,6 +56,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: async () => {
+      // CHECK FOR LOCAL ADMIN BYPASS FIRST (DEV ONLY)
+      if (import.meta.env.DEV) {
+        const isLocalAdmin = localStorage.getItem('mock_admin_session') === 'true';
+        if (isLocalAdmin) {
+          return {
+            id: 999999,
+            username: "admin",
+            email: "admin@elbeg.com",
+            isAdmin: true,
+            role: "admin",
+            name: "Local Admin",
+            createdAt: new Date().toISOString(),
+          } as any;
+        }
+      }
+
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) return null;
@@ -100,6 +116,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
+      // CHECK FOR LOCAL ADMIN BYPASS (DEV ONLY)
+      if (import.meta.env.DEV && data.username === 'admin' && data.password === 'admin123') {
+        localStorage.setItem('mock_admin_session', 'true');
+        return {
+          id: 999999,
+          username: "admin",
+          email: "admin@elbeg.com",
+          isAdmin: true,
+          role: "admin",
+          name: "Local Admin",
+          createdAt: new Date().toISOString(),
+        } as any;
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: data.username.includes('@') ? data.username : `${data.username}@placeholder.com`, // Support username if needed, but schema uses email
         password: data.password,
@@ -217,6 +247,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      // CLEAR LOCAL ADMIN SESSION
+      localStorage.removeItem('mock_admin_session');
+
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     },
