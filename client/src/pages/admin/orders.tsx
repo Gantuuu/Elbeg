@@ -34,12 +34,12 @@ import { Calendar } from "@/components/ui/calendar";
 
 // SMS message templates based on order status
 const SMS_TEMPLATES: Record<string, (amount: string) => string> = {
-  pending: (amount) => `[Арвижих] Таны ${amount} төлбөр төлөгдөөгүй байна. Төлбөрөө баталгаажуулна уу.`,
-  payment_confirmed: (amount) => `[Арвижих] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
-  processing: (amount) => `[Арвижих] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
-  shipped: () => `[Арвижих] Таны захиалга хүргэлтэд гарлаа.`,
-  delivered: () => `[Арвижих] Таны захиалга амжилттай хүргэгдлээ. Баярлалаа.`,
-  cancelled: () => `[Арвижих] Таны захиалга цуцлагдсан байна.`,
+  pending: (amount) => `[Элбэг] Таны ${amount} төлбөр төлөгдөөгүй байна. Төлбөрөө баталгаажуулна уу.`,
+  payment_confirmed: (amount) => `[Элбэг] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
+  processing: (amount) => `[Элбэг] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
+  shipped: () => `[Элбэг] Таны захиалга хүргэлтэд гарлаа.`,
+  delivered: () => `[Элбэг] Таны захиалга амжилттай хүргэгдлээ. Баярлалаа.`,
+  cancelled: () => `[Элбэг] Таны захиалга цуцлагдсан байна.`,
 };
 
 export default function AdminOrders() {
