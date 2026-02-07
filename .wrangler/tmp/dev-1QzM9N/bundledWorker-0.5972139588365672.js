@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../../node_modules/unenv/dist/runtime/_internal/utils.mjs
+// node_modules/unenv/dist/runtime/_internal/utils.mjs
 // @__NO_SIDE_EFFECTS__
 function createNotImplementedError(name) {
   return new Error(`[unenv] ${name} is not implemented yet!`);
@@ -26,7 +26,7 @@ function notImplementedClass(name) {
 }
 __name(notImplementedClass, "notImplementedClass");
 
-// ../../node_modules/unenv/dist/runtime/node/internal/perf_hooks/performance.mjs
+// node_modules/unenv/dist/runtime/node/internal/perf_hooks/performance.mjs
 var _timeOrigin = globalThis.performance?.timeOrigin ?? Date.now();
 var _performanceNow = globalThis.performance?.now ? globalThis.performance.now.bind(globalThis.performance) : () => Date.now() - _timeOrigin;
 var nodeTiming = {
@@ -264,7 +264,7 @@ var PerformanceObserver = class {
 };
 var performance = globalThis.performance && "addEventListener" in globalThis.performance ? globalThis.performance : new Performance();
 
-// ../../node_modules/@cloudflare/unenv-preset/dist/runtime/polyfill/performance.mjs
+// node_modules/@cloudflare/unenv-preset/dist/runtime/polyfill/performance.mjs
 globalThis.performance = performance;
 globalThis.Performance = Performance;
 globalThis.PerformanceEntry = PerformanceEntry;
@@ -274,14 +274,14 @@ globalThis.PerformanceObserver = PerformanceObserver;
 globalThis.PerformanceObserverEntryList = PerformanceObserverEntryList;
 globalThis.PerformanceResourceTiming = PerformanceResourceTiming;
 
-// ../../node_modules/unenv/dist/runtime/node/console.mjs
+// node_modules/unenv/dist/runtime/node/console.mjs
 import { Writable } from "node:stream";
 
-// ../../node_modules/unenv/dist/runtime/mock/noop.mjs
+// node_modules/unenv/dist/runtime/mock/noop.mjs
 var noop_default = Object.assign(() => {
 }, { __unenv__: true });
 
-// ../../node_modules/unenv/dist/runtime/node/console.mjs
+// node_modules/unenv/dist/runtime/node/console.mjs
 var _console = globalThis.console;
 var _ignoreErrors = true;
 var _stderr = new Writable();
@@ -313,7 +313,7 @@ var _times = /* @__PURE__ */ new Map();
 var _stdoutErrorHandler = noop_default;
 var _stderrErrorHandler = noop_default;
 
-// ../../node_modules/@cloudflare/unenv-preset/dist/runtime/node/console.mjs
+// node_modules/@cloudflare/unenv-preset/dist/runtime/node/console.mjs
 var workerdConsole = globalThis["console"];
 var {
   assert,
@@ -354,10 +354,10 @@ Object.assign(workerdConsole, {
 });
 var console_default = workerdConsole;
 
-// ../../node_modules/wrangler/_virtual_unenv_global_polyfill-@cloudflare-unenv-preset-node-console
+// node_modules/wrangler/_virtual_unenv_global_polyfill-@cloudflare-unenv-preset-node-console
 globalThis.console = console_default;
 
-// ../../node_modules/unenv/dist/runtime/node/internal/process/hrtime.mjs
+// node_modules/unenv/dist/runtime/node/internal/process/hrtime.mjs
 var hrtime = /* @__PURE__ */ Object.assign(/* @__PURE__ */ __name(function hrtime2(startTime) {
   const now = Date.now();
   const seconds = Math.trunc(now / 1e3);
@@ -376,10 +376,10 @@ var hrtime = /* @__PURE__ */ Object.assign(/* @__PURE__ */ __name(function hrtim
   return BigInt(Date.now() * 1e6);
 }, "bigint") });
 
-// ../../node_modules/unenv/dist/runtime/node/internal/process/process.mjs
+// node_modules/unenv/dist/runtime/node/internal/process/process.mjs
 import { EventEmitter } from "node:events";
 
-// ../../node_modules/unenv/dist/runtime/node/internal/tty/read-stream.mjs
+// node_modules/unenv/dist/runtime/node/internal/tty/read-stream.mjs
 var ReadStream = class {
   static {
     __name(this, "ReadStream");
@@ -396,7 +396,7 @@ var ReadStream = class {
   }
 };
 
-// ../../node_modules/unenv/dist/runtime/node/internal/tty/write-stream.mjs
+// node_modules/unenv/dist/runtime/node/internal/tty/write-stream.mjs
 var WriteStream = class {
   static {
     __name(this, "WriteStream");
@@ -408,7 +408,7 @@ var WriteStream = class {
   constructor(fd) {
     this.fd = fd;
   }
-  clearLine(dir3, callback) {
+  clearLine(dir4, callback) {
     callback && callback();
     return false;
   }
@@ -424,10 +424,10 @@ var WriteStream = class {
     callback && callback();
     return false;
   }
-  getColorDepth(env2) {
+  getColorDepth(env3) {
     return 1;
   }
-  hasColors(count3, env2) {
+  hasColors(count4, env3) {
     return false;
   }
   getWindowSize() {
@@ -446,11 +446,11 @@ var WriteStream = class {
   }
 };
 
-// ../../node_modules/unenv/dist/runtime/node/internal/process/node-version.mjs
+// node_modules/unenv/dist/runtime/node/internal/process/node-version.mjs
 var NODE_VERSION = "22.14.0";
 
-// ../../node_modules/unenv/dist/runtime/node/internal/process/process.mjs
-var Process = class _Process extends EventEmitter {
+// node_modules/unenv/dist/runtime/node/internal/process/process.mjs
+var Process = class _Process2 extends EventEmitter {
   static {
     __name(this, "Process");
   }
@@ -462,7 +462,7 @@ var Process = class _Process extends EventEmitter {
     this.env = impl.env;
     this.hrtime = impl.hrtime;
     this.nextTick = impl.nextTick;
-    for (const prop of [...Object.getOwnPropertyNames(_Process.prototype), ...Object.getOwnPropertyNames(EventEmitter.prototype)]) {
+    for (const prop of [...Object.getOwnPropertyNames(_Process2.prototype), ...Object.getOwnPropertyNames(EventEmitter.prototype)]) {
       const value = this[prop];
       if (typeof value === "function") {
         this[prop] = value.bind(this);
@@ -494,8 +494,8 @@ var Process = class _Process extends EventEmitter {
   }
   // --- cwd ---
   #cwd = "/";
-  chdir(cwd2) {
-    this.#cwd = cwd2;
+  chdir(cwd3) {
+    this.#cwd = cwd3;
   }
   cwd() {
     return this.#cwd;
@@ -684,7 +684,7 @@ var Process = class _Process extends EventEmitter {
   _linkedBinding = void 0;
 };
 
-// ../../node_modules/@cloudflare/unenv-preset/dist/runtime/node/process.mjs
+// node_modules/@cloudflare/unenv-preset/dist/runtime/node/process.mjs
 var globalProcess = globalThis["process"];
 var getBuiltinModule = globalProcess.getBuiltinModule;
 var workerdProcess = getBuiltinModule("node:process");
@@ -942,12 +942,959 @@ var _process = {
 };
 var process_default = _process;
 
-// ../../node_modules/wrangler/_virtual_unenv_global_polyfill-@cloudflare-unenv-preset-node-process
+// node_modules/wrangler/_virtual_unenv_global_polyfill-@cloudflare-unenv-preset-node-process
 globalThis.process = process_default;
 
-// _worker.js
-var compose = /* @__PURE__ */ __name((middleware, onError, onNotFound) => {
-  return (context2, next) => {
+// .wrangler/tmp/pages-R1rack/bundledWorker-0.5972139588365672.mjs
+import { Writable as Writable2 } from "node:stream";
+import { EventEmitter as EventEmitter2 } from "node:events";
+var __defProp2 = Object.defineProperty;
+var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
+// @__NO_SIDE_EFFECTS__
+function createNotImplementedError2(name) {
+  return new Error(`[unenv] ${name} is not implemented yet!`);
+}
+__name(createNotImplementedError2, "createNotImplementedError");
+__name2(createNotImplementedError2, "createNotImplementedError");
+// @__NO_SIDE_EFFECTS__
+function notImplemented2(name) {
+  const fn = /* @__PURE__ */ __name2(() => {
+    throw /* @__PURE__ */ createNotImplementedError2(name);
+  }, "fn");
+  return Object.assign(fn, { __unenv__: true });
+}
+__name(notImplemented2, "notImplemented");
+__name2(notImplemented2, "notImplemented");
+// @__NO_SIDE_EFFECTS__
+function notImplementedClass2(name) {
+  return class {
+    __unenv__ = true;
+    constructor() {
+      throw new Error(`[unenv] ${name} is not implemented yet!`);
+    }
+  };
+}
+__name(notImplementedClass2, "notImplementedClass");
+__name2(notImplementedClass2, "notImplementedClass");
+var _timeOrigin2 = globalThis.performance?.timeOrigin ?? Date.now();
+var _performanceNow2 = globalThis.performance?.now ? globalThis.performance.now.bind(globalThis.performance) : () => Date.now() - _timeOrigin2;
+var nodeTiming2 = {
+  name: "node",
+  entryType: "node",
+  startTime: 0,
+  duration: 0,
+  nodeStart: 0,
+  v8Start: 0,
+  bootstrapComplete: 0,
+  environment: 0,
+  loopStart: 0,
+  loopExit: 0,
+  idleTime: 0,
+  uvMetricsInfo: {
+    loopCount: 0,
+    events: 0,
+    eventsWaiting: 0
+  },
+  detail: void 0,
+  toJSON() {
+    return this;
+  }
+};
+var PerformanceEntry2 = class {
+  static {
+    __name(this, "PerformanceEntry");
+  }
+  static {
+    __name2(this, "PerformanceEntry");
+  }
+  __unenv__ = true;
+  detail;
+  entryType = "event";
+  name;
+  startTime;
+  constructor(name, options) {
+    this.name = name;
+    this.startTime = options?.startTime || _performanceNow2();
+    this.detail = options?.detail;
+  }
+  get duration() {
+    return _performanceNow2() - this.startTime;
+  }
+  toJSON() {
+    return {
+      name: this.name,
+      entryType: this.entryType,
+      startTime: this.startTime,
+      duration: this.duration,
+      detail: this.detail
+    };
+  }
+};
+var PerformanceMark3 = class PerformanceMark22 extends PerformanceEntry2 {
+  static {
+    __name(this, "PerformanceMark2");
+  }
+  static {
+    __name2(this, "PerformanceMark");
+  }
+  entryType = "mark";
+  constructor() {
+    super(...arguments);
+  }
+  get duration() {
+    return 0;
+  }
+};
+var PerformanceMeasure2 = class extends PerformanceEntry2 {
+  static {
+    __name(this, "PerformanceMeasure");
+  }
+  static {
+    __name2(this, "PerformanceMeasure");
+  }
+  entryType = "measure";
+};
+var PerformanceResourceTiming2 = class extends PerformanceEntry2 {
+  static {
+    __name(this, "PerformanceResourceTiming");
+  }
+  static {
+    __name2(this, "PerformanceResourceTiming");
+  }
+  entryType = "resource";
+  serverTiming = [];
+  connectEnd = 0;
+  connectStart = 0;
+  decodedBodySize = 0;
+  domainLookupEnd = 0;
+  domainLookupStart = 0;
+  encodedBodySize = 0;
+  fetchStart = 0;
+  initiatorType = "";
+  name = "";
+  nextHopProtocol = "";
+  redirectEnd = 0;
+  redirectStart = 0;
+  requestStart = 0;
+  responseEnd = 0;
+  responseStart = 0;
+  secureConnectionStart = 0;
+  startTime = 0;
+  transferSize = 0;
+  workerStart = 0;
+  responseStatus = 0;
+};
+var PerformanceObserverEntryList2 = class {
+  static {
+    __name(this, "PerformanceObserverEntryList");
+  }
+  static {
+    __name2(this, "PerformanceObserverEntryList");
+  }
+  __unenv__ = true;
+  getEntries() {
+    return [];
+  }
+  getEntriesByName(_name, _type) {
+    return [];
+  }
+  getEntriesByType(type) {
+    return [];
+  }
+};
+var Performance2 = class {
+  static {
+    __name(this, "Performance");
+  }
+  static {
+    __name2(this, "Performance");
+  }
+  __unenv__ = true;
+  timeOrigin = _timeOrigin2;
+  eventCounts = /* @__PURE__ */ new Map();
+  _entries = [];
+  _resourceTimingBufferSize = 0;
+  navigation = void 0;
+  timing = void 0;
+  timerify(_fn, _options) {
+    throw /* @__PURE__ */ createNotImplementedError2("Performance.timerify");
+  }
+  get nodeTiming() {
+    return nodeTiming2;
+  }
+  eventLoopUtilization() {
+    return {};
+  }
+  markResourceTiming() {
+    return new PerformanceResourceTiming2("");
+  }
+  onresourcetimingbufferfull = null;
+  now() {
+    if (this.timeOrigin === _timeOrigin2) {
+      return _performanceNow2();
+    }
+    return Date.now() - this.timeOrigin;
+  }
+  clearMarks(markName) {
+    this._entries = markName ? this._entries.filter((e) => e.name !== markName) : this._entries.filter((e) => e.entryType !== "mark");
+  }
+  clearMeasures(measureName) {
+    this._entries = measureName ? this._entries.filter((e) => e.name !== measureName) : this._entries.filter((e) => e.entryType !== "measure");
+  }
+  clearResourceTimings() {
+    this._entries = this._entries.filter((e) => e.entryType !== "resource" || e.entryType !== "navigation");
+  }
+  getEntries() {
+    return this._entries;
+  }
+  getEntriesByName(name, type) {
+    return this._entries.filter((e) => e.name === name && (!type || e.entryType === type));
+  }
+  getEntriesByType(type) {
+    return this._entries.filter((e) => e.entryType === type);
+  }
+  mark(name, options) {
+    const entry = new PerformanceMark3(name, options);
+    this._entries.push(entry);
+    return entry;
+  }
+  measure(measureName, startOrMeasureOptions, endMark) {
+    let start;
+    let end;
+    if (typeof startOrMeasureOptions === "string") {
+      start = this.getEntriesByName(startOrMeasureOptions, "mark")[0]?.startTime;
+      end = this.getEntriesByName(endMark, "mark")[0]?.startTime;
+    } else {
+      start = Number.parseFloat(startOrMeasureOptions?.start) || this.now();
+      end = Number.parseFloat(startOrMeasureOptions?.end) || this.now();
+    }
+    const entry = new PerformanceMeasure2(measureName, {
+      startTime: start,
+      detail: {
+        start,
+        end
+      }
+    });
+    this._entries.push(entry);
+    return entry;
+  }
+  setResourceTimingBufferSize(maxSize) {
+    this._resourceTimingBufferSize = maxSize;
+  }
+  addEventListener(type, listener, options) {
+    throw /* @__PURE__ */ createNotImplementedError2("Performance.addEventListener");
+  }
+  removeEventListener(type, listener, options) {
+    throw /* @__PURE__ */ createNotImplementedError2("Performance.removeEventListener");
+  }
+  dispatchEvent(event) {
+    throw /* @__PURE__ */ createNotImplementedError2("Performance.dispatchEvent");
+  }
+  toJSON() {
+    return this;
+  }
+};
+var PerformanceObserver2 = class {
+  static {
+    __name(this, "PerformanceObserver");
+  }
+  static {
+    __name2(this, "PerformanceObserver");
+  }
+  __unenv__ = true;
+  static supportedEntryTypes = [];
+  _callback = null;
+  constructor(callback) {
+    this._callback = callback;
+  }
+  takeRecords() {
+    return [];
+  }
+  disconnect() {
+    throw /* @__PURE__ */ createNotImplementedError2("PerformanceObserver.disconnect");
+  }
+  observe(options) {
+    throw /* @__PURE__ */ createNotImplementedError2("PerformanceObserver.observe");
+  }
+  bind(fn) {
+    return fn;
+  }
+  runInAsyncScope(fn, thisArg, ...args) {
+    return fn.call(thisArg, ...args);
+  }
+  asyncId() {
+    return 0;
+  }
+  triggerAsyncId() {
+    return 0;
+  }
+  emitDestroy() {
+    return this;
+  }
+};
+var performance2 = globalThis.performance && "addEventListener" in globalThis.performance ? globalThis.performance : new Performance2();
+globalThis.performance = performance2;
+globalThis.Performance = Performance2;
+globalThis.PerformanceEntry = PerformanceEntry2;
+globalThis.PerformanceMark = PerformanceMark3;
+globalThis.PerformanceMeasure = PerformanceMeasure2;
+globalThis.PerformanceObserver = PerformanceObserver2;
+globalThis.PerformanceObserverEntryList = PerformanceObserverEntryList2;
+globalThis.PerformanceResourceTiming = PerformanceResourceTiming2;
+var noop_default2 = Object.assign(() => {
+}, { __unenv__: true });
+var _console2 = globalThis.console;
+var _ignoreErrors2 = true;
+var _stderr2 = new Writable2();
+var _stdout2 = new Writable2();
+var log3 = _console2?.log ?? noop_default2;
+var info3 = _console2?.info ?? log3;
+var trace3 = _console2?.trace ?? info3;
+var debug3 = _console2?.debug ?? log3;
+var table3 = _console2?.table ?? log3;
+var error3 = _console2?.error ?? log3;
+var warn3 = _console2?.warn ?? error3;
+var createTask3 = _console2?.createTask ?? /* @__PURE__ */ notImplemented2("console.createTask");
+var clear3 = _console2?.clear ?? noop_default2;
+var count3 = _console2?.count ?? noop_default2;
+var countReset3 = _console2?.countReset ?? noop_default2;
+var dir3 = _console2?.dir ?? noop_default2;
+var dirxml3 = _console2?.dirxml ?? noop_default2;
+var group3 = _console2?.group ?? noop_default2;
+var groupEnd3 = _console2?.groupEnd ?? noop_default2;
+var groupCollapsed3 = _console2?.groupCollapsed ?? noop_default2;
+var profile3 = _console2?.profile ?? noop_default2;
+var profileEnd3 = _console2?.profileEnd ?? noop_default2;
+var time3 = _console2?.time ?? noop_default2;
+var timeEnd3 = _console2?.timeEnd ?? noop_default2;
+var timeLog3 = _console2?.timeLog ?? noop_default2;
+var timeStamp3 = _console2?.timeStamp ?? noop_default2;
+var Console2 = _console2?.Console ?? /* @__PURE__ */ notImplementedClass2("console.Console");
+var _times2 = /* @__PURE__ */ new Map();
+var _stdoutErrorHandler2 = noop_default2;
+var _stderrErrorHandler2 = noop_default2;
+var workerdConsole2 = globalThis["console"];
+var {
+  assert: assert3,
+  clear: clear22,
+  // @ts-expect-error undocumented public API
+  context: context2,
+  count: count22,
+  countReset: countReset22,
+  // @ts-expect-error undocumented public API
+  createTask: createTask22,
+  debug: debug22,
+  dir: dir22,
+  dirxml: dirxml22,
+  error: error22,
+  group: group22,
+  groupCollapsed: groupCollapsed22,
+  groupEnd: groupEnd22,
+  info: info22,
+  log: log22,
+  profile: profile22,
+  profileEnd: profileEnd22,
+  table: table22,
+  time: time22,
+  timeEnd: timeEnd22,
+  timeLog: timeLog22,
+  timeStamp: timeStamp22,
+  trace: trace22,
+  warn: warn22
+} = workerdConsole2;
+Object.assign(workerdConsole2, {
+  Console: Console2,
+  _ignoreErrors: _ignoreErrors2,
+  _stderr: _stderr2,
+  _stderrErrorHandler: _stderrErrorHandler2,
+  _stdout: _stdout2,
+  _stdoutErrorHandler: _stdoutErrorHandler2,
+  _times: _times2
+});
+var console_default2 = workerdConsole2;
+globalThis.console = console_default2;
+var hrtime4 = /* @__PURE__ */ Object.assign(/* @__PURE__ */ __name2(/* @__PURE__ */ __name(function hrtime22(startTime) {
+  const now = Date.now();
+  const seconds = Math.trunc(now / 1e3);
+  const nanos = now % 1e3 * 1e6;
+  if (startTime) {
+    let diffSeconds = seconds - startTime[0];
+    let diffNanos = nanos - startTime[0];
+    if (diffNanos < 0) {
+      diffSeconds = diffSeconds - 1;
+      diffNanos = 1e9 + diffNanos;
+    }
+    return [diffSeconds, diffNanos];
+  }
+  return [seconds, nanos];
+}, "hrtime2"), "hrtime"), { bigint: /* @__PURE__ */ __name2(/* @__PURE__ */ __name(function bigint2() {
+  return BigInt(Date.now() * 1e6);
+}, "bigint"), "bigint") });
+var ReadStream2 = class {
+  static {
+    __name(this, "ReadStream");
+  }
+  static {
+    __name2(this, "ReadStream");
+  }
+  fd;
+  isRaw = false;
+  isTTY = false;
+  constructor(fd) {
+    this.fd = fd;
+  }
+  setRawMode(mode) {
+    this.isRaw = mode;
+    return this;
+  }
+};
+var WriteStream2 = class {
+  static {
+    __name(this, "WriteStream");
+  }
+  static {
+    __name2(this, "WriteStream");
+  }
+  fd;
+  columns = 80;
+  rows = 24;
+  isTTY = false;
+  constructor(fd) {
+    this.fd = fd;
+  }
+  clearLine(dir32, callback) {
+    callback && callback();
+    return false;
+  }
+  clearScreenDown(callback) {
+    callback && callback();
+    return false;
+  }
+  cursorTo(x, y, callback) {
+    callback && typeof callback === "function" && callback();
+    return false;
+  }
+  moveCursor(dx, dy, callback) {
+    callback && callback();
+    return false;
+  }
+  getColorDepth(env22) {
+    return 1;
+  }
+  hasColors(count32, env22) {
+    return false;
+  }
+  getWindowSize() {
+    return [this.columns, this.rows];
+  }
+  write(str, encoding, cb) {
+    if (str instanceof Uint8Array) {
+      str = new TextDecoder().decode(str);
+    }
+    try {
+      console.log(str);
+    } catch {
+    }
+    cb && typeof cb === "function" && cb();
+    return false;
+  }
+};
+var NODE_VERSION2 = "22.14.0";
+var Process2 = class _Process extends EventEmitter2 {
+  static {
+    __name(this, "_Process");
+  }
+  static {
+    __name2(this, "Process");
+  }
+  env;
+  hrtime;
+  nextTick;
+  constructor(impl) {
+    super();
+    this.env = impl.env;
+    this.hrtime = impl.hrtime;
+    this.nextTick = impl.nextTick;
+    for (const prop of [...Object.getOwnPropertyNames(_Process.prototype), ...Object.getOwnPropertyNames(EventEmitter2.prototype)]) {
+      const value = this[prop];
+      if (typeof value === "function") {
+        this[prop] = value.bind(this);
+      }
+    }
+  }
+  // --- event emitter ---
+  emitWarning(warning, type, code) {
+    console.warn(`${code ? `[${code}] ` : ""}${type ? `${type}: ` : ""}${warning}`);
+  }
+  emit(...args) {
+    return super.emit(...args);
+  }
+  listeners(eventName) {
+    return super.listeners(eventName);
+  }
+  // --- stdio (lazy initializers) ---
+  #stdin;
+  #stdout;
+  #stderr;
+  get stdin() {
+    return this.#stdin ??= new ReadStream2(0);
+  }
+  get stdout() {
+    return this.#stdout ??= new WriteStream2(1);
+  }
+  get stderr() {
+    return this.#stderr ??= new WriteStream2(2);
+  }
+  // --- cwd ---
+  #cwd = "/";
+  chdir(cwd22) {
+    this.#cwd = cwd22;
+  }
+  cwd() {
+    return this.#cwd;
+  }
+  // --- dummy props and getters ---
+  arch = "";
+  platform = "";
+  argv = [];
+  argv0 = "";
+  execArgv = [];
+  execPath = "";
+  title = "";
+  pid = 200;
+  ppid = 100;
+  get version() {
+    return `v${NODE_VERSION2}`;
+  }
+  get versions() {
+    return { node: NODE_VERSION2 };
+  }
+  get allowedNodeEnvironmentFlags() {
+    return /* @__PURE__ */ new Set();
+  }
+  get sourceMapsEnabled() {
+    return false;
+  }
+  get debugPort() {
+    return 0;
+  }
+  get throwDeprecation() {
+    return false;
+  }
+  get traceDeprecation() {
+    return false;
+  }
+  get features() {
+    return {};
+  }
+  get release() {
+    return {};
+  }
+  get connected() {
+    return false;
+  }
+  get config() {
+    return {};
+  }
+  get moduleLoadList() {
+    return [];
+  }
+  constrainedMemory() {
+    return 0;
+  }
+  availableMemory() {
+    return 0;
+  }
+  uptime() {
+    return 0;
+  }
+  resourceUsage() {
+    return {};
+  }
+  // --- noop methods ---
+  ref() {
+  }
+  unref() {
+  }
+  // --- unimplemented methods ---
+  umask() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.umask");
+  }
+  getBuiltinModule() {
+    return void 0;
+  }
+  getActiveResourcesInfo() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.getActiveResourcesInfo");
+  }
+  exit() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.exit");
+  }
+  reallyExit() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.reallyExit");
+  }
+  kill() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.kill");
+  }
+  abort() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.abort");
+  }
+  dlopen() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.dlopen");
+  }
+  setSourceMapsEnabled() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.setSourceMapsEnabled");
+  }
+  loadEnvFile() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.loadEnvFile");
+  }
+  disconnect() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.disconnect");
+  }
+  cpuUsage() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.cpuUsage");
+  }
+  setUncaughtExceptionCaptureCallback() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.setUncaughtExceptionCaptureCallback");
+  }
+  hasUncaughtExceptionCaptureCallback() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.hasUncaughtExceptionCaptureCallback");
+  }
+  initgroups() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.initgroups");
+  }
+  openStdin() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.openStdin");
+  }
+  assert() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.assert");
+  }
+  binding() {
+    throw /* @__PURE__ */ createNotImplementedError2("process.binding");
+  }
+  // --- attached interfaces ---
+  permission = { has: /* @__PURE__ */ notImplemented2("process.permission.has") };
+  report = {
+    directory: "",
+    filename: "",
+    signal: "SIGUSR2",
+    compact: false,
+    reportOnFatalError: false,
+    reportOnSignal: false,
+    reportOnUncaughtException: false,
+    getReport: /* @__PURE__ */ notImplemented2("process.report.getReport"),
+    writeReport: /* @__PURE__ */ notImplemented2("process.report.writeReport")
+  };
+  finalization = {
+    register: /* @__PURE__ */ notImplemented2("process.finalization.register"),
+    unregister: /* @__PURE__ */ notImplemented2("process.finalization.unregister"),
+    registerBeforeExit: /* @__PURE__ */ notImplemented2("process.finalization.registerBeforeExit")
+  };
+  memoryUsage = Object.assign(() => ({
+    arrayBuffers: 0,
+    rss: 0,
+    external: 0,
+    heapTotal: 0,
+    heapUsed: 0
+  }), { rss: /* @__PURE__ */ __name2(() => 0, "rss") });
+  // --- undefined props ---
+  mainModule = void 0;
+  domain = void 0;
+  // optional
+  send = void 0;
+  exitCode = void 0;
+  channel = void 0;
+  getegid = void 0;
+  geteuid = void 0;
+  getgid = void 0;
+  getgroups = void 0;
+  getuid = void 0;
+  setegid = void 0;
+  seteuid = void 0;
+  setgid = void 0;
+  setgroups = void 0;
+  setuid = void 0;
+  // internals
+  _events = void 0;
+  _eventsCount = void 0;
+  _exiting = void 0;
+  _maxListeners = void 0;
+  _debugEnd = void 0;
+  _debugProcess = void 0;
+  _fatalException = void 0;
+  _getActiveHandles = void 0;
+  _getActiveRequests = void 0;
+  _kill = void 0;
+  _preload_modules = void 0;
+  _rawDebug = void 0;
+  _startProfilerIdleNotifier = void 0;
+  _stopProfilerIdleNotifier = void 0;
+  _tickCallback = void 0;
+  _disconnect = void 0;
+  _handleQueue = void 0;
+  _pendingMessage = void 0;
+  _channel = void 0;
+  _send = void 0;
+  _linkedBinding = void 0;
+};
+var globalProcess2 = globalThis["process"];
+var getBuiltinModule2 = globalProcess2.getBuiltinModule;
+var workerdProcess2 = getBuiltinModule2("node:process");
+var isWorkerdProcessV22 = globalThis.Cloudflare.compatibilityFlags.enable_nodejs_process_v2;
+var unenvProcess2 = new Process2({
+  env: globalProcess2.env,
+  // `hrtime` is only available from workerd process v2
+  hrtime: isWorkerdProcessV22 ? workerdProcess2.hrtime : hrtime4,
+  // `nextTick` is available from workerd process v1
+  nextTick: workerdProcess2.nextTick
+});
+var { exit: exit2, features: features2, platform: platform2 } = workerdProcess2;
+var {
+  // Always implemented by workerd
+  env: env2,
+  // Only implemented in workerd v2
+  hrtime: hrtime32,
+  // Always implemented by workerd
+  nextTick: nextTick2
+} = unenvProcess2;
+var {
+  _channel: _channel2,
+  _disconnect: _disconnect2,
+  _events: _events2,
+  _eventsCount: _eventsCount2,
+  _handleQueue: _handleQueue2,
+  _maxListeners: _maxListeners2,
+  _pendingMessage: _pendingMessage2,
+  _send: _send2,
+  assert: assert22,
+  disconnect: disconnect2,
+  mainModule: mainModule2
+} = unenvProcess2;
+var {
+  // @ts-expect-error `_debugEnd` is missing typings
+  _debugEnd: _debugEnd2,
+  // @ts-expect-error `_debugProcess` is missing typings
+  _debugProcess: _debugProcess2,
+  // @ts-expect-error `_exiting` is missing typings
+  _exiting: _exiting2,
+  // @ts-expect-error `_fatalException` is missing typings
+  _fatalException: _fatalException2,
+  // @ts-expect-error `_getActiveHandles` is missing typings
+  _getActiveHandles: _getActiveHandles2,
+  // @ts-expect-error `_getActiveRequests` is missing typings
+  _getActiveRequests: _getActiveRequests2,
+  // @ts-expect-error `_kill` is missing typings
+  _kill: _kill2,
+  // @ts-expect-error `_linkedBinding` is missing typings
+  _linkedBinding: _linkedBinding2,
+  // @ts-expect-error `_preload_modules` is missing typings
+  _preload_modules: _preload_modules2,
+  // @ts-expect-error `_rawDebug` is missing typings
+  _rawDebug: _rawDebug2,
+  // @ts-expect-error `_startProfilerIdleNotifier` is missing typings
+  _startProfilerIdleNotifier: _startProfilerIdleNotifier2,
+  // @ts-expect-error `_stopProfilerIdleNotifier` is missing typings
+  _stopProfilerIdleNotifier: _stopProfilerIdleNotifier2,
+  // @ts-expect-error `_tickCallback` is missing typings
+  _tickCallback: _tickCallback2,
+  abort: abort2,
+  addListener: addListener2,
+  allowedNodeEnvironmentFlags: allowedNodeEnvironmentFlags2,
+  arch: arch2,
+  argv: argv2,
+  argv0: argv02,
+  availableMemory: availableMemory2,
+  // @ts-expect-error `binding` is missing typings
+  binding: binding2,
+  channel: channel2,
+  chdir: chdir2,
+  config: config2,
+  connected: connected2,
+  constrainedMemory: constrainedMemory2,
+  cpuUsage: cpuUsage2,
+  cwd: cwd2,
+  debugPort: debugPort2,
+  dlopen: dlopen2,
+  // @ts-expect-error `domain` is missing typings
+  domain: domain2,
+  emit: emit2,
+  emitWarning: emitWarning2,
+  eventNames: eventNames2,
+  execArgv: execArgv2,
+  execPath: execPath2,
+  exitCode: exitCode2,
+  finalization: finalization2,
+  getActiveResourcesInfo: getActiveResourcesInfo2,
+  getegid: getegid2,
+  geteuid: geteuid2,
+  getgid: getgid2,
+  getgroups: getgroups2,
+  getMaxListeners: getMaxListeners2,
+  getuid: getuid2,
+  hasUncaughtExceptionCaptureCallback: hasUncaughtExceptionCaptureCallback2,
+  // @ts-expect-error `initgroups` is missing typings
+  initgroups: initgroups2,
+  kill: kill2,
+  listenerCount: listenerCount2,
+  listeners: listeners2,
+  loadEnvFile: loadEnvFile2,
+  memoryUsage: memoryUsage2,
+  // @ts-expect-error `moduleLoadList` is missing typings
+  moduleLoadList: moduleLoadList2,
+  off: off2,
+  on: on2,
+  once: once2,
+  // @ts-expect-error `openStdin` is missing typings
+  openStdin: openStdin2,
+  permission: permission2,
+  pid: pid2,
+  ppid: ppid2,
+  prependListener: prependListener2,
+  prependOnceListener: prependOnceListener2,
+  rawListeners: rawListeners2,
+  // @ts-expect-error `reallyExit` is missing typings
+  reallyExit: reallyExit2,
+  ref: ref2,
+  release: release2,
+  removeAllListeners: removeAllListeners2,
+  removeListener: removeListener2,
+  report: report2,
+  resourceUsage: resourceUsage2,
+  send: send2,
+  setegid: setegid2,
+  seteuid: seteuid2,
+  setgid: setgid2,
+  setgroups: setgroups2,
+  setMaxListeners: setMaxListeners2,
+  setSourceMapsEnabled: setSourceMapsEnabled2,
+  setuid: setuid2,
+  setUncaughtExceptionCaptureCallback: setUncaughtExceptionCaptureCallback2,
+  sourceMapsEnabled: sourceMapsEnabled2,
+  stderr: stderr2,
+  stdin: stdin2,
+  stdout: stdout2,
+  throwDeprecation: throwDeprecation2,
+  title: title2,
+  traceDeprecation: traceDeprecation2,
+  umask: umask2,
+  unref: unref2,
+  uptime: uptime2,
+  version: version2,
+  versions: versions2
+} = isWorkerdProcessV22 ? workerdProcess2 : unenvProcess2;
+var _process2 = {
+  abort: abort2,
+  addListener: addListener2,
+  allowedNodeEnvironmentFlags: allowedNodeEnvironmentFlags2,
+  hasUncaughtExceptionCaptureCallback: hasUncaughtExceptionCaptureCallback2,
+  setUncaughtExceptionCaptureCallback: setUncaughtExceptionCaptureCallback2,
+  loadEnvFile: loadEnvFile2,
+  sourceMapsEnabled: sourceMapsEnabled2,
+  arch: arch2,
+  argv: argv2,
+  argv0: argv02,
+  chdir: chdir2,
+  config: config2,
+  connected: connected2,
+  constrainedMemory: constrainedMemory2,
+  availableMemory: availableMemory2,
+  cpuUsage: cpuUsage2,
+  cwd: cwd2,
+  debugPort: debugPort2,
+  dlopen: dlopen2,
+  disconnect: disconnect2,
+  emit: emit2,
+  emitWarning: emitWarning2,
+  env: env2,
+  eventNames: eventNames2,
+  execArgv: execArgv2,
+  execPath: execPath2,
+  exit: exit2,
+  finalization: finalization2,
+  features: features2,
+  getBuiltinModule: getBuiltinModule2,
+  getActiveResourcesInfo: getActiveResourcesInfo2,
+  getMaxListeners: getMaxListeners2,
+  hrtime: hrtime32,
+  kill: kill2,
+  listeners: listeners2,
+  listenerCount: listenerCount2,
+  memoryUsage: memoryUsage2,
+  nextTick: nextTick2,
+  on: on2,
+  off: off2,
+  once: once2,
+  pid: pid2,
+  platform: platform2,
+  ppid: ppid2,
+  prependListener: prependListener2,
+  prependOnceListener: prependOnceListener2,
+  rawListeners: rawListeners2,
+  release: release2,
+  removeAllListeners: removeAllListeners2,
+  removeListener: removeListener2,
+  report: report2,
+  resourceUsage: resourceUsage2,
+  setMaxListeners: setMaxListeners2,
+  setSourceMapsEnabled: setSourceMapsEnabled2,
+  stderr: stderr2,
+  stdin: stdin2,
+  stdout: stdout2,
+  title: title2,
+  throwDeprecation: throwDeprecation2,
+  traceDeprecation: traceDeprecation2,
+  umask: umask2,
+  uptime: uptime2,
+  version: version2,
+  versions: versions2,
+  // @ts-expect-error old API
+  domain: domain2,
+  initgroups: initgroups2,
+  moduleLoadList: moduleLoadList2,
+  reallyExit: reallyExit2,
+  openStdin: openStdin2,
+  assert: assert22,
+  binding: binding2,
+  send: send2,
+  exitCode: exitCode2,
+  channel: channel2,
+  getegid: getegid2,
+  geteuid: geteuid2,
+  getgid: getgid2,
+  getgroups: getgroups2,
+  getuid: getuid2,
+  setegid: setegid2,
+  seteuid: seteuid2,
+  setgid: setgid2,
+  setgroups: setgroups2,
+  setuid: setuid2,
+  permission: permission2,
+  mainModule: mainModule2,
+  _events: _events2,
+  _eventsCount: _eventsCount2,
+  _exiting: _exiting2,
+  _maxListeners: _maxListeners2,
+  _debugEnd: _debugEnd2,
+  _debugProcess: _debugProcess2,
+  _fatalException: _fatalException2,
+  _getActiveHandles: _getActiveHandles2,
+  _getActiveRequests: _getActiveRequests2,
+  _kill: _kill2,
+  _preload_modules: _preload_modules2,
+  _rawDebug: _rawDebug2,
+  _startProfilerIdleNotifier: _startProfilerIdleNotifier2,
+  _stopProfilerIdleNotifier: _stopProfilerIdleNotifier2,
+  _tickCallback: _tickCallback2,
+  _disconnect: _disconnect2,
+  _handleQueue: _handleQueue2,
+  _pendingMessage: _pendingMessage2,
+  _channel: _channel2,
+  _send: _send2,
+  _linkedBinding: _linkedBinding2
+};
+var process_default2 = _process2;
+globalThis.process = process_default2;
+var compose = /* @__PURE__ */ __name2((middleware, onError, onNotFound) => {
+  return (context22, next) => {
     let index = -1;
     return dispatch(0);
     async function dispatch(i) {
@@ -960,37 +1907,38 @@ var compose = /* @__PURE__ */ __name((middleware, onError, onNotFound) => {
       let handler;
       if (middleware[i]) {
         handler = middleware[i][0][0];
-        context2.req.routeIndex = i;
+        context22.req.routeIndex = i;
       } else {
         handler = i === middleware.length && next || void 0;
       }
       if (handler) {
         try {
-          res = await handler(context2, () => dispatch(i + 1));
+          res = await handler(context22, () => dispatch(i + 1));
         } catch (err) {
           if (err instanceof Error && onError) {
-            context2.error = err;
-            res = await onError(err, context2);
+            context22.error = err;
+            res = await onError(err, context22);
             isError = true;
           } else {
             throw err;
           }
         }
       } else {
-        if (context2.finalized === false && onNotFound) {
-          res = await onNotFound(context2);
+        if (context22.finalized === false && onNotFound) {
+          res = await onNotFound(context22);
         }
       }
-      if (res && (context2.finalized === false || isError)) {
-        context2.res = res;
+      if (res && (context22.finalized === false || isError)) {
+        context22.res = res;
       }
-      return context2;
+      return context22;
     }
     __name(dispatch, "dispatch");
+    __name2(dispatch, "dispatch");
   };
 }, "compose");
 var GET_MATCH_RESULT = /* @__PURE__ */ Symbol();
-var parseBody = /* @__PURE__ */ __name(async (request, options = /* @__PURE__ */ Object.create(null)) => {
+var parseBody = /* @__PURE__ */ __name2(async (request, options = /* @__PURE__ */ Object.create(null)) => {
   const { all = false, dot = false } = options;
   const headers = request instanceof HonoRequest ? request.raw.headers : request.headers;
   const contentType = headers.get("Content-Type");
@@ -1007,6 +1955,7 @@ async function parseFormData(request, options) {
   return {};
 }
 __name(parseFormData, "parseFormData");
+__name2(parseFormData, "parseFormData");
 function convertFormDataToBodyData(formData, options) {
   const form = /* @__PURE__ */ Object.create(null);
   formData.forEach((value, key) => {
@@ -1029,7 +1978,8 @@ function convertFormDataToBodyData(formData, options) {
   return form;
 }
 __name(convertFormDataToBodyData, "convertFormDataToBodyData");
-var handleParsingAllValues = /* @__PURE__ */ __name((form, key, value) => {
+__name2(convertFormDataToBodyData, "convertFormDataToBodyData");
+var handleParsingAllValues = /* @__PURE__ */ __name2((form, key, value) => {
   if (form[key] !== void 0) {
     if (Array.isArray(form[key])) {
       ;
@@ -1045,7 +1995,7 @@ var handleParsingAllValues = /* @__PURE__ */ __name((form, key, value) => {
     }
   }
 }, "handleParsingAllValues");
-var handleParsingNestedValues = /* @__PURE__ */ __name((form, key, value) => {
+var handleParsingNestedValues = /* @__PURE__ */ __name2((form, key, value) => {
   let nestedForm = form;
   const keys = key.split(".");
   keys.forEach((key2, index) => {
@@ -1059,19 +2009,19 @@ var handleParsingNestedValues = /* @__PURE__ */ __name((form, key, value) => {
     }
   });
 }, "handleParsingNestedValues");
-var splitPath = /* @__PURE__ */ __name((path) => {
+var splitPath = /* @__PURE__ */ __name2((path) => {
   const paths = path.split("/");
   if (paths[0] === "") {
     paths.shift();
   }
   return paths;
 }, "splitPath");
-var splitRoutingPath = /* @__PURE__ */ __name((routePath) => {
+var splitRoutingPath = /* @__PURE__ */ __name2((routePath) => {
   const { groups, path } = extractGroupsFromPath(routePath);
   const paths = splitPath(path);
   return replaceGroupMarks(paths, groups);
 }, "splitRoutingPath");
-var extractGroupsFromPath = /* @__PURE__ */ __name((path) => {
+var extractGroupsFromPath = /* @__PURE__ */ __name2((path) => {
   const groups = [];
   path = path.replace(/\{[^}]+\}/g, (match2, index) => {
     const mark = `@${index}`;
@@ -1080,7 +2030,7 @@ var extractGroupsFromPath = /* @__PURE__ */ __name((path) => {
   });
   return { groups, path };
 }, "extractGroupsFromPath");
-var replaceGroupMarks = /* @__PURE__ */ __name((paths, groups) => {
+var replaceGroupMarks = /* @__PURE__ */ __name2((paths, groups) => {
   for (let i = groups.length - 1; i >= 0; i--) {
     const [mark] = groups[i];
     for (let j = paths.length - 1; j >= 0; j--) {
@@ -1093,7 +2043,7 @@ var replaceGroupMarks = /* @__PURE__ */ __name((paths, groups) => {
   return paths;
 }, "replaceGroupMarks");
 var patternCache = {};
-var getPattern = /* @__PURE__ */ __name((label, next) => {
+var getPattern = /* @__PURE__ */ __name2((label, next) => {
   if (label === "*") {
     return "*";
   }
@@ -1111,7 +2061,7 @@ var getPattern = /* @__PURE__ */ __name((label, next) => {
   }
   return null;
 }, "getPattern");
-var tryDecode = /* @__PURE__ */ __name((str, decoder) => {
+var tryDecode = /* @__PURE__ */ __name2((str, decoder) => {
   try {
     return decoder(str);
   } catch {
@@ -1124,8 +2074,8 @@ var tryDecode = /* @__PURE__ */ __name((str, decoder) => {
     });
   }
 }, "tryDecode");
-var tryDecodeURI = /* @__PURE__ */ __name((str) => tryDecode(str, decodeURI), "tryDecodeURI");
-var getPath = /* @__PURE__ */ __name((request) => {
+var tryDecodeURI = /* @__PURE__ */ __name2((str) => tryDecode(str, decodeURI), "tryDecodeURI");
+var getPath = /* @__PURE__ */ __name2((request) => {
   const url = request.url;
   const start = url.indexOf("/", url.indexOf(":") + 4);
   let i = start;
@@ -1141,17 +2091,17 @@ var getPath = /* @__PURE__ */ __name((request) => {
   }
   return url.slice(start, i);
 }, "getPath");
-var getPathNoStrict = /* @__PURE__ */ __name((request) => {
+var getPathNoStrict = /* @__PURE__ */ __name2((request) => {
   const result = getPath(request);
   return result.length > 1 && result.at(-1) === "/" ? result.slice(0, -1) : result;
 }, "getPathNoStrict");
-var mergePath = /* @__PURE__ */ __name((base, sub, ...rest) => {
+var mergePath = /* @__PURE__ */ __name2((base, sub, ...rest) => {
   if (rest.length) {
     sub = mergePath(sub, ...rest);
   }
   return `${base?.[0] === "/" ? "" : "/"}${base}${sub === "/" ? "" : `${base?.at(-1) === "/" ? "" : "/"}${sub?.[0] === "/" ? sub.slice(1) : sub}`}`;
 }, "mergePath");
-var checkOptionalParameter = /* @__PURE__ */ __name((path) => {
+var checkOptionalParameter = /* @__PURE__ */ __name2((path) => {
   if (path.charCodeAt(path.length - 1) !== 63 || !path.includes(":")) {
     return null;
   }
@@ -1178,7 +2128,7 @@ var checkOptionalParameter = /* @__PURE__ */ __name((path) => {
   });
   return results.filter((v, i, a) => a.indexOf(v) === i);
 }, "checkOptionalParameter");
-var _decodeURI = /* @__PURE__ */ __name((value) => {
+var _decodeURI = /* @__PURE__ */ __name2((value) => {
   if (!/[%+]/.test(value)) {
     return value;
   }
@@ -1187,7 +2137,7 @@ var _decodeURI = /* @__PURE__ */ __name((value) => {
   }
   return value.indexOf("%") !== -1 ? tryDecode(value, decodeURIComponent_) : value;
 }, "_decodeURI");
-var _getQueryParam = /* @__PURE__ */ __name((url, key, multiple) => {
+var _getQueryParam = /* @__PURE__ */ __name2((url, key, multiple) => {
   let encoded;
   if (!multiple && key && !/[%+]/.test(key)) {
     let keyIndex2 = url.indexOf("?", 8);
@@ -1255,14 +2205,17 @@ var _getQueryParam = /* @__PURE__ */ __name((url, key, multiple) => {
   return key ? results[key] : results;
 }, "_getQueryParam");
 var getQueryParam = _getQueryParam;
-var getQueryParams = /* @__PURE__ */ __name((url, key) => {
+var getQueryParams = /* @__PURE__ */ __name2((url, key) => {
   return _getQueryParam(url, key, true);
 }, "getQueryParams");
 var decodeURIComponent_ = decodeURIComponent;
-var tryDecodeURIComponent = /* @__PURE__ */ __name((str) => tryDecode(str, decodeURIComponent_), "tryDecodeURIComponent");
+var tryDecodeURIComponent = /* @__PURE__ */ __name2((str) => tryDecode(str, decodeURIComponent_), "tryDecodeURIComponent");
 var HonoRequest = class {
   static {
     __name(this, "HonoRequest");
+  }
+  static {
+    __name2(this, "HonoRequest");
   }
   /**
    * `.raw` can get the raw Request object.
@@ -1344,7 +2297,7 @@ var HonoRequest = class {
   async parseBody(options) {
     return this.bodyCache.parsedBody ??= await parseBody(this, options);
   }
-  #cachedBody = /* @__PURE__ */ __name((key) => {
+  #cachedBody = /* @__PURE__ */ __name2((key) => {
     const { bodyCache, raw: raw2 } = this;
     const cachedBody = bodyCache[key];
     if (cachedBody) {
@@ -1533,13 +2486,13 @@ var HtmlEscapedCallbackPhase = {
   BeforeStream: 2,
   Stream: 3
 };
-var raw = /* @__PURE__ */ __name((value, callbacks) => {
+var raw = /* @__PURE__ */ __name2((value, callbacks) => {
   const escapedString = new String(value);
   escapedString.isEscaped = true;
   escapedString.callbacks = callbacks;
   return escapedString;
 }, "raw");
-var resolveCallback = /* @__PURE__ */ __name(async (str, phase, preserveCallbacks, context2, buffer) => {
+var resolveCallback = /* @__PURE__ */ __name2(async (str, phase, preserveCallbacks, context22, buffer) => {
   if (typeof str === "object" && !(str instanceof String)) {
     if (!(str instanceof Promise)) {
       str = str.toString();
@@ -1557,9 +2510,9 @@ var resolveCallback = /* @__PURE__ */ __name(async (str, phase, preserveCallback
   } else {
     buffer = [str];
   }
-  const resStr = Promise.all(callbacks.map((c) => c({ phase, buffer, context: context2 }))).then(
+  const resStr = Promise.all(callbacks.map((c) => c({ phase, buffer, context: context22 }))).then(
     (res) => Promise.all(
-      res.filter(Boolean).map((str2) => resolveCallback(str2, phase, false, context2, buffer))
+      res.filter(Boolean).map((str2) => resolveCallback(str2, phase, false, context22, buffer))
     ).then(() => buffer[0])
   );
   if (preserveCallbacks) {
@@ -1569,7 +2522,7 @@ var resolveCallback = /* @__PURE__ */ __name(async (str, phase, preserveCallback
   }
 }, "resolveCallback");
 var TEXT_PLAIN = "text/plain; charset=UTF-8";
-var setDefaultContentType = /* @__PURE__ */ __name((contentType, headers) => {
+var setDefaultContentType = /* @__PURE__ */ __name2((contentType, headers) => {
   return {
     "Content-Type": contentType,
     ...headers
@@ -1578,6 +2531,9 @@ var setDefaultContentType = /* @__PURE__ */ __name((contentType, headers) => {
 var Context = class {
   static {
     __name(this, "Context");
+  }
+  static {
+    __name2(this, "Context");
   }
   #rawRequest;
   #req;
@@ -1718,7 +2674,7 @@ var Context = class {
    * })
    * ```
    */
-  render = /* @__PURE__ */ __name((...args) => {
+  render = /* @__PURE__ */ __name2((...args) => {
     this.#renderer ??= (content) => this.html(content);
     return this.#renderer(...args);
   }, "render");
@@ -1728,13 +2684,13 @@ var Context = class {
    * @param layout - The layout to set.
    * @returns The layout function.
    */
-  setLayout = /* @__PURE__ */ __name((layout) => this.#layout = layout, "setLayout");
+  setLayout = /* @__PURE__ */ __name2((layout) => this.#layout = layout, "setLayout");
   /**
    * Gets the current layout for the response.
    *
    * @returns The current layout function.
    */
-  getLayout = /* @__PURE__ */ __name(() => this.#layout, "getLayout");
+  getLayout = /* @__PURE__ */ __name2(() => this.#layout, "getLayout");
   /**
    * `.setRenderer()` can set the layout in the custom middleware.
    *
@@ -1756,7 +2712,7 @@ var Context = class {
    * })
    * ```
    */
-  setRenderer = /* @__PURE__ */ __name((renderer) => {
+  setRenderer = /* @__PURE__ */ __name2((renderer) => {
     this.#renderer = renderer;
   }, "setRenderer");
   /**
@@ -1775,7 +2731,7 @@ var Context = class {
    * })
    * ```
    */
-  header = /* @__PURE__ */ __name((name, value, options) => {
+  header = /* @__PURE__ */ __name2((name, value, options) => {
     if (this.finalized) {
       this.#res = new Response(this.#res.body, this.#res);
     }
@@ -1788,7 +2744,7 @@ var Context = class {
       headers.set(name, value);
     }
   }, "header");
-  status = /* @__PURE__ */ __name((status) => {
+  status = /* @__PURE__ */ __name2((status) => {
     this.#status = status;
   }, "status");
   /**
@@ -1804,7 +2760,7 @@ var Context = class {
    * })
    * ```
    */
-  set = /* @__PURE__ */ __name((key, value) => {
+  set = /* @__PURE__ */ __name2((key, value) => {
     this.#var ??= /* @__PURE__ */ new Map();
     this.#var.set(key, value);
   }, "set");
@@ -1821,7 +2777,7 @@ var Context = class {
    * })
    * ```
    */
-  get = /* @__PURE__ */ __name((key) => {
+  get = /* @__PURE__ */ __name2((key) => {
     return this.#var ? this.#var.get(key) : void 0;
   }, "get");
   /**
@@ -1868,7 +2824,7 @@ var Context = class {
     const status = typeof arg === "number" ? arg : arg?.status ?? this.#status;
     return new Response(data, { status, headers: responseHeaders });
   }
-  newResponse = /* @__PURE__ */ __name((...args) => this.#newResponse(...args), "newResponse");
+  newResponse = /* @__PURE__ */ __name2((...args) => this.#newResponse(...args), "newResponse");
   /**
    * `.body()` can return the HTTP response.
    * You can set headers with `.header()` and set HTTP status code with `.status`.
@@ -1890,7 +2846,7 @@ var Context = class {
    * })
    * ```
    */
-  body = /* @__PURE__ */ __name((data, arg, headers) => this.#newResponse(data, arg, headers), "body");
+  body = /* @__PURE__ */ __name2((data, arg, headers) => this.#newResponse(data, arg, headers), "body");
   /**
    * `.text()` can render text as `Content-Type:text/plain`.
    *
@@ -1903,7 +2859,7 @@ var Context = class {
    * })
    * ```
    */
-  text = /* @__PURE__ */ __name((text, arg, headers) => {
+  text = /* @__PURE__ */ __name2((text, arg, headers) => {
     return !this.#preparedHeaders && !this.#status && !arg && !headers && !this.finalized ? new Response(text) : this.#newResponse(
       text,
       arg,
@@ -1922,15 +2878,15 @@ var Context = class {
    * })
    * ```
    */
-  json = /* @__PURE__ */ __name((object, arg, headers) => {
+  json = /* @__PURE__ */ __name2((object, arg, headers) => {
     return this.#newResponse(
       JSON.stringify(object),
       arg,
       setDefaultContentType("application/json", headers)
     );
   }, "json");
-  html = /* @__PURE__ */ __name((html, arg, headers) => {
-    const res = /* @__PURE__ */ __name((html2) => this.#newResponse(html2, arg, setDefaultContentType("text/html; charset=UTF-8", headers)), "res");
+  html = /* @__PURE__ */ __name2((html, arg, headers) => {
+    const res = /* @__PURE__ */ __name2((html2) => this.#newResponse(html2, arg, setDefaultContentType("text/html; charset=UTF-8", headers)), "res");
     return typeof html === "object" ? resolveCallback(html, HtmlEscapedCallbackPhase.Stringify, false, {}).then(res) : res(html);
   }, "html");
   /**
@@ -1948,7 +2904,7 @@ var Context = class {
    * })
    * ```
    */
-  redirect = /* @__PURE__ */ __name((location, status) => {
+  redirect = /* @__PURE__ */ __name2((location, status) => {
     const locationString = String(location);
     this.header(
       "Location",
@@ -1970,7 +2926,7 @@ var Context = class {
    * })
    * ```
    */
-  notFound = /* @__PURE__ */ __name(() => {
+  notFound = /* @__PURE__ */ __name2(() => {
     this.#notFoundHandler ??= () => new Response();
     return this.#notFoundHandler(this);
   }, "notFound");
@@ -1983,12 +2939,15 @@ var UnsupportedPathError = class extends Error {
   static {
     __name(this, "UnsupportedPathError");
   }
+  static {
+    __name2(this, "UnsupportedPathError");
+  }
 };
 var COMPOSED_HANDLER = "__COMPOSED_HANDLER";
-var notFoundHandler = /* @__PURE__ */ __name((c) => {
+var notFoundHandler = /* @__PURE__ */ __name2((c) => {
   return c.text("404 Not Found", 404);
 }, "notFoundHandler");
-var errorHandler = /* @__PURE__ */ __name((err, c) => {
+var errorHandler = /* @__PURE__ */ __name2((err, c) => {
   if ("getResponse" in err) {
     const res = err.getResponse();
     return c.newResponse(res.body, res);
@@ -1999,6 +2958,9 @@ var errorHandler = /* @__PURE__ */ __name((err, c) => {
 var Hono = class _Hono {
   static {
     __name(this, "_Hono");
+  }
+  static {
+    __name2(this, "_Hono");
   }
   get;
   post;
@@ -2099,7 +3061,7 @@ var Hono = class _Hono {
       if (app7.errorHandler === errorHandler) {
         handler = r.handler;
       } else {
-        handler = /* @__PURE__ */ __name(async (c, next) => (await compose([], app7.errorHandler)(c, () => r.handler(c, next))).res, "handler");
+        handler = /* @__PURE__ */ __name2(async (c, next) => (await compose([], app7.errorHandler)(c, () => r.handler(c, next))).res, "handler");
         handler[COMPOSED_HANDLER] = r.handler;
       }
       subApp.#addRoute(r.method, r.path, handler);
@@ -2140,7 +3102,7 @@ var Hono = class _Hono {
    * })
    * ```
    */
-  onError = /* @__PURE__ */ __name((handler) => {
+  onError = /* @__PURE__ */ __name2((handler) => {
     this.errorHandler = handler;
     return this;
   }, "onError");
@@ -2159,7 +3121,7 @@ var Hono = class _Hono {
    * })
    * ```
    */
-  notFound = /* @__PURE__ */ __name((handler) => {
+  notFound = /* @__PURE__ */ __name2((handler) => {
     this.#notFoundHandler = handler;
     return this;
   }, "notFound");
@@ -2204,7 +3166,7 @@ var Hono = class _Hono {
       } else {
         optionHandler = options.optionHandler;
         if (options.replaceRequest === false) {
-          replaceRequest = /* @__PURE__ */ __name((request) => request, "replaceRequest");
+          replaceRequest = /* @__PURE__ */ __name2((request) => request, "replaceRequest");
         } else {
           replaceRequest = options.replaceRequest;
         }
@@ -2230,7 +3192,7 @@ var Hono = class _Hono {
         return new Request(url, request);
       };
     })();
-    const handler = /* @__PURE__ */ __name(async (c, next) => {
+    const handler = /* @__PURE__ */ __name2(async (c, next) => {
       const res = await applicationHandler(replaceRequest(c.req.raw), ...getOptions(c));
       if (res) {
         return res;
@@ -2253,16 +3215,16 @@ var Hono = class _Hono {
     }
     throw err;
   }
-  #dispatch(request, executionCtx, env2, method) {
+  #dispatch(request, executionCtx, env22, method) {
     if (method === "HEAD") {
-      return (async () => new Response(null, await this.#dispatch(request, executionCtx, env2, "GET")))();
+      return (async () => new Response(null, await this.#dispatch(request, executionCtx, env22, "GET")))();
     }
-    const path = this.getPath(request, { env: env2 });
+    const path = this.getPath(request, { env: env22 });
     const matchResult = this.router.match(method, path);
     const c = new Context(request, {
       path,
       matchResult,
-      env: env2,
+      env: env22,
       executionCtx,
       notFoundHandler: this.#notFoundHandler
     });
@@ -2282,13 +3244,13 @@ var Hono = class _Hono {
     const composed = compose(matchResult[0], this.errorHandler, this.#notFoundHandler);
     return (async () => {
       try {
-        const context2 = await composed(c);
-        if (!context2.finalized) {
+        const context22 = await composed(c);
+        if (!context22.finalized) {
           throw new Error(
             "Context is not finalized. Did you forget to return a Response object or `await next()`?"
           );
         }
-        return context2.res;
+        return context22.res;
       } catch (err) {
         return this.#handleError(err, c);
       }
@@ -2305,7 +3267,7 @@ var Hono = class _Hono {
    * @returns {Response | Promise<Response>} response of request
    *
    */
-  fetch = /* @__PURE__ */ __name((request, ...rest) => {
+  fetch = /* @__PURE__ */ __name2((request, ...rest) => {
     return this.#dispatch(request, rest[1], rest[0], request.method);
   }, "fetch");
   /**
@@ -2320,7 +3282,7 @@ var Hono = class _Hono {
    * ```
    * @see https://hono.dev/docs/api/hono#request
    */
-  request = /* @__PURE__ */ __name((input, requestInit, Env, executionCtx) => {
+  request = /* @__PURE__ */ __name2((input, requestInit, Env, executionCtx) => {
     if (input instanceof Request) {
       return this.fetch(requestInit ? new Request(input, requestInit) : input, Env, executionCtx);
     }
@@ -2351,7 +3313,7 @@ var Hono = class _Hono {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
    * @see https://developers.cloudflare.com/workers/reference/migrate-to-module-workers/
    */
-  fire = /* @__PURE__ */ __name(() => {
+  fire = /* @__PURE__ */ __name2(() => {
     addEventListener("fetch", (event) => {
       event.respondWith(this.#dispatch(event.request, event, void 0, event.request.method));
     });
@@ -2360,7 +3322,7 @@ var Hono = class _Hono {
 var emptyParam = [];
 function match(method, path) {
   const matchers = this.buildAllMatchers();
-  const match2 = /* @__PURE__ */ __name((method2, path2) => {
+  const match2 = /* @__PURE__ */ __name2((method2, path2) => {
     const matcher = matchers[method2] || matchers[METHOD_NAME_ALL];
     const staticMatch = matcher[2][path2];
     if (staticMatch) {
@@ -2377,6 +3339,7 @@ function match(method, path) {
   return match2(method, path);
 }
 __name(match, "match");
+__name2(match, "match");
 var LABEL_REG_EXP_STR = "[^/]+";
 var ONLY_WILDCARD_REG_EXP_STR = ".*";
 var TAIL_WILDCARD_REG_EXP_STR = "(?:|/.*)";
@@ -2402,14 +3365,18 @@ function compareKey(a, b) {
   return a.length === b.length ? a < b ? -1 : 1 : b.length - a.length;
 }
 __name(compareKey, "compareKey");
+__name2(compareKey, "compareKey");
 var Node = class _Node {
   static {
     __name(this, "_Node");
   }
+  static {
+    __name2(this, "_Node");
+  }
   #index;
   #varIndex;
   #children = /* @__PURE__ */ Object.create(null);
-  insert(tokens, index, paramMap, context2, pathErrorCheckOnly) {
+  insert(tokens, index, paramMap, context22, pathErrorCheckOnly) {
     if (tokens.length === 0) {
       if (this.#index !== void 0) {
         throw PATH_ERROR;
@@ -2447,7 +3414,7 @@ var Node = class _Node {
         }
         node = this.#children[regexpStr] = new _Node();
         if (name !== "") {
-          node.#varIndex = context2.varIndex++;
+          node.#varIndex = context22.varIndex++;
         }
       }
       if (!pathErrorCheckOnly && name !== "") {
@@ -2467,7 +3434,7 @@ var Node = class _Node {
         node = this.#children[token] = new _Node();
       }
     }
-    node.insert(restTokens, index, paramMap, context2, pathErrorCheckOnly);
+    node.insert(restTokens, index, paramMap, context22, pathErrorCheckOnly);
   }
   buildRegExpStr() {
     const childKeys = Object.keys(this.#children).sort(compareKey);
@@ -2490,6 +3457,9 @@ var Node = class _Node {
 var Trie = class {
   static {
     __name(this, "Trie");
+  }
+  static {
+    __name2(this, "Trie");
   }
   #context = { varIndex: 0 };
   #root = new Node();
@@ -2555,10 +3525,12 @@ function buildWildcardRegExp(path) {
   );
 }
 __name(buildWildcardRegExp, "buildWildcardRegExp");
+__name2(buildWildcardRegExp, "buildWildcardRegExp");
 function clearWildcardRegExpCache() {
   wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
 }
 __name(clearWildcardRegExpCache, "clearWildcardRegExpCache");
+__name2(clearWildcardRegExpCache, "clearWildcardRegExpCache");
 function buildMatcherFromPreprocessedRoutes(routes) {
   const trie = new Trie();
   const handlerData = [];
@@ -2617,6 +3589,7 @@ function buildMatcherFromPreprocessedRoutes(routes) {
   return [regexp, handlerMap, staticMap];
 }
 __name(buildMatcherFromPreprocessedRoutes, "buildMatcherFromPreprocessedRoutes");
+__name2(buildMatcherFromPreprocessedRoutes, "buildMatcherFromPreprocessedRoutes");
 function findMiddleware(middleware, path) {
   if (!middleware) {
     return void 0;
@@ -2629,9 +3602,13 @@ function findMiddleware(middleware, path) {
   return void 0;
 }
 __name(findMiddleware, "findMiddleware");
+__name2(findMiddleware, "findMiddleware");
 var RegExpRouter = class {
   static {
     __name(this, "RegExpRouter");
+  }
+  static {
+    __name2(this, "RegExpRouter");
   }
   name = "RegExpRouter";
   #middleware;
@@ -2732,6 +3709,9 @@ var SmartRouter = class {
   static {
     __name(this, "SmartRouter");
   }
+  static {
+    __name2(this, "SmartRouter");
+  }
   name = "SmartRouter";
   #routers = [];
   #routes = [];
@@ -2788,6 +3768,9 @@ var emptyParams = /* @__PURE__ */ Object.create(null);
 var Node2 = class _Node2 {
   static {
     __name(this, "_Node2");
+  }
+  static {
+    __name2(this, "_Node2");
   }
   #methods;
   #children;
@@ -2947,6 +3930,9 @@ var TrieRouter = class {
   static {
     __name(this, "TrieRouter");
   }
+  static {
+    __name2(this, "TrieRouter");
+  }
   name = "TrieRouter";
   #node;
   constructor() {
@@ -2970,6 +3956,9 @@ var Hono2 = class extends Hono {
   static {
     __name(this, "Hono2");
   }
+  static {
+    __name2(this, "Hono2");
+  }
   /**
    * Creates an instance of the Hono class.
    *
@@ -2982,7 +3971,7 @@ var Hono2 = class extends Hono {
     });
   }
 };
-var cors = /* @__PURE__ */ __name((options) => {
+var cors = /* @__PURE__ */ __name2((options) => {
   const defaults = {
     origin: "*",
     allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
@@ -3015,11 +4004,12 @@ var cors = /* @__PURE__ */ __name((options) => {
       return () => [];
     }
   })(opts.allowMethods);
-  return /* @__PURE__ */ __name(async function cors2(c, next) {
+  return /* @__PURE__ */ __name2(/* @__PURE__ */ __name(async function cors2(c, next) {
     function set(key, value) {
       c.res.headers.set(key, value);
     }
     __name(set, "set");
+    __name2(set, "set");
     const allowOrigin = await findAllowOrigin(c.req.header("origin") || "", c);
     if (allowOrigin) {
       set("Access-Control-Allow-Origin", allowOrigin);
@@ -3064,7 +4054,7 @@ var cors = /* @__PURE__ */ __name((options) => {
     if (opts.origin !== "*") {
       c.header("Vary", "Origin", { append: true });
     }
-  }, "cors2");
+  }, "cors2"), "cors2");
 }, "cors");
 function getColorEnabled() {
   const { process: process2, Deno } = globalThis;
@@ -3075,6 +4065,7 @@ function getColorEnabled() {
   return !isNoColor;
 }
 __name(getColorEnabled, "getColorEnabled");
+__name2(getColorEnabled, "getColorEnabled");
 async function getColorEnabledAsync() {
   const { navigator } = globalThis;
   const cfWorkers = "cloudflare:workers";
@@ -3088,16 +4079,17 @@ async function getColorEnabledAsync() {
   return !isNoColor;
 }
 __name(getColorEnabledAsync, "getColorEnabledAsync");
-var humanize = /* @__PURE__ */ __name((times) => {
+__name2(getColorEnabledAsync, "getColorEnabledAsync");
+var humanize = /* @__PURE__ */ __name2((times) => {
   const [delimiter, separator] = [",", "."];
   const orderTimes = times.map((v) => v.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1" + delimiter));
   return orderTimes.join(separator);
 }, "humanize");
-var time3 = /* @__PURE__ */ __name((start) => {
+var time32 = /* @__PURE__ */ __name2((start) => {
   const delta = Date.now() - start;
   return humanize([delta < 1e3 ? delta + "ms" : Math.round(delta / 1e3) + "s"]);
 }, "time");
-var colorStatus = /* @__PURE__ */ __name(async (status) => {
+var colorStatus = /* @__PURE__ */ __name2(async (status) => {
   const colorEnabled = await getColorEnabledAsync();
   if (colorEnabled) {
     switch (status / 100 | 0) {
@@ -3113,33 +4105,34 @@ var colorStatus = /* @__PURE__ */ __name(async (status) => {
   }
   return `${status}`;
 }, "colorStatus");
-async function log3(fn, prefix, method, path, status = 0, elapsed) {
+async function log32(fn, prefix, method, path, status = 0, elapsed) {
   const out = prefix === "<--" ? `${prefix} ${method} ${path}` : `${prefix} ${method} ${path} ${await colorStatus(status)} ${elapsed}`;
   fn(out);
 }
-__name(log3, "log");
-var logger = /* @__PURE__ */ __name((fn = console.log) => {
-  return /* @__PURE__ */ __name(async function logger2(c, next) {
+__name(log32, "log3");
+__name2(log32, "log");
+var logger = /* @__PURE__ */ __name2((fn = console.log) => {
+  return /* @__PURE__ */ __name2(/* @__PURE__ */ __name(async function logger2(c, next) {
     const { method, url } = c.req;
     const path = url.slice(url.indexOf("/", 8));
-    await log3(fn, "<--", method, path);
+    await log32(fn, "<--", method, path);
     const start = Date.now();
     await next();
-    await log3(fn, "-->", method, path, c.res.status, time3(start));
-  }, "logger2");
+    await log32(fn, "-->", method, path, c.res.status, time32(start));
+  }, "logger2"), "logger2");
 }, "logger");
-var createMiddleware = /* @__PURE__ */ __name((middleware) => middleware, "createMiddleware");
+var createMiddleware = /* @__PURE__ */ __name2((middleware) => middleware, "createMiddleware");
 var algorithm = { name: "HMAC", hash: "SHA-256" };
-var getCryptoKey = /* @__PURE__ */ __name(async (secret) => {
+var getCryptoKey = /* @__PURE__ */ __name2(async (secret) => {
   const secretBuf = typeof secret === "string" ? new TextEncoder().encode(secret) : secret;
   return await crypto.subtle.importKey("raw", secretBuf, algorithm, false, ["sign", "verify"]);
 }, "getCryptoKey");
-var makeSignature = /* @__PURE__ */ __name(async (value, secret) => {
+var makeSignature = /* @__PURE__ */ __name2(async (value, secret) => {
   const key = await getCryptoKey(secret);
   const signature = await crypto.subtle.sign(algorithm.name, key, new TextEncoder().encode(value));
   return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }, "makeSignature");
-var verifySignature = /* @__PURE__ */ __name(async (base64Signature, value, secret) => {
+var verifySignature = /* @__PURE__ */ __name2(async (base64Signature, value, secret) => {
   try {
     const signatureBinStr = atob(base64Signature);
     const signature = new Uint8Array(signatureBinStr.length);
@@ -3153,7 +4146,7 @@ var verifySignature = /* @__PURE__ */ __name(async (base64Signature, value, secr
 }, "verifySignature");
 var validCookieNameRegEx = /^[\w!#$%&'*.^`|~+-]+$/;
 var validCookieValueRegEx = /^[ !#-:<-[\]-~]*$/;
-var parse = /* @__PURE__ */ __name((cookie, name) => {
+var parse = /* @__PURE__ */ __name2((cookie, name) => {
   if (name && cookie.indexOf(name) === -1) {
     return {};
   }
@@ -3182,7 +4175,7 @@ var parse = /* @__PURE__ */ __name((cookie, name) => {
   }
   return parsedCookie;
 }, "parse");
-var parseSigned = /* @__PURE__ */ __name(async (cookie, secret, name) => {
+var parseSigned = /* @__PURE__ */ __name2(async (cookie, secret, name) => {
   const parsedCookie = {};
   const secretKey = await getCryptoKey(secret);
   for (const [key, value] of Object.entries(parse(cookie, name))) {
@@ -3200,7 +4193,7 @@ var parseSigned = /* @__PURE__ */ __name(async (cookie, secret, name) => {
   }
   return parsedCookie;
 }, "parseSigned");
-var _serialize = /* @__PURE__ */ __name((name, value, opt = {}) => {
+var _serialize = /* @__PURE__ */ __name2((name, value, opt = {}) => {
   let cookie = `${name}=${value}`;
   if (name.startsWith("__Secure-") && !opt.secure) {
     throw new Error("__Secure- Cookie must have Secure attributes");
@@ -3258,17 +4251,17 @@ var _serialize = /* @__PURE__ */ __name((name, value, opt = {}) => {
   }
   return cookie;
 }, "_serialize");
-var serialize = /* @__PURE__ */ __name((name, value, opt) => {
+var serialize = /* @__PURE__ */ __name2((name, value, opt) => {
   value = encodeURIComponent(value);
   return _serialize(name, value, opt);
 }, "serialize");
-var serializeSigned = /* @__PURE__ */ __name(async (name, value, secret, opt = {}) => {
+var serializeSigned = /* @__PURE__ */ __name2(async (name, value, secret, opt = {}) => {
   const signature = await makeSignature(value, secret);
   value = `${value}.${signature}`;
   value = encodeURIComponent(value);
   return _serialize(name, value, opt);
 }, "serializeSigned");
-var getCookie = /* @__PURE__ */ __name((c, key, prefix) => {
+var getCookie = /* @__PURE__ */ __name2((c, key, prefix) => {
   const cookie = c.req.raw.headers.get("Cookie");
   if (typeof key === "string") {
     if (!cookie) {
@@ -3289,7 +4282,7 @@ var getCookie = /* @__PURE__ */ __name((c, key, prefix) => {
   const obj = parse(cookie);
   return obj;
 }, "getCookie");
-var getSignedCookie = /* @__PURE__ */ __name(async (c, secret, key, prefix) => {
+var getSignedCookie = /* @__PURE__ */ __name2(async (c, secret, key, prefix) => {
   const cookie = c.req.raw.headers.get("Cookie");
   if (typeof key === "string") {
     if (!cookie) {
@@ -3310,7 +4303,7 @@ var getSignedCookie = /* @__PURE__ */ __name(async (c, secret, key, prefix) => {
   const obj = await parseSigned(cookie, secret);
   return obj;
 }, "getSignedCookie");
-var generateCookie = /* @__PURE__ */ __name((name, value, opt) => {
+var generateCookie = /* @__PURE__ */ __name2((name, value, opt) => {
   let cookie;
   if (opt?.prefix === "secure") {
     cookie = serialize("__Secure-" + name, value, { path: "/", ...opt, secure: true });
@@ -3326,11 +4319,11 @@ var generateCookie = /* @__PURE__ */ __name((name, value, opt) => {
   }
   return cookie;
 }, "generateCookie");
-var setCookie = /* @__PURE__ */ __name((c, name, value, opt) => {
+var setCookie = /* @__PURE__ */ __name2((c, name, value, opt) => {
   const cookie = generateCookie(name, value, opt);
   c.header("Set-Cookie", cookie, { append: true });
 }, "setCookie");
-var generateSignedCookie = /* @__PURE__ */ __name(async (name, value, secret, opt) => {
+var generateSignedCookie = /* @__PURE__ */ __name2(async (name, value, secret, opt) => {
   let cookie;
   if (opt?.prefix === "secure") {
     cookie = await serializeSigned("__Secure-" + name, value, secret, {
@@ -3350,11 +4343,11 @@ var generateSignedCookie = /* @__PURE__ */ __name(async (name, value, secret, op
   }
   return cookie;
 }, "generateSignedCookie");
-var setSignedCookie = /* @__PURE__ */ __name(async (c, name, value, secret, opt) => {
+var setSignedCookie = /* @__PURE__ */ __name2(async (c, name, value, secret, opt) => {
   const cookie = await generateSignedCookie(name, value, secret, opt);
   c.header("set-cookie", cookie, { append: true });
 }, "setSignedCookie");
-var deleteCookie = /* @__PURE__ */ __name((c, name, opt) => {
+var deleteCookie = /* @__PURE__ */ __name2((c, name, opt) => {
   const deletedCookie = getCookie(c, name, opt?.prefix);
   setCookie(c, name, "", { ...opt, maxAge: 0 });
   return deletedCookie;
@@ -3362,6 +4355,9 @@ var deleteCookie = /* @__PURE__ */ __name((c, name, opt) => {
 var SupabaseStorage = class {
   static {
     __name(this, "SupabaseStorage");
+  }
+  static {
+    __name2(this, "SupabaseStorage");
   }
   supabaseUrl;
   supabaseAnonKey;
@@ -3737,7 +4733,7 @@ var SupabaseStorage = class {
   async getNavigationItemsTree() {
     const items = await this.getNavigationItems();
     const topLevelItems = items.filter((item) => !item.parentId);
-    const buildTree = /* @__PURE__ */ __name((parentItems) => {
+    const buildTree = /* @__PURE__ */ __name2((parentItems) => {
       return parentItems.map((item) => {
         const children = items.filter((i) => i.parentId === item.id);
         return {
@@ -4167,6 +5163,7 @@ async function hashPassword(password) {
   return `${hashHex}.${saltHex}`;
 }
 __name(hashPassword, "hashPassword");
+__name2(hashPassword, "hashPassword");
 async function comparePasswords(supplied, stored) {
   try {
     if (!stored || !stored.includes(".")) return false;
@@ -4196,12 +5193,13 @@ async function comparePasswords(supplied, stored) {
     const exportedKey = await crypto.subtle.exportKey("raw", key);
     const derivedHashHex = Array.from(new Uint8Array(exportedKey)).map((b) => b.toString(16).padStart(2, "0")).join("");
     return derivedHashHex === storedHash;
-  } catch (error3) {
-    console.error("Error comparing passwords:", error3);
+  } catch (error32) {
+    console.error("Error comparing passwords:", error32);
     return false;
   }
 }
 __name(comparePasswords, "comparePasswords");
+__name2(comparePasswords, "comparePasswords");
 var app = new Hono2();
 async function setUserSession(c, userId) {
   const secret = c.env.SESSION_SECRET || "gerinmah-secret-key";
@@ -4218,6 +5216,7 @@ async function setUserSession(c, userId) {
   c.header("Set-Cookie", `sessionActive=true; Path=/; Max-Age=${60 * 60 * 24}; SameSite=Lax`, { append: true });
 }
 __name(setUserSession, "setUserSession");
+__name2(setUserSession, "setUserSession");
 app.post("/login", async (c) => {
   try {
     const storage = c.get("storage");
@@ -4259,13 +5258,13 @@ app.post("/login", async (c) => {
     await setUserSession(c, user.id);
     const { password: _, ...userWithoutPassword } = user;
     return c.json(userWithoutPassword);
-  } catch (error3) {
-    console.error("[Login] Unexpected error:", error3);
+  } catch (error32) {
+    console.error("[Login] Unexpected error:", error32);
     return c.json({
       success: false,
       message: "Internal Server Error",
-      error: error3.message,
-      stack: error3.stack
+      error: error32.message,
+      stack: error32.stack
     }, 500);
   }
 });
@@ -4308,12 +5307,12 @@ app.post("/admin/login", async (c) => {
     await setUserSession(c, user.id);
     const { password: _, ...userWithoutPassword } = user;
     return c.json(userWithoutPassword);
-  } catch (error3) {
-    console.error("[Admin Login] Unexpected error:", error3);
+  } catch (error32) {
+    console.error("[Admin Login] Unexpected error:", error32);
     return c.json({
       success: false,
       message: "Internal Server Error",
-      error: error3.message
+      error: error32.message
     }, 500);
   }
 });
@@ -4345,8 +5344,8 @@ app.post("/auth/sync-session", async (c) => {
       }
     });
     if (!authResponse.ok) {
-      const error3 = await authResponse.text();
-      console.error("Supabase token verification failed:", error3);
+      const error32 = await authResponse.text();
+      console.error("Supabase token verification failed:", error32);
       return c.json({ success: false, message: "Invalid token" }, 401);
     }
     const authData = await authResponse.json();
@@ -4366,8 +5365,8 @@ app.post("/auth/sync-session", async (c) => {
       }
     );
     if (!dbResponse.ok) {
-      const error3 = await dbResponse.text();
-      console.error("Supabase DB query failed:", error3);
+      const error32 = await dbResponse.text();
+      console.error("Supabase DB query failed:", error32);
       if (dbResponse.status === 401 || dbResponse.status === 403) {
         return c.json({ success: false, message: "Database permission denied (RLS). Please contact admin." }, 403);
       }
@@ -4527,12 +5526,12 @@ app2.post("/", requireAdmin, async (c) => {
     }
     const newProduct = await storage.createProduct(productData);
     return c.json(newProduct, 201);
-  } catch (error3) {
-    console.error("Error creating product:", error3);
+  } catch (error32) {
+    console.error("Error creating product:", error32);
     return c.json({
       message: "Error creating product",
-      error: error3.message,
-      stack: error3.stack
+      error: error32.message,
+      stack: error32.stack
     }, 500);
   }
 });
@@ -4583,12 +5582,12 @@ app2.put("/:id", requireAdmin, async (c) => {
       return c.json({ message: "Product not found" }, 404);
     }
     return c.json(updatedProduct);
-  } catch (error3) {
-    console.error("Error updating product:", error3);
+  } catch (error32) {
+    console.error("Error updating product:", error32);
     return c.json({
       message: "Error updating product",
-      error: error3.message,
-      stack: error3.stack
+      error: error32.message,
+      stack: error32.stack
     }, 500);
   }
 });
@@ -4836,8 +5835,8 @@ app4.post("/orders", async (c) => {
       // Allow guest checkout if userId provided or null
     }, items);
     return c.json(order, 201);
-  } catch (error3) {
-    console.error("Order creation failed:", error3);
+  } catch (error32) {
+    console.error("Order creation failed:", error32);
     return c.json({ message: "Order creation failed" }, 500);
   }
 });
@@ -5111,11 +6110,11 @@ app5.put("/settings/hero", requireAdmin, async (c) => {
       });
     }
     return c.json(heroData);
-  } catch (error3) {
-    console.error("Error updating hero settings:", error3);
+  } catch (error32) {
+    console.error("Error updating hero settings:", error32);
     return c.json({
       message: "Failed to update hero settings",
-      error: error3.message
+      error: error32.message
     }, 500);
   }
 });
@@ -5147,7 +6146,7 @@ var cms_default = app5;
 var app6 = new Hono2();
 app6.use("*", logger());
 app6.use("*", cors({
-  origin: /* @__PURE__ */ __name((origin) => origin, "origin"),
+  origin: /* @__PURE__ */ __name2((origin) => origin, "origin"),
   // Allow all origins for now
   credentials: true
 }));
@@ -5172,11 +6171,9 @@ app6.get("*", async (c) => {
   return c.env.ASSETS.fetch(c.req.raw);
 });
 var index_default = app6;
-
-// ../../node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var drainBody = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx) => {
+var drainBody = /* @__PURE__ */ __name2(async (request, env22, _ctx, middlewareCtx) => {
   try {
-    return await middlewareCtx.next(request, env2);
+    return await middlewareCtx.next(request, env22);
   } finally {
     try {
       if (request.body !== null && !request.bodyUsed) {
@@ -5190,8 +6187,6 @@ var drainBody = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
   }
 }, "drainBody");
 var middleware_ensure_req_body_drained_default = drainBody;
-
-// ../../node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
 function reduceError(e) {
   return {
     name: e?.name,
@@ -5201,33 +6196,31 @@ function reduceError(e) {
   };
 }
 __name(reduceError, "reduceError");
-var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx) => {
+__name2(reduceError, "reduceError");
+var jsonError = /* @__PURE__ */ __name2(async (request, env22, _ctx, middlewareCtx) => {
   try {
-    return await middlewareCtx.next(request, env2);
+    return await middlewareCtx.next(request, env22);
   } catch (e) {
-    const error3 = reduceError(e);
-    return Response.json(error3, {
+    const error32 = reduceError(e);
+    return Response.json(error32, {
       status: 500,
       headers: { "MF-Experimental-Error-Stack": "true" }
     });
   }
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
-
-// ../../.wrangler/tmp/bundle-5SY5sn/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
 ];
 var middleware_insertion_facade_default = index_default;
-
-// ../../node_modules/wrangler/templates/middleware/common.ts
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
 }
 __name(__facade_register__, "__facade_register__");
-function __facade_invokeChain__(request, env2, ctx, dispatch, middlewareChain) {
+__name2(__facade_register__, "__facade_register__");
+function __facade_invokeChain__(request, env22, ctx, dispatch, middlewareChain) {
   const [head, ...tail] = middlewareChain;
   const middlewareCtx = {
     dispatch,
@@ -5235,26 +6228,29 @@ function __facade_invokeChain__(request, env2, ctx, dispatch, middlewareChain) {
       return __facade_invokeChain__(newRequest, newEnv, ctx, dispatch, tail);
     }
   };
-  return head(request, env2, ctx, middlewareCtx);
+  return head(request, env22, ctx, middlewareCtx);
 }
 __name(__facade_invokeChain__, "__facade_invokeChain__");
-function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
-  return __facade_invokeChain__(request, env2, ctx, dispatch, [
+__name2(__facade_invokeChain__, "__facade_invokeChain__");
+function __facade_invoke__(request, env22, ctx, dispatch, finalMiddleware) {
+  return __facade_invokeChain__(request, env22, ctx, dispatch, [
     ...__facade_middleware__,
     finalMiddleware
   ]);
 }
 __name(__facade_invoke__, "__facade_invoke__");
-
-// ../../.wrangler/tmp/bundle-5SY5sn/middleware-loader.entry.ts
+__name2(__facade_invoke__, "__facade_invoke__");
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
+  static {
+    __name(this, "___Facade_ScheduledController__");
+  }
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
     this.cron = cron;
     this.#noRetry = noRetry;
   }
   static {
-    __name(this, "__Facade_ScheduledController__");
+    __name2(this, "__Facade_ScheduledController__");
   }
   #noRetry;
   noRetry() {
@@ -5271,16 +6267,16 @@ function wrapExportedHandler(worker) {
   for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
     __facade_register__(middleware);
   }
-  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env2, ctx) {
+  const fetchDispatcher = /* @__PURE__ */ __name2(function(request, env22, ctx) {
     if (worker.fetch === void 0) {
       throw new Error("Handler does not export a fetch() function.");
     }
-    return worker.fetch(request, env2, ctx);
+    return worker.fetch(request, env22, ctx);
   }, "fetchDispatcher");
   return {
     ...worker,
-    fetch(request, env2, ctx) {
-      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
+    fetch(request, env22, ctx) {
+      const dispatcher = /* @__PURE__ */ __name2(function(type, init) {
         if (type === "scheduled" && worker.scheduled !== void 0) {
           const controller = new __Facade_ScheduledController__(
             Date.now(),
@@ -5288,14 +6284,15 @@ function wrapExportedHandler(worker) {
             () => {
             }
           );
-          return worker.scheduled(controller, env2, ctx);
+          return worker.scheduled(controller, env22, ctx);
         }
       }, "dispatcher");
-      return __facade_invoke__(request, env2, ctx, dispatcher, fetchDispatcher);
+      return __facade_invoke__(request, env22, ctx, dispatcher, fetchDispatcher);
     }
   };
 }
 __name(wrapExportedHandler, "wrapExportedHandler");
+__name2(wrapExportedHandler, "wrapExportedHandler");
 function wrapWorkerEntrypoint(klass) {
   if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
     return klass;
@@ -5304,15 +6301,15 @@ function wrapWorkerEntrypoint(klass) {
     __facade_register__(middleware);
   }
   return class extends klass {
-    #fetchDispatcher = /* @__PURE__ */ __name((request, env2, ctx) => {
-      this.env = env2;
+    #fetchDispatcher = /* @__PURE__ */ __name2((request, env22, ctx) => {
+      this.env = env22;
       this.ctx = ctx;
       if (super.fetch === void 0) {
         throw new Error("Entrypoint class does not define a fetch() function.");
       }
       return super.fetch(request);
     }, "#fetchDispatcher");
-    #dispatcher = /* @__PURE__ */ __name((type, init) => {
+    #dispatcher = /* @__PURE__ */ __name2((type, init) => {
       if (type === "scheduled" && super.scheduled !== void 0) {
         const controller = new __Facade_ScheduledController__(
           Date.now(),
@@ -5335,6 +6332,7 @@ function wrapWorkerEntrypoint(klass) {
   };
 }
 __name(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
+__name2(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
 var WRAPPED_ENTRY;
 if (typeof middleware_insertion_facade_default === "object") {
   WRAPPED_ENTRY = wrapExportedHandler(middleware_insertion_facade_default);
@@ -5342,8 +6340,178 @@ if (typeof middleware_insertion_facade_default === "object") {
   WRAPPED_ENTRY = wrapWorkerEntrypoint(middleware_insertion_facade_default);
 }
 var middleware_loader_entry_default = WRAPPED_ENTRY;
-export {
-  __INTERNAL_WRANGLER_MIDDLEWARE__,
-  middleware_loader_entry_default as default
+
+// node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+var drainBody2 = /* @__PURE__ */ __name(async (request, env3, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env3);
+  } finally {
+    try {
+      if (request.body !== null && !request.bodyUsed) {
+        const reader = request.body.getReader();
+        while (!(await reader.read()).done) {
+        }
+      }
+    } catch (e) {
+      console.error("Failed to drain the unused request body.", e);
+    }
+  }
+}, "drainBody");
+var middleware_ensure_req_body_drained_default2 = drainBody2;
+
+// node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+function reduceError2(e) {
+  return {
+    name: e?.name,
+    message: e?.message ?? String(e),
+    stack: e?.stack,
+    cause: e?.cause === void 0 ? void 0 : reduceError2(e.cause)
+  };
+}
+__name(reduceError2, "reduceError");
+var jsonError2 = /* @__PURE__ */ __name(async (request, env3, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env3);
+  } catch (e) {
+    const error4 = reduceError2(e);
+    return Response.json(error4, {
+      status: 500,
+      headers: { "MF-Experimental-Error-Stack": "true" }
+    });
+  }
+}, "jsonError");
+var middleware_miniflare3_json_error_default2 = jsonError2;
+
+// .wrangler/tmp/bundle-I35U8R/middleware-insertion-facade.js
+var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
+  middleware_ensure_req_body_drained_default2,
+  middleware_miniflare3_json_error_default2
+];
+var middleware_insertion_facade_default2 = middleware_loader_entry_default;
+
+// node_modules/wrangler/templates/middleware/common.ts
+var __facade_middleware__2 = [];
+function __facade_register__2(...args) {
+  __facade_middleware__2.push(...args.flat());
+}
+__name(__facade_register__2, "__facade_register__");
+function __facade_invokeChain__2(request, env3, ctx, dispatch, middlewareChain) {
+  const [head, ...tail] = middlewareChain;
+  const middlewareCtx = {
+    dispatch,
+    next(newRequest, newEnv) {
+      return __facade_invokeChain__2(newRequest, newEnv, ctx, dispatch, tail);
+    }
+  };
+  return head(request, env3, ctx, middlewareCtx);
+}
+__name(__facade_invokeChain__2, "__facade_invokeChain__");
+function __facade_invoke__2(request, env3, ctx, dispatch, finalMiddleware) {
+  return __facade_invokeChain__2(request, env3, ctx, dispatch, [
+    ...__facade_middleware__2,
+    finalMiddleware
+  ]);
+}
+__name(__facade_invoke__2, "__facade_invoke__");
+
+// .wrangler/tmp/bundle-I35U8R/middleware-loader.entry.ts
+var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
+  constructor(scheduledTime, cron, noRetry) {
+    this.scheduledTime = scheduledTime;
+    this.cron = cron;
+    this.#noRetry = noRetry;
+  }
+  static {
+    __name(this, "__Facade_ScheduledController__");
+  }
+  #noRetry;
+  noRetry() {
+    if (!(this instanceof ___Facade_ScheduledController__2)) {
+      throw new TypeError("Illegal invocation");
+    }
+    this.#noRetry();
+  }
 };
-//# sourceMappingURL=bundledWorker-0.8049410768833881.mjs.map
+function wrapExportedHandler2(worker) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
+    return worker;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
+    __facade_register__2(middleware);
+  }
+  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env3, ctx) {
+    if (worker.fetch === void 0) {
+      throw new Error("Handler does not export a fetch() function.");
+    }
+    return worker.fetch(request, env3, ctx);
+  }, "fetchDispatcher");
+  return {
+    ...worker,
+    fetch(request, env3, ctx) {
+      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
+        if (type === "scheduled" && worker.scheduled !== void 0) {
+          const controller = new __Facade_ScheduledController__2(
+            Date.now(),
+            init.cron ?? "",
+            () => {
+            }
+          );
+          return worker.scheduled(controller, env3, ctx);
+        }
+      }, "dispatcher");
+      return __facade_invoke__2(request, env3, ctx, dispatcher, fetchDispatcher);
+    }
+  };
+}
+__name(wrapExportedHandler2, "wrapExportedHandler");
+function wrapWorkerEntrypoint2(klass) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
+    return klass;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
+    __facade_register__2(middleware);
+  }
+  return class extends klass {
+    #fetchDispatcher = /* @__PURE__ */ __name((request, env3, ctx) => {
+      this.env = env3;
+      this.ctx = ctx;
+      if (super.fetch === void 0) {
+        throw new Error("Entrypoint class does not define a fetch() function.");
+      }
+      return super.fetch(request);
+    }, "#fetchDispatcher");
+    #dispatcher = /* @__PURE__ */ __name((type, init) => {
+      if (type === "scheduled" && super.scheduled !== void 0) {
+        const controller = new __Facade_ScheduledController__2(
+          Date.now(),
+          init.cron ?? "",
+          () => {
+          }
+        );
+        return super.scheduled(controller);
+      }
+    }, "#dispatcher");
+    fetch(request) {
+      return __facade_invoke__2(
+        request,
+        this.env,
+        this.ctx,
+        this.#dispatcher,
+        this.#fetchDispatcher
+      );
+    }
+  };
+}
+__name(wrapWorkerEntrypoint2, "wrapWorkerEntrypoint");
+var WRAPPED_ENTRY2;
+if (typeof middleware_insertion_facade_default2 === "object") {
+  WRAPPED_ENTRY2 = wrapExportedHandler2(middleware_insertion_facade_default2);
+} else if (typeof middleware_insertion_facade_default2 === "function") {
+  WRAPPED_ENTRY2 = wrapWorkerEntrypoint2(middleware_insertion_facade_default2);
+}
+var middleware_loader_entry_default2 = WRAPPED_ENTRY2;
+export {
+  __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
+  middleware_loader_entry_default2 as default
+};
+//# sourceMappingURL=bundledWorker-0.5972139588365672.js.map

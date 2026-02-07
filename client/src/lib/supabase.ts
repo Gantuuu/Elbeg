@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
+import { compressImage } from './image-utils';
+
 
 // These will be replaced with actual values from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -16,22 +19,62 @@ export const getCurrentUser = async () => {
     return user;
 };
 
+
+
 // Helper function for file upload
 export const uploadImage = async (file: File, bucket = 'images') => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    // 1. Start Logging
+    logger.custom('⏳', '이미지 업로드 시작:', {
+        fileName: file.name,
+        fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        fileType: file.type,
+        bucket: bucket
+    });
 
-    const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(fileName, file);
+    try {
+        const fileExt = file.name.split('.').pop();
+        const originalSize = file.size;
 
-    if (error) throw error;
+        // 2. Compression & WebP Conversion
+        const compressedFile = await compressImage(file);
 
-    const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(data.path);
+        // Log compression results
+        logger.success('이미지 압축 완료:', {
+            originalSize: `${(originalSize / 1024 / 1024).toFixed(2)} MB`,
+            compressedSize: `${(compressedFile.size / 1024).toFixed(2)} KB`,
+            reduction: `${((1 - compressedFile.size / originalSize) * 100).toFixed(1)}%`,
+            format: compressedFile.type
+        });
 
-    return publicUrl;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`; // Force .webp extension
+
+        // 3. Upload to Supabase
+        const { data, error } = await supabase.storage
+            .from(bucket)
+            .upload(fileName, compressedFile);
+
+        if (error) throw error;
+
+        const { data: { publicUrl } } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(data.path);
+
+        // 4. Success Logging
+        logger.success('이미지 업로드 성공:', {
+            path: data.path,
+            url: publicUrl,
+            bucket: bucket
+        });
+
+        return publicUrl;
+    } catch (error: any) {
+        logger.error('이미지 업로드 실패:', {
+            fileName: file.name,
+            error: error.message,
+            details: error
+        });
+        throw error;
+    }
 };
 
 // Database types (generated from schema)

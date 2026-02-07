@@ -28,6 +28,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "lucide-react";
 import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
+import { logger } from "@/lib/logger";
+
 
 interface ProductFormProps {
   product?: Product;
@@ -121,9 +123,17 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    try {
-      console.log("Submitting form data:", data);
+    logger.custom('⏳', '상품 저장 시작...');
 
+    // Log data to be saved
+    logger.custom('📦', '저장 데이터:', {
+      name: data.name,
+      price: data.price,
+      category: data.category,
+      hasImage: !!selectedFile || !!data.imageUrl,
+    });
+
+    try {
       // Ensure we have required fields
       if (!data.name || !data.category || !data.price) {
         throw new Error("Бүтээгдэхүүний нэр, ангилал, үнэ заавал оруулна уу");
@@ -174,16 +184,29 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
           description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ.",
         });
+
+        logger.success('상품 수정 성공:', {
+          productId: product.id,
+          changes: productData
+        });
       } else {
         // Create new product via Worker
         console.log("Creating product via Worker");
 
         // Send JSON data directly
-        await apiRequest('POST', '/api/products', productData);
+        const newProduct = await apiRequest('POST', '/api/products', productData);
 
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",
           description: "Шинэ бүтээгдэхүүн амжилттай нэмэгдлээ.",
+        });
+
+        logger.success('상품 저장 성공:', {
+          // @ts-ignore
+          productId: newProduct?.id,
+          productName: productData.name,
+          imageUrl: productData.imageUrl,
+          price: productData.price
         });
       }
 
@@ -204,6 +227,13 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       onSuccess();
     } catch (error: any) {
       console.error("Error submitting product form:", error);
+
+      logger.error('상품 저장 실패:', {
+        formData: data,
+        error: error.message,
+        details: error
+      });
+
       toast({
         title: "Алдаа гарлаа",
         description: error.message || "Бүтээгдэхүүн хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",

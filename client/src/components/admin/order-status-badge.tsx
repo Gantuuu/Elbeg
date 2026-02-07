@@ -1,18 +1,19 @@
 import { getOrderStatusColor, translateOrderStatus } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/constants";
 import { useLanguage } from "@/contexts/language-context";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface OrderStatusBadgeProps {
   status: string;
@@ -21,15 +22,15 @@ interface OrderStatusBadgeProps {
   forceLanguage?: 'mn' | 'ru' | 'en'; // 강제로 특정 언어 사용
 }
 
-export function OrderStatusBadge({ 
-  status, 
-  orderId, 
+export function OrderStatusBadge({
+  status,
+  orderId,
   isEditable = false,
   forceLanguage
 }: OrderStatusBadgeProps) {
   const { t, language } = useLanguage();
   const statusColor = getOrderStatusColor(status);
-  
+
   // 몽골어 번역 정의
   const mongolianOrderStatus = {
     pending: 'Төлбөр төлөлт хүлээгдэж байна',
@@ -37,49 +38,61 @@ export function OrderStatusBadge({
     completed: 'Хүргэгдсэн',
     cancelled: 'Цуцлагдсан',
   };
-  
+
   // forceLanguage가 있으면 해당 언어 사용, 없으면 현재 언어 사용
-  const translatedStatus = forceLanguage === 'mn' 
+  const translatedStatus = forceLanguage === 'mn'
     ? mongolianOrderStatus[status as keyof typeof mongolianOrderStatus] || status
     : t.orderStatus[status as keyof typeof t.orderStatus] || status;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   const handleUpdateStatus = async (newStatus: string) => {
     setIsUpdating(true);
-    
+
     try {
       // Update status in API
       await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status: newStatus });
-      
+
       // Immediately update the cache for instant UI feedback
       queryClient.setQueryData(['/api/orders'], (oldData: any) => {
         if (!Array.isArray(oldData)) return oldData;
-        return oldData.map((order: any) => 
+        return oldData.map((order: any) =>
           order.id === orderId ? { ...order, status: newStatus } : order
         );
       });
-      
+
       // Then invalidate and refetch for server sync
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
-      
+
       // Background refetch to ensure consistency
       queryClient.refetchQueries({ queryKey: ['/api/orders'] });
-      
-      const statusText = forceLanguage === 'mn' 
+
+      const statusText = forceLanguage === 'mn'
         ? mongolianOrderStatus[newStatus as keyof typeof mongolianOrderStatus] || newStatus
         : t.orderStatus[newStatus as keyof typeof t.orderStatus] || newStatus;
-        
+
+      logger.custom('🔄', '주문 상태 변경:', {
+        orderId: orderId,
+        oldStatus: status,
+        newStatus: newStatus
+      });
+
       toast({
         title: "Төлөв шинэчлэгдлээ",
         description: `Захиалгын төлөв '${statusText}' болж шинэчлэгдлээ.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       // Revert the optimistic update on error
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      
+
+      logger.error('주문 상태 변경 실패:', {
+        orderId: orderId,
+        targetStatus: newStatus,
+        error: error.message || error
+      });
+
       toast({
         title: "Алдаа гарлаа",
         description: "Захиалгын төлөв шинэчлэх үед алдаа гарлаа. Дахин оролдоно уу.",
@@ -89,7 +102,7 @@ export function OrderStatusBadge({
       setIsUpdating(false);
     }
   };
-  
+
   if (!isEditable) {
     return (
       <span className={cn("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", statusColor)}>
@@ -97,10 +110,10 @@ export function OrderStatusBadge({
       </span>
     );
   }
-  
+
   return (
     <div className="relative">
-      <Select 
+      <Select
         defaultValue={status}
         onValueChange={handleUpdateStatus}
         disabled={isUpdating}
@@ -114,7 +127,7 @@ export function OrderStatusBadge({
         <SelectContent>
           {ORDER_STATUSES.map((statusOption) => (
             <SelectItem key={statusOption.value} value={statusOption.value}>
-              {forceLanguage === 'mn' 
+              {forceLanguage === 'mn'
                 ? mongolianOrderStatus[statusOption.value as keyof typeof mongolianOrderStatus] || statusOption.label
                 : t.orderStatus[statusOption.value as keyof typeof t.orderStatus] || statusOption.label
               }

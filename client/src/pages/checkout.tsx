@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "../lib/queryClient";
 import { supabase } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 import { Loader2, LogIn, UserCircle2 } from "lucide-react";
 import { insertOrderSchema, BankAccount } from "@shared/schema";
 import { useLanguage } from "@/contexts/language-context";
@@ -212,10 +213,18 @@ export default function Checkout() {
 
   // Enhanced form submission handler with better debugging
   const onSubmit = async (data: CheckoutFormValues) => {
-    console.log("Form submission triggered with values:", data);
-    console.log("Form validation state:", form.formState);
+    logger.custom('⏳', '주문 생성 시작...');
 
-    // Check for form validation errors
+    // Log order data
+    logger.custom('🛒', '주문 데이터:', {
+      customerName: data.customerName,
+      totalAmount: totalPrice + shippingFee,
+      itemsCount: items.length,
+      paymentMethod: data.paymentMethod,
+      deliveryAddress: data.customerAddress
+    });
+
+    // Check for form validation errors (logging already added by logger above implicitly via custom if needed, but keeping existing logic)
     if (Object.keys(form.formState.errors).length > 0) {
       console.error("Form has validation errors:", form.formState.errors);
       toast({
@@ -238,35 +247,8 @@ export default function Checkout() {
     setIsSubmitting(true);
 
     try {
-      console.log("Submitting order with data:", data);
-      console.log("Cart items:", items);
-      console.log("Total price:", totalPrice);
-
       // Calculate total with shipping fee
       const orderTotalWithShipping = totalPrice + shippingFee;
-
-      // Create a properly formatted order payload 
-      const orderPayload = {
-        orderData: {
-          customerName: data.customerName,
-          customerEmail: data.customerEmail,
-          customerPhone: data.customerPhone,
-          customerAddress: data.customerAddress,
-          paymentMethod: data.paymentMethod,
-          selectedBankAccount: data.selectedBankAccount,
-          transferAccountHolder: data.transferAccountHolder,
-          totalAmount: orderTotalWithShipping.toString(),
-        },
-        cartItems: items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          name: item.name,
-          price: item.price.toString(),
-          imageUrl: item.imageUrl
-        })),
-      };
-
-      console.log("Sending order payload:", orderPayload);
 
       try {
         // 1. Insert order into 'orders' table
@@ -287,6 +269,11 @@ export default function Checkout() {
         if (orderError) throw orderError;
         if (!order) throw new Error("Захиалга үүсгэхэд алдаа гарлаа");
 
+        logger.success('Master Order 생성:', {
+          orderId: order.id,
+          totalAmount: order.total_amount
+        });
+
         // 2. Insert order items into 'order_items' table
         const orderItems = items.map(item => ({
           order_id: order.id,
@@ -304,14 +291,32 @@ export default function Checkout() {
           // We might want to delete the order here or just inform the user
         }
 
-        console.log("Order created successfully with Supabase:", order);
+        logger.success('Order Items 생성:', {
+          itemsCount: orderItems.length,
+          items: orderItems.map(i => ({
+            productId: i.product_id,
+            quantity: i.quantity
+          }))
+        });
+
+        logger.success('결제 완료:', {
+          orderId: order.id,
+          amount: orderTotalWithShipping,
+          method: data.paymentMethod
+        });
+
         handleCheckoutSuccess(order.id);
       } catch (error: any) {
         console.error("Supabase order error:", error);
         throw error;
       }
     } catch (error: any) {
-      console.error("Error submitting order:", error);
+      logger.error('주문 생성 실패:', {
+        formData: data,
+        error: error.message,
+        details: error
+      });
+
       toast({
         title: "Алдаа гарлаа",
         description: error.message || "Захиалга боловсруулах үед алдаа гарлаа. Дахин оролдоно уу.",
