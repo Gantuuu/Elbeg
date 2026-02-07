@@ -534,10 +534,10 @@ export default function Checkout() {
                                   <div className="h-4 w-36 bg-[#0e5841]/10 animate-pulse rounded-full mx-auto"></div>
                                 </div>
                               ) : bankAccounts.length > 0 ? (
-                                bankAccounts.map((account) => (
+                                bankAccounts.filter(account => account && account.id).map((account) => (
                                   <SelectItem
                                     key={account.id}
-                                    value={account.id.toString()}
+                                    value={String(account.id || '')}
                                     className="border-none focus:bg-violet-600 data-[state=checked]:bg-violet-600 data-[state=checked]:text-white text-gray-900 my-1 rounded-lg py-3"
                                   >
                                     <div className="flex items-center w-full">
