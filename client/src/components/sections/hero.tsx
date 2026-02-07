@@ -118,7 +118,7 @@ export function Hero() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
-                          className="text-2xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg mb-2"
+                          className="text-lg md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg mb-2 line-clamp-1"
                         >
                           {slide.title}
                         </motion.h2>
@@ -126,7 +126,7 @@ export function Hero() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.4 }}
-                          className="text-white/90 text-sm md:text-lg font-medium drop-shadow-md hidden md:block"
+                          className="text-white/90 text-xs md:text-base font-medium drop-shadow-md hidden md:block line-clamp-1"
                         >
                           {slide.text}
                         </motion.p>
