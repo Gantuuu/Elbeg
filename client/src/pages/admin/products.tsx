@@ -54,9 +54,9 @@ export default function AdminProducts() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      return data as Product[];
+      const response = await fetch('/api/products');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      return await response.json() as Product[];
     },
   });
 
@@ -88,13 +88,10 @@ export default function AdminProducts() {
   const handleEditProduct = async (product: Product) => {
     try {
       // Fetch the latest product data to ensure we have the most up-to-date information
-      const { data: updatedProduct, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', product.id)
-        .single();
-
-      if (error) throw error;
+      // Fetch the latest product data to ensure we have the most up-to-date information
+      const response = await fetch(`/api/products/${product.id}`);
+      if (!response.ok) throw new Error('Failed to fetch product details');
+      const updatedProduct = await response.json() as Product;
 
       // Set the product for editing with the fresh data
       setEditingProduct(updatedProduct);
@@ -141,12 +138,7 @@ export default function AdminProducts() {
     if (!productToDelete) return;
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productToDelete.id);
-
-      if (error) throw error;
+      await apiRequest('DELETE', `/api/products/${productToDelete.id}`);
 
       // Invalidate queries to reload product list
       queryClient.invalidateQueries({ queryKey: ['products'] });
