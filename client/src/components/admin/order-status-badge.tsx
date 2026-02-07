@@ -49,33 +49,40 @@ export function OrderStatusBadge({
 
   const handleUpdateStatus = async (newStatus: string) => {
     setIsUpdating(true);
+    // Snapshot previous data for rollback
+    const previousOrders = queryClient.getQueriesData({ queryKey: ['/api/orders'] });
 
     try {
-      // Update status in API
-      await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status: newStatus });
+      // 1. Optimistic Update (Update UI immediately)
+      console.log('🔄 Optimistic Update Started for Order:', orderId, 'New Status:', newStatus);
 
-      // Immediately update the cache for instant UI feedback
-      queryClient.setQueryData(['/api/orders'], (oldData: any) => {
-        if (!Array.isArray(oldData)) return oldData;
+      await queryClient.cancelQueries({ queryKey: ['/api/orders'] });
+
+      queryClient.setQueriesData({ queryKey: ['/api/orders'] }, (oldData: any) => {
+        if (!oldData) {
+          console.log('⚠️ No old data found for query');
+          return oldData;
+        }
+        if (!Array.isArray(oldData)) {
+          console.log('⚠️ Old data is not an array:', oldData);
+          return oldData;
+        }
+
+        console.log(`✅ Updating ${oldData.length} orders in cache`);
         return oldData.map((order: any) =>
           order.id === orderId ? { ...order, status: newStatus } : order
         );
       });
 
-      // Then invalidate and refetch for server sync
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/orders', orderId] });
-
-      // Background refetch to ensure consistency
-      queryClient.refetchQueries({ queryKey: ['/api/orders'] });
+      // 2. Perform API Call
+      await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status: newStatus });
 
       const statusText = forceLanguage === 'mn'
         ? mongolianOrderStatus[newStatus as keyof typeof mongolianOrderStatus] || newStatus
         : t.orderStatus[newStatus as keyof typeof t.orderStatus] || newStatus;
 
-      logger.custom('🔄', '주문 상태 변경:', {
+      logger.custom('🔄', '주문 상태 변경 성공:', {
         orderId: orderId,
-        oldStatus: status,
         newStatus: newStatus
       });
 
@@ -83,8 +90,23 @@ export function OrderStatusBadge({
         title: "Төлөв шинэчлэгдлээ",
         description: `Захиалгын төлөв '${statusText}' болж шинэчлэгдлээ.`,
       });
+
+      // 3. Invalidate to ensure consistency (background refetch)
+      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+
     } catch (error: any) {
-      // Revert the optimistic update on error
+      console.error('❌ Failed to update status', error);
+
+      // Rollback on error
+      queryClient.setQueriesData({ queryKey: ['/api/orders'] }, (oldData: any) => {
+        // Ideally restore from previousOrders, but simple refetch is often enough
+        return oldData;
+      });
+      // Restore specific queries
+      previousOrders.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
 
       logger.error('주문 상태 변경 실패:', {

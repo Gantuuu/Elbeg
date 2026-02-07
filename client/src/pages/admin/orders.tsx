@@ -105,7 +105,7 @@ export default function AdminOrders() {
   // Fetch orders with date filters and improved refresh settings
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: [
-      'orders',
+      '/api/orders',
       formatDateForQuery(startDate),
       formatDateForQuery(endDate)
     ],
