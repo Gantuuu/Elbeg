@@ -138,7 +138,7 @@ app.delete('/bank-accounts/:id', requireAdmin, async (c) => {
     return c.json({ success: true });
 });
 
-app.post('/bank-accounts/:id/default', requireAdmin, async (c) => {
+app.post('/bank-accounts/:id/set-default', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const id = parseInt(c.req.param('id'));
     const success = await storage.setDefaultBankAccount(id);

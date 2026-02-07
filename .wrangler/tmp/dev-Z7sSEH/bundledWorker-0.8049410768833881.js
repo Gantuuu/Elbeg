@@ -5880,7 +5880,7 @@ app4.delete("/bank-accounts/:id", requireAdmin, async (c) => {
   if (!success) return c.json({ message: "Account not found or is default" }, 400);
   return c.json({ success: true });
 });
-app4.post("/bank-accounts/:id/default", requireAdmin, async (c) => {
+app4.post("/bank-accounts/:id/set-default", requireAdmin, async (c) => {
   const storage = c.get("storage");
   const id = parseInt(c.req.param("id"));
   const success = await storage.setDefaultBankAccount(id);
