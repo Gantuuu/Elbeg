@@ -35,24 +35,25 @@ export function Footer() {
     queryKey: ['footer-settings'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('footer_settings')
-          .select('*')
-          .single();
+        const response = await fetch('/api/settings/footer');
+        if (!response.ok) throw new Error('Failed to fetch footer settings');
+        const footerInfo = await response.json() as any;
 
-        if (error) throw error;
+        // If API returns empty object
+        if (!footerInfo || Object.keys(footerInfo).length === 0) return {} as FooterSettings;
 
-        // Map snake_case to camelCase
+        // Map API response (camelCase from Drizzle) to Component state
         return {
-          companyName: data.company_name,
-          description: data.description,
-          address: data.address,
-          phone: data.phone,
-          email: data.email,
-          logoUrl: data.logo_url,
-          socialLinks: data.social_links as any,
-          quickLinks: data.quick_links as any,
-          copyright: data.copyright_text
+          companyName: footerInfo.companyName || footerInfo.company_name,
+          description: footerInfo.description,
+          address: footerInfo.address,
+          phone: footerInfo.phone,
+          email: footerInfo.email,
+          logoUrl: footerInfo.logoUrl || footerInfo.logo_url,
+          socialLinks: footerInfo.socialLinks || footerInfo.social_links || {},
+          quickLinks: footerInfo.quickLinks || footerInfo.quick_links || [],
+          // Schema has 'copyrightText', component expects 'copyright'
+          copyright: footerInfo.copyrightText || footerInfo.copyright || footerInfo.copyright_text
         };
       } catch (error) {
         console.error('Error fetching footer settings:', error);

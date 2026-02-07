@@ -26,14 +26,22 @@ export function getFullImageUrl(src: string | null | undefined): string {
  */
 export function handleImageError(event: React.SyntheticEvent<HTMLImageElement, Event>, originalSrc?: string) {
   const currentSrc = event.currentTarget.src;
-  console.error('Image failed to load:', {
-    originalSrc,
-    currentSrc,
-    windowLocation: window.location.href
+
+  // 브라우저에서 제공하는 오류 세부 정보 로깅 (가능한 경우)
+  console.error('Image failing to load details:', {
+    timestamp: new Date().toISOString(),
+    originalSrc: originalSrc,
+    resolvedSrc: currentSrc,
+    windowLocation: window.location.href,
+    origin: window.location.origin
   });
+
   // 몽골어로 기본 이미지 텍스트 변경 및 명확한 아이콘 사용
   const fallbackUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+PHJlY3Qgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjQ1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMzMzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0JfRg9GA0LDQsyDQsNC70LPQsDwvdGV4dD48cGF0aCBmaWxsPSIjNTU1IiBkPSJNNjUgNzBjMC04LjI4NCA2LjcxNi0xNSAxNS0xNSA4LjI4NCAwIDE1IDYuNzE2IDE1IDE1IDAgOC4yODQtNi43MTYgMTUtMTUgMTUtOC4yODQgMC0xNS02LjcxNi0xNS0xNXptNSAwYzAgNS41MjMgNC40NzcgMTAgMTAgMTAgNS41MjMgMCAxMC00LjQ3NyAxMC0xMCAwLTUuNTIzLTQuNDc3LTEwLTEwLTEwLTUuNTIzIDAtMTAgNC40NzctMTAgMTB6Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjQiIGQ9Ik01NSA5MGMwLTEzLjgwNyAxMS4xOTMtMjUgMjUtMjVzMjUgMTEuMTkzIDI1IDI1djEwSDU1VjkweiIvPjwvc3ZnPg==';
-  event.currentTarget.src = fallbackUrl;
+
+  if (currentSrc !== fallbackUrl) {
+    event.currentTarget.src = fallbackUrl;
+  }
 }
 
 /**

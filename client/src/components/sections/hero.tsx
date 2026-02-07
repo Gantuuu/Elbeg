@@ -44,7 +44,7 @@ export function Hero() {
   // Locally derived content
   const title = heroSettings?.title || t.heroTitle;
   const subtitle = heroSettings?.text || t.heroSubtitle;
-  const imageUrl = getFullImageUrl(heroSettings?.imageUrl) || "/uploads/1746355234137-26887706.jpg";
+  const imageUrl = getFullImageUrl(heroSettings?.imageUrl);
 
   return (
     <section className="bg-[#0e5841] pt-3 pb-4">

@@ -27,30 +27,8 @@ app.route('/api', shopApp); // shopApp mounts at root of /api (e.g. /api/categor
 app.route('/api', ordersApp); // ordersApp mounts at root of /api
 app.route('/api', cmsApp); // cmsApp mounts at root of /api
 
-app.get('/uploads/*', async (c) => {
-    if (!c.env.BUCKET) {
-        return c.text('Storage not configured', 503);
-    }
-    const key = c.req.path.replace('/uploads/', '');
-    try {
-        const object = await c.env.BUCKET.get(key);
-
-        if (!object) {
-            return c.text('Not Found', 404);
-        }
-
-        const headers = new Headers();
-        object.writeHttpMetadata(headers);
-        headers.set('etag', object.httpEtag);
-        headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-
-        return new Response(object.body, {
-            headers,
-        });
-    } catch (error) {
-        console.error('Error fetching from BUCKET:', error);
-        return c.text('Internal Server Error', 500);
-    }
+app.get('/uploads/*', (c) => {
+    return c.text('Not Found (Use Supabase Storage URLs)', 404);
 });
 
 app.onError((err, c) => {
