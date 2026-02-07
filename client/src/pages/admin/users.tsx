@@ -17,7 +17,7 @@ export default function AdminUsers() {
   });
 
   // Filter users based on search query
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -27,10 +27,10 @@ export default function AdminUsers() {
   return (
     <AdminLayout>
       <div className="p-6">
-        <AdminHeader 
-          title="Хэрэглэгчид" 
-          description="Бүртгэлтэй хэрэглэгчдийн жагсаалт" 
-          icon={<UserIcon className="h-6 w-6" />} 
+        <AdminHeader
+          title="Хэрэглэгчид"
+          description="Бүртгэлтэй хэрэглэгчдийн жагсаалт"
+          icon={<UserIcon className="h-6 w-6" />}
         />
 
         <Card className="mt-6">
@@ -76,39 +76,61 @@ export default function AdminUsers() {
                         </td>
                       </tr>
                     ) : (
-                      filteredUsers.map((user) => (
-                        <tr key={user.id} className="border-b hover:bg-muted/50">
-                          <td className="px-4 py-3 text-sm">{user.id}</td>
-                          <td className="px-4 py-3 text-sm">{user.username}</td>
-                          <td className="px-4 py-3 text-sm">{user.name || '-'}</td>
-                          <td className="px-4 py-3 text-sm">
-                            {user.email && user.email.trim() !== '' ? (
-                              user.email
-                            ) : (
-                              <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                                И-мэйл байхгүй
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm">{user.phone || '-'}</td>
-                          <td className="px-4 py-3 text-sm">
-                            {user.isAdmin ? (
-                              <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                                Тийм
-                              </span>
-                            ) : (
-                              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
-                                Үгүй
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            {user.createdAt 
-                              ? new Date(user.createdAt).toLocaleDateString('mn-MN') 
-                              : '-'}
-                          </td>
-                        </tr>
-                      ))
+                      filteredUsers.map((user) => {
+                        // Helper function to mask sensitive data
+                        const maskData = (str: string | null | undefined, type: 'email' | 'phone') => {
+                          if (!str) return '-';
+                          if (type === 'email') {
+                            const parts = str.split('@');
+                            if (parts.length !== 2) return str;
+                            const name = parts[0];
+                            if (name.length <= 3) return str; // Don't mask very short emails
+                            return `${name.substring(0, 3)}***@${parts[1]}`;
+                          } else {
+                            // Phone masking (keep first 2 and last 2 digits if possible)
+                            if (str.length < 5) return str;
+                            return `${str.substring(0, 2)}****${str.substring(str.length - 2)}`;
+                          }
+                        };
+
+                        return (
+                          <tr key={user.id} className="border-b hover:bg-muted/50">
+                            <td className="px-4 py-3 text-sm">{user.id}</td>
+                            <td className="px-4 py-3 text-sm">{user.username}</td>
+                            <td className="px-4 py-3 text-sm">{user.name || '-'}</td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.email && user.email.trim() !== '' ? (
+                                <span title={user.email}>{maskData(user.email, 'email')}</span>
+                              ) : (
+                                <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
+                                  И-мэйл байхгүй
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.phone ? (
+                                <span title={user.phone}>{maskData(user.phone, 'phone')}</span>
+                              ) : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.isAdmin ? (
+                                <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                  Тийм
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
+                                  Үгүй
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.createdAt
+                                ? new Date(user.createdAt).toLocaleDateString('mn-MN')
+                                : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

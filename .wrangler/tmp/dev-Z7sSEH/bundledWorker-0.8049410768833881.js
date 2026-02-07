@@ -6093,19 +6093,12 @@ app5.get("/settings/hero", async (c) => {
 app5.put("/settings/hero", requireAdmin, async (c) => {
   const storage = c.get("storage");
   try {
-    const body = await c.req.parseBody();
-    const title22 = body["title"];
-    const text = body["text"];
-    const imageFile = body["image"];
-    let imageUrl = body["imageUrl"] || "";
-    if (imageFile && imageFile instanceof File) {
-      const fileName = `hero/${Date.now()}_${imageFile.name}`;
-      imageUrl = await storage.uploadFile("media", fileName, imageFile);
+    const body = await c.req.json();
+    if (!body.slides || !Array.isArray(body.slides)) {
     }
     const heroData = {
-      title: title22,
-      text,
-      imageUrl
+      slides: body.slides
+      // Array of { title, text, imageUrl }
     };
     const existing = await storage.getSiteSettingByKey("hero_settings");
     if (existing) {
@@ -6121,8 +6114,7 @@ app5.put("/settings/hero", requireAdmin, async (c) => {
     console.error("Error updating hero settings:", error32);
     return c.json({
       message: "Failed to update hero settings",
-      error: error32.message,
-      stack: error32.stack
+      error: error32.message
     }, 500);
   }
 });

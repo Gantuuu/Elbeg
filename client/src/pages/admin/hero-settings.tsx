@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AdminSidebar } from "@/components/admin/sidebar";
@@ -18,16 +18,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Image } from "lucide-react";
+import { Image, Plus, Trash2, Upload } from "lucide-react";
 import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
 
 // Create form schema
-const heroFormSchema = z.object({
+const slideSchema = z.object({
   title: z.string().min(1, "Гарчиг оруулна уу"),
   text: z.string().min(1, "Тайлбар оруулна уу"),
   imageUrl: z.string().optional(),
+});
+
+const heroFormSchema = z.object({
+  slides: z.array(slideSchema).min(1, "Дор хаяж нэг слайд байх ёстой"),
 });
 
 type HeroFormValues = z.infer<typeof heroFormSchema>;
@@ -36,103 +41,111 @@ export default function HeroSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
+  // File input refs for each slide
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const form = useForm<HeroFormValues>({
+    resolver: zodResolver(heroFormSchema),
+    defaultValues: {
+      slides: [
+        { title: "", text: "", imageUrl: "" }
+      ]
+    }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "slides"
+  });
 
   // Fetch current hero settings
   const { data: heroSettings, isLoading } = useQuery({
     queryKey: ['/api/settings/hero'],
     queryFn: async () => {
       try {
-        return await apiRequest('GET', '/api/settings/hero');
+        const data = await apiRequest('GET', '/api/settings/hero') as any;
+        // Handle migration from legacy object to array
+        if (data.slides && Array.isArray(data.slides)) {
+          return data;
+        } else if (data.title || data.text || data.imageUrl) {
+          // Convert legacy single slide to array
+          return {
+            slides: [{
+              title: data.title || "",
+              text: data.text || "",
+              imageUrl: data.imageUrl || ""
+            }]
+          };
+        }
+        return { slides: [{ title: "", text: "", imageUrl: "" }] };
       } catch (error) {
         console.error("Error fetching hero settings:", error);
         return {
-          title: "",
-          text: "",
-          imageUrl: ""
+          slides: [{ title: "", text: "", imageUrl: "" }]
         };
       }
     }
   });
 
-  // Set default form values and image preview when data loads
+  // Set default form values when data loads
   useEffect(() => {
     if (heroSettings) {
       form.reset({
-        title: heroSettings.title,
-        text: heroSettings.text,
-        imageUrl: heroSettings.imageUrl
+        slides: heroSettings.slides
+      });
+    }
+  }, [heroSettings, form]);
+
+  // Handle file selection and upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingIndex(index);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/media', {
+        method: 'POST',
+        body: formData
       });
 
-      if (heroSettings.imageUrl) {
-        setImagePreview(heroSettings.imageUrl);
+      if (!response.ok) throw new Error('Failed to upload image');
+
+      const data = await response.json() as { url: string };
+
+      // Update the form field with the new image URL
+      form.setValue(`slides.${index}.imageUrl`, data.url);
+      toast({
+        title: "Зураг амжилттай хуулагдлаа",
+        description: "Image uploaded successfully"
+      });
+
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Алдаа",
+        description: "Зураг хуулахад алдаа гарлаа",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingIndex(null);
+      // Reset file input
+      if (fileInputRefs.current[index]) {
+        fileInputRefs.current[index]!.value = '';
       }
-    }
-  }, [heroSettings]);
-
-  const form = useForm<HeroFormValues>({
-    resolver: zodResolver(heroFormSchema),
-    defaultValues: {
-      title: "",
-      text: "",
-      imageUrl: ""
-    }
-  });
-
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-
-      // Create image preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      // Clear imageUrl field when uploading a new file
-      form.setValue("imageUrl", "");
     }
   };
 
   const onSubmit = async (data: HeroFormValues) => {
     setIsSubmitting(true);
     try {
-      // Create FormData object for file upload
-      const formData = new FormData();
-
-      // Add the file if one was selected
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      }
-
-      // Add form data
-      formData.append("title", data.title);
-      formData.append("text", data.text);
-
-      // Only add imageUrl if no file is selected
-      if (!selectedFile && data.imageUrl) {
-        formData.append("imageUrl", data.imageUrl);
-      }
-
-      // Send request to update hero settings
-      const response = await fetch("/api/settings/hero", {
-        method: "PUT",
-        credentials: "include",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({})).then(data => data as any);
-        console.error("Backend error details:", errorData);
-        throw new Error(errorData.error || errorData.message || "Failed to update hero settings");
-      }
-
-      const updatedSettings = await response.json();
+      // Send JSON request to update hero settings
+      await apiRequest("PUT", "/api/settings/hero", data);
 
       // Show success toast
       toast({
@@ -159,17 +172,25 @@ export default function HeroSettings() {
     <div className="min-h-screen bg-neutral flex">
       <AdminSidebar />
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden flex flex-col">
         <AdminHeader
           title="Нүүр хуудас зураг"
           description="배너 이미지, 제목 및 텍스트를 변경할 수 있습니다"
           icon={<Image className="h-6 w-6" />}
         />
 
-        <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Нүүр хуудасны зураг ба текст (배너 이미지 및 텍스트)</CardTitle>
+        <div className="p-6 overflow-auto flex-1">
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Нүүр хуудасны слайдер (배너 슬라이더)</CardTitle>
+              <Button
+                onClick={() => append({ title: "", text: "", imageUrl: "" })}
+                variant="outline"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Слайд нэмэх (슬라이드 추가)
+              </Button>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -179,147 +200,138 @@ export default function HeroSettings() {
               ) : (
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="title"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Гарчиг (제목)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Шинэ, Шинэхэн, Чанартай Мах" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="text"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Тайлбар (설명)</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <FormField
-                          control={form.control}
-                          name="imageUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Зурагны URL (이미지 URL)</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="https://example.com/image.jpg"
-                                  {...field}
-                                  disabled={!!selectedFile}
+                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                      {fields.map((field, index) => (
+                        <AccordionItem key={field.id} value={`item-${index}`}>
+                          <AccordionTrigger className="hover:no-underline">
+                            <div className="flex justify-between items-center w-full pr-4">
+                              <span className="font-medium">
+                                Слайд {index + 1}: {form.watch(`slides.${index}.title`) || "(Гарчиггүй - 제목 없음)"}
+                              </span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent className="p-4 border rounded-md mt-2 bg-gray-50/50">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-4">
+                                <FormField
+                                  control={form.control}
+                                  name={`slides.${index}.title`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Гарчиг (제목)</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Шинэ, Шинэхэн, Чанартай Мах" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
                                 />
-                              </FormControl>
-                              <FormDescription>
-                                Зурагны холбоос оруулна уу эсвэл доор файл оруулна уу (이미지 URL을 입력하거나 아래에서 파일 업로드)
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
 
-                        {/* Image upload component */}
-                        <div className="mt-4">
-                          <div className="flex items-center mb-2">
-                            <span className="text-sm font-medium">Зураг оруулах (이미지 업로드)</span>
-                          </div>
+                                <FormField
+                                  control={form.control}
+                                  name={`slides.${index}.text`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Тайлбар (설명)</FormLabel>
+                                      <FormControl>
+                                        <Textarea
+                                          placeholder="Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."
+                                          className="resize-none"
+                                          {...field}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
 
-                          <div className="flex flex-col gap-2">
-                            <div className="space-y-4">
-                              <div
-                                className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
-                                onClick={() => fileInputRef.current?.click()}
-                              >
-                                <div className="flex flex-col items-center justify-center py-2">
-                                  <Image className="h-8 w-8 text-gray-400 mb-2" />
-                                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    Зураг оруулахын тулд энд дарна уу<br />(이미지 업로드하려면 여기를 클릭하세요)
-                                  </span>
-                                  <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                    (JPEG, PNG, GIF, WEBP)
-                                  </span>
+                                <FormField
+                                  control={form.control}
+                                  name={`slides.${index}.imageUrl`}
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Зурагны URL (이미지 URL)</FormLabel>
+                                      <FormControl>
+                                        <div className="flex gap-2">
+                                          <Input {...field} placeholder="https://example.com/image.jpg" />
+                                        </div>
+                                      </FormControl>
+                                      <FormDescription>URL шууд оруулах эсвэл доорх товчийг ашиглан хуулна уу</FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <div className="pt-2">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    ref={(el) => (fileInputRefs.current[index] = el)}
+                                    onChange={(e) => handleFileChange(e, index)}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="w-full"
+                                    disabled={uploadingIndex === index}
+                                    onClick={() => fileInputRefs.current[index]?.click()}
+                                  >
+                                    {uploadingIndex === index ? (
+                                      <span className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                    ) : (
+                                      <Upload className="h-4 w-4 mr-2" />
+                                    )}
+                                    Зураг хуулах (이미지 업로드)
+                                  </Button>
                                 </div>
-                                <input
-                                  type="file"
-                                  accept="image/jpeg,image/png,image/gif,image/webp"
-                                  className="hidden"
-                                  ref={fileInputRef}
-                                  onChange={handleFileChange}
-                                />
+
+                                {fields.length > 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    className="w-full mt-4"
+                                    onClick={() => remove(index)}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Слайд устгах (슬라이드 삭제)
+                                  </Button>
+                                )}
                               </div>
 
-                              <button
-                                type="button"
-                                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                                onClick={() => fileInputRef.current?.click()}
-                              >
-                                <Image className="h-5 w-5" />
-                                <span>배너 이미지 추가하기 (Баннер зураг нэмэх)</span>
-                              </button>
+                              <div className="space-y-4">
+                                <div className="text-sm font-medium">Урьдчилсан харагдац (미리보기)</div>
+                                {form.watch(`slides.${index}.imageUrl`) ? (
+                                  <div className="relative aspect-video rounded-md overflow-hidden border">
+                                    <img
+                                      src={getFullImageUrl(form.watch(`slides.${index}.imageUrl`) || "")}
+                                      alt="Slide preview"
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => handleImageError(e, form.watch(`slides.${index}.imageUrl`))}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="aspect-video rounded-md border border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                                    <span className="text-gray-400">Зураг байхгүй байна</span>
+                                  </div>
+                                )}
+
+                                <div className="p-4 bg-gray-900 text-white rounded-md mt-4">
+                                  <h3 className="font-bold text-lg mb-2">{form.watch(`slides.${index}.title`) || "Гарчиг"}</h3>
+                                  <p className="text-sm opacity-80">{form.watch(`slides.${index}.text`) || "Тайлбар текст..."}</p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
 
-                      {/* Image preview */}
-                      <div>
-                        <div className="text-sm font-medium mb-2">Зурагны урьдчилсан харагдац (이미지 미리보기)</div>
-                        {imagePreview ? (
-                          <div className="relative">
-                            <img
-                              src={getFullImageUrl(imagePreview)}
-                              alt="미리보기"
-                              className="max-h-80 rounded-md object-cover w-full"
-                              onError={(e) => handleImageError(e, imagePreview)}
-                            />
-                            {selectedFile && (
-                              <button
-                                type="button"
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
-                                onClick={() => {
-                                  setSelectedFile(null);
-                                  setImagePreview(heroSettings?.imageUrl || null);
-                                  form.setValue("imageUrl", heroSettings?.imageUrl || "");
-                                  if (fileInputRef.current) {
-                                    fileInputRef.current.value = '';
-                                  }
-                                }}
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="border border-dashed border-gray-300 rounded-md p-4 h-60 flex items-center justify-center">
-                            <span className="text-gray-400">Зураг байхгүй байна (이미지 없음)</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end">
+                    <div className="flex justify-end pt-4">
                       <Button
                         type="submit"
                         disabled={isSubmitting}
+                        className="w-full md:w-auto"
                       >
                         {isSubmitting && (
                           <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>
@@ -330,48 +342,6 @@ export default function HeroSettings() {
                   </form>
                 </Form>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Preview card */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Нүүр хуудасны урьдчилсан харагдац (미리보기)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative w-full h-80 rounded-md overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-center bg-cover z-0"
-                  style={{
-                    backgroundImage: `url('${getFullImageUrl(imagePreview || heroSettings?.imageUrl)}')`,
-                    filter: 'brightness(0.85) contrast(1.1)',
-                  }}
-                  data-testid="hero-background"
-                />
-
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-secondary/80 opacity-60 z-10"></div>
-
-                {/* Content */}
-                <div className="absolute inset-0 flex items-center z-20">
-                  <div className="px-6">
-                    <div className="max-w-2xl bg-gradient-to-r from-black/30 to-transparent p-6 rounded-lg backdrop-blur-sm">
-                      <h2 className="text-2xl font-bold mb-2 text-white drop-shadow-lg">
-                        {form.watch("title") || heroSettings?.title || "Шинэ, Шинэхэн, Чанартай Мах"}
-                      </h2>
-                      <p className="text-md mb-4 max-w-2xl text-white/90">
-                        {form.watch("text") || heroSettings?.text || "Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."}
-                      </p>
-                      <button
-                        className="bg-[#0e5841] text-white font-bold py-2 px-4 rounded-lg inline-flex items-center"
-                        disabled
-                      >
-                        Дэлгэрэнгүй
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>

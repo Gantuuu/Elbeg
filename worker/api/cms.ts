@@ -230,23 +230,17 @@ app.put('/settings/hero', requireAdmin, async (c) => {
     const storage = c.get('storage');
 
     try {
-        // Parse multipart body
-        const body = await c.req.parseBody();
-        const title = body['title'] as string;
-        const text = body['text'] as string;
-        const imageFile = body['image'];
-        let imageUrl = body['imageUrl'] as string || "";
+        const body = await c.req.json();
 
-        // Handle file upload if present
-        if (imageFile && imageFile instanceof File) {
-            const fileName = `hero/${Date.now()}_${imageFile.name}`;
-            imageUrl = await storage.uploadFile('media', fileName, imageFile);
+        // Validate structure (basic check)
+        if (!body.slides || !Array.isArray(body.slides)) {
+            // Fallback for legacy single object updates if needed, or just enforce new structure
+            // For now, let's assume the frontend sends the correct { slides: [] } structure
+            // If we want to support legacy calls, we'd check keys. But we are updating frontend too.
         }
 
         const heroData = {
-            title,
-            text,
-            imageUrl
+            slides: body.slides // Array of { title, text, imageUrl }
         };
 
         const existing = await storage.getSiteSettingByKey('hero_settings');
@@ -263,11 +257,9 @@ app.put('/settings/hero', requireAdmin, async (c) => {
         return c.json(heroData);
     } catch (error: any) {
         console.error("Error updating hero settings:", error);
-        // Include more details in the response for debugging
         return c.json({
             message: "Failed to update hero settings",
-            error: error.message,
-            stack: error.stack
+            error: error.message
         }, 500);
     }
 });
