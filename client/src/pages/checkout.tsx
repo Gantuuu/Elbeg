@@ -261,7 +261,8 @@ export default function Checkout() {
             customer_address: data.customerAddress,
             payment_method: data.paymentMethod,
             total_amount: orderTotalWithShipping,
-            status: 'pending'
+            status: 'pending',
+            user_id: user?.id // Link order to user
           })
           .select()
           .single();
@@ -279,7 +280,7 @@ export default function Checkout() {
           order_id: order.id,
           product_id: item.productId,
           quantity: item.quantity,
-          price: parseFloat(item.price.toString())
+          price: parseFloat(item.price?.toString() || "0")
         }));
 
         const { error: itemsError } = await supabase
@@ -567,7 +568,7 @@ export default function Checkout() {
                           // Find selected bank account
                           const selectedAccountId = form.watch("selectedBankAccount");
                           const selectedAccount = bankAccounts.find(
-                            account => account.id.toString() === selectedAccountId
+                            account => account?.id?.toString() === selectedAccountId
                           );
 
                           const accountData = selectedAccount || defaultBankAccount;
