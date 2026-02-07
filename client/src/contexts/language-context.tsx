@@ -228,7 +228,7 @@ const translations: Record<Language, Translations> = {
 
     // 홈페이지
     heroTitle: 'Элбэг мах хүнс',
-    heroSubtitle: 'Амт чанар болон найдвартай үйлчилгээ нэг дор',
+    heroSubtitle: 'Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна.',
     featuredProducts: 'Манай бүтээгдэхүүнүүд',
     featuredProductsDesc: 'Хамгийн амтлаг чанартайг та бүхэндээ',
     categories: {

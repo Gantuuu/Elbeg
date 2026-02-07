@@ -185,9 +185,10 @@ app.post('/auth/sync-session', async (c) => {
 
         // Initialize Supabase configuration
         const supabaseUrl = c.env.VITE_SUPABASE_URL || c.env.SUPABASE_URL;
-        const supabaseKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
+        const supabaseAnonKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
+        const supabaseServiceKey = c.env.SUPABASE_SERVICE_ROLE_KEY; // Get service role key if available
 
-        if (!supabaseUrl || !supabaseKey) {
+        if (!supabaseUrl || !supabaseAnonKey) {
             console.error("Supabase credentials missing in Worker env");
             return c.json({ success: false, message: "Server configuration error" }, 500);
         }
@@ -195,7 +196,7 @@ app.post('/auth/sync-session', async (c) => {
         // Step 1: Verify token using Supabase Auth API
         const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
             headers: {
-                'apikey': supabaseKey,
+                'apikey': supabaseAnonKey,
                 'Authorization': `Bearer ${access_token}`
             }
         });
@@ -213,12 +214,18 @@ app.post('/auth/sync-session', async (c) => {
         }
 
         // Step 2: Query Supabase database (PostgREST) to check if user exists and is admin
+        // Use Service Role Key if available (bypasses RLS), otherwise try using the user's access token (respects RLS)
+        // Fallback to Anon Key is usually insufficient for restricted tables like `users`
+        const dbAuthHeader = supabaseServiceKey ? `Bearer ${supabaseServiceKey}` : `Bearer ${access_token}`;
+
+        console.log(`[Sync Session] Checking user ${authData.email} with ${supabaseServiceKey ? 'Service Key' : 'Access Token'}`);
+
         const dbResponse = await fetch(
             `${supabaseUrl}/rest/v1/users?email=eq.${encodeURIComponent(authData.email)}&select=id,username,email,name,is_admin`,
             {
                 headers: {
-                    'apikey': supabaseKey,
-                    'Authorization': `Bearer ${supabaseKey}`, // Use service key for DB access
+                    'apikey': supabaseAnonKey,
+                    'Authorization': dbAuthHeader,
                     'Content-Type': 'application/json'
                 }
             }
@@ -227,18 +234,24 @@ app.post('/auth/sync-session', async (c) => {
         if (!dbResponse.ok) {
             const error = await dbResponse.text();
             console.error("Supabase DB query failed:", error);
+            // If it's a permission error (401/403), it specifically means RLS blocked it without Service Key
+            if (dbResponse.status === 401 || dbResponse.status === 403) {
+                return c.json({ success: false, message: "Database permission denied (RLS). Please contact admin." }, 403);
+            }
             return c.json({ success: false, message: "Database error" }, 500);
         }
 
         const users = await dbResponse.json() as Array<{ id: number, username: string, email: string, name: string, is_admin: boolean }>;
 
         if (!users || users.length === 0) {
-            return c.json({ success: false, message: "User not found in system" }, 401);
+            console.warn(`[Sync Session] User ${authData.email} authenticated but not found in public.users table.`);
+            return c.json({ success: false, message: "User record not found in system (public.users)" }, 401);
         }
 
         const localUser = users[0];
 
         if (!localUser.is_admin) {
+            console.warn(`[Sync Session] User ${authData.email} is not an admin.`);
             return c.json({ success: false, message: "Not authorized as admin" }, 403);
         }
 

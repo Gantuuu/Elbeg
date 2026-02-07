@@ -201,7 +201,7 @@ export default function HeroSettings() {
                           <FormLabel>Тайлбар (설명)</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Монголын хамгийн чанартай, шинэ махыг танд хүргэж байна."
+                              placeholder="Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."
                               className="resize-none"
                               {...field}
                             />
@@ -360,7 +360,7 @@ export default function HeroSettings() {
                         {form.watch("title") || heroSettings?.title || "Шинэ, Шинэхэн, Чанартай Мах"}
                       </h2>
                       <p className="text-md mb-4 max-w-2xl text-white/90">
-                        {form.watch("text") || heroSettings?.text || "Монголын хамгийн чанартай, шинэ махыг танд хүргэж байна."}
+                        {form.watch("text") || heroSettings?.text || "Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."}
                       </p>
                       <button
                         className="bg-[#0e5841] text-white font-bold py-2 px-4 rounded-lg inline-flex items-center"

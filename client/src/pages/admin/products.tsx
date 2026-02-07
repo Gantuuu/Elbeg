@@ -231,7 +231,8 @@ export default function AdminProducts() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Desktop View: Table */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -300,6 +301,76 @@ export default function AdminProducts() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile View: Cards */}
+              <div className="md:hidden space-y-4">
+                {isLoading ? (
+                  Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
+                      <div className="h-20 bg-gray-200 rounded mb-4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  ))
+                ) : filteredProducts.length === 0 ? (
+                  <div className="text-center p-8 bg-gray-50 rounded-lg text-gray-500">
+                    {searchQuery || categoryFilter !== "all"
+                      ? "Хайлтад тохирох бүтээгдэхүүн олдсонгүй"
+                      : "Бүтээгдэхүүн байхгүй байна"}
+                  </div>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <div key={product.id} className="bg-white border rounded-lg shadow-sm overflow-hidden">
+                      <div className="flex p-4 gap-4">
+                        <div className="flex-shrink-0">
+                          <img
+                            src={getFullImageUrl(product.imageUrl)}
+                            alt={product.name}
+                            className="w-20 h-20 rounded-md object-cover"
+                            onError={(e) => handleImageError(e, product.imageUrl)}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-start">
+                            <h3 className="text-base font-bold text-gray-900 truncate pr-2">
+                              {product.name}
+                            </h3>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                              {product.category}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-[#0e5841]">
+                            {formatPrice(product.price)}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                            {product.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 px-4 py-3 flex justify-end gap-2 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-primary hover:text-primary-dark hover:bg-primary/10 border-primary/20"
+                          onClick={() => handleEditProduct(product)}
+                        >
+                          <span className="material-icons text-sm mr-1">edit</span>
+                          Засах
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          onClick={() => openDeleteConfirm(product)}
+                        >
+                          <span className="material-icons text-sm mr-1">delete</span>
+                          Устгах
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Pagination (if needed) */}
