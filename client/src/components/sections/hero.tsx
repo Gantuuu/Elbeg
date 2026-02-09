@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/language-context";
 import { apiRequest } from "@/lib/queryClient";
-import { getFullImageUrl } from "@/lib/image-utils";
+import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
+
 import {
   Carousel,
   CarouselApi,
@@ -101,13 +102,15 @@ export function Hero() {
             {slides.map((slide: any, index: number) => (
               <CarouselItem key={index} className="pl-2 md:pl-4 basis-[90%] md:basis-[95%] lg:basis-full">
                 <div className="relative overflow-hidden rounded-xl shadow-lg">
-                  <div
-                    className="w-full aspect-[16/9] md:aspect-[21/9] bg-center bg-cover rounded-xl transition-all duration-500"
-                    style={{
-                      backgroundImage: `url('${getFullImageUrl(slide.imageUrl)}')`,
-                      backgroundPosition: 'center 35%' // Adjusted for better face visibility
-                    }}
-                  >
+                  <div className="w-full aspect-[16/9] md:aspect-[21/9] bg-gray-100 rounded-xl transition-all duration-500 overflow-hidden relative">
+                    <img
+                      src={getFullImageUrl(slide.imageUrl)}
+                      alt={slide.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                      style={{ objectPosition: 'center 35%' }}
+                      onError={(e) => handleImageError(e, slide.imageUrl)}
+                      loading="eager"
+                    />
                     {/* Dark gradient overlay for text readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:from-black/40 md:via-black/10 md:to-transparent" />
 
