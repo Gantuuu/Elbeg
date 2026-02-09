@@ -44,7 +44,7 @@ export default function AdminCategories() {
     queryKey: ['categories'],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/categories");
-      return res;
+      return Array.isArray(res) ? res : [];
     }
   });
 

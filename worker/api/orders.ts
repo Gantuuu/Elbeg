@@ -21,7 +21,7 @@ app.get('/orders/pending-count', requireAdmin, async (c) => {
     return c.json({ count });
 });
 
-app.get('/stats', requireAdmin, async (c) => {
+app.get('/orders/stats', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const stats = await storage.getStats();
     return c.json(stats);

@@ -22,9 +22,10 @@ const app = new Hono<Env>();
 // Helper to set session cookie
 async function setUserSession(c: any, userId: number) {
     const secret = c.env.SESSION_SECRET || 'gerinmah-secret-key';
+    const isSecure = c.req.url.startsWith("https://");
     await setSignedCookie(c, 'auth_user_id', userId.toString(), secret, {
         path: '/',
-        secure: true, // Always true in Cloudflare (HTTPS)
+        secure: isSecure, // Only secure in HTTPS
         domain: undefined,
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60, // 30 days

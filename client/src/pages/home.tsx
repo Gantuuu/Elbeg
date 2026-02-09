@@ -38,6 +38,7 @@ export default function HomePage() {
     queryKey: ['service-categories'],
     queryFn: async () => {
       const data = await apiRequest('GET', '/api/service-categories');
+      if (!Array.isArray(data)) return [];
       return data.filter((cat: any) => cat.isActive);
     },
     staleTime: 5 * 60 * 1000,
@@ -319,8 +320,7 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">Чанар баталгааг амлая</p>
               </div>
               {/* Desktop: Grid layout */}
-              <div className="hidden md:grid md:grid-cols-3 gap-4">
-                {reviewsData.slice(0, 3).map((review) => (
+                {(Array.isArray(reviewsData) ? reviewsData : []).slice(0, 3).map((review) => (
                   <div
                     key={review.id}
                     className="bg-white rounded-lg p-4 shadow-sm"
@@ -351,7 +351,9 @@ export default function HomePage() {
               {/* Mobile: Horizontal auto-scrolling carousel */}
               <div className="md:hidden overflow-hidden">
                 <div className="flex gap-4 animate-scroll-x">
-                  {[...reviewsData.slice(0, 3), ...reviewsData.slice(0, 3)].map((review, index) => (
+                  {(() => {
+                    const safeReviews = Array.isArray(reviewsData) ? reviewsData : [];
+                    return [...safeReviews.slice(0, 3), ...safeReviews.slice(0, 3)].map((review, index) => (
                     <div
                       key={`${review.id}-${index}`}
                       className="bg-white rounded-lg p-4 shadow-sm flex-shrink-0 w-[280px]"
@@ -377,7 +379,8 @@ export default function HomePage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ));
+                  })()}
                 </div>
               </div>
             </div>
@@ -414,7 +417,7 @@ export default function HomePage() {
                   </button>
 
                   {/* Dynamic categories from API */}
-                  {productCategories
+                  {Array.isArray(productCategories) && productCategories
                     .filter((cat: any) => cat.isActive !== false)
                     .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
                     .map((category: any) => (
@@ -569,12 +572,12 @@ export default function HomePage() {
         </section>
       </main>
       <Footer />
-      {/* Quantity Modal */}
-      <QuantityModal
-        isOpen={isQuantityModalOpen}
-        onClose={handleCloseModal}
-        product={selectedProduct}
-      />
-    </div>
+      {/* Quantity Modal */ }
+  <QuantityModal
+    isOpen={isQuantityModalOpen}
+    onClose={handleCloseModal}
+    product={selectedProduct}
+  />
+    </div >
   );
 }

@@ -77,7 +77,9 @@ export async function apiRequest(
     console.log(`Response status: ${res.status}`);
 
     // Log cookies and headers for debugging
-    console.log("Response headers:", Object.fromEntries([...res.headers.entries()]));
+    const resHeaders: Record<string, string> = {};
+    res.headers.forEach((v, k) => resHeaders[k] = v);
+    console.log("Response headers:", resHeaders);
 
     await throwIfResNotOk(res);
 
@@ -98,8 +100,7 @@ export async function apiRequest(
         return jsonResponse;
       } catch (parseError) {
         console.error("Error parsing JSON response:", parseError);
-        // Return empty object if JSON parsing fails
-        return {};
+        throw parseError;
       }
     } else {
       // If it's not JSON (e.g., HTML), return success object
@@ -155,7 +156,9 @@ export const getQueryFn: <T>(options: {
       console.log(`Query response status: ${res.status}`);
 
       // Log headers for debugging
-      console.log("Query response headers:", Object.fromEntries([...res.headers.entries()]));
+      const resHeaders: Record<string, string> = {};
+      res.headers.forEach((v, k) => resHeaders[k] = v);
+      console.log("Query response headers:", resHeaders);
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
         console.log("401 Unauthorized - returning null as specified");
@@ -165,7 +168,7 @@ export const getQueryFn: <T>(options: {
       await throwIfResNotOk(res);
       const data = await res.json();
       console.log("Query response data:", data);
-      return data;
+      return data as any;
     };
 
 export const queryClient = new QueryClient({
