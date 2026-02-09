@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFullImageUrl } from "@/lib/image-utils";
 
 
 interface GeneratedMealKitComponent {
@@ -160,7 +161,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
             {mealKit.components.slice(0, 3).map((component) => (
               <div key={component.id} className="w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm">
                 <img
-                  src={component.product.imageUrl}
+                  src={getFullImageUrl(component.product.imageUrl)}
                   alt={component.product.name}
                   className="w-full h-full object-cover"
                 />
@@ -197,7 +198,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
               <li key={component.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                 <div className="flex items-center">
                   <img
-                    src={component.product.imageUrl}
+                    src={getFullImageUrl(component.product.imageUrl)}
                     alt={component.product.name}
                     className="w-8 h-8 rounded object-cover mr-2"
                   />

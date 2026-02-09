@@ -2,6 +2,8 @@ import { formatPrice } from "@/lib/utils";
 import { CartItem } from "@shared/schema";
 import { useCart } from "@/hooks/use-cart";
 import { useLanguage } from "@/contexts/language-context";
+import { getFullImageUrl } from "@/lib/image-utils";
+
 
 interface CartItemProps {
   item: CartItem;
@@ -31,7 +33,7 @@ export function CartItemComponent({ item }: CartItemProps) {
     <div className="flex items-center py-4 border-b group hover:shadow-sm hover:bg-secondary/10 rounded-lg px-2 transition-all duration-300">
       <div className="relative overflow-hidden rounded-lg">
         <img
-          src={item.imageUrl}
+          src={getFullImageUrl(item.imageUrl)}
           alt={item.name}
           className="w-20 h-20 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105 shadow-sm"
         />

@@ -13,11 +13,29 @@ export function getFullImageUrl(src: string | null | undefined): string {
     return src;
   }
 
-  // 상대 경로인 경우 절대 경로로 변환
-  // Last query parameter addition for cache prevention
+  // API 베이스 URL이 있으면 사용, 아니면 현재 오리진 사용
+  // 상대 경로인 경우 브라우저가 현재 도메인을 기준으로 요청함
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+
+  // 경로 정리: /로 시작하도록 보장
+  const cleanPath = src.startsWith('/') ? src : `/${src}`;
+
+  // URL 인코딩 처리 (공백 및 특수문자 대응)
+  const encodedPath = encodeURI(cleanPath);
+
+  // 캐시 방지용 타임스탬프 추가
   const timestamp = new Date().getTime();
-  const separator = src.includes('?') ? '&' : '?';
-  return `${window.location.origin}${src.startsWith('/') ? '' : '/'}${src}${separator}t=${timestamp}`;
+  const separator = encodedPath.includes('?') ? '&' : '?';
+
+  // apiBaseUrl이 절대 경로인 경우를 위해 결합
+  const fullUrl = `${apiBaseUrl}${encodedPath}${separator}t=${timestamp}`;
+
+  // 절대 URL이 아니면 현재 오리진을 붙여줌 (SSR 대응 보다는 안정성 위함)
+  if (!fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+    return `${window.location.origin}${fullUrl.startsWith('/') ? '' : '/'}${fullUrl}`;
+  }
+
+  return fullUrl;
 }
 
 /**

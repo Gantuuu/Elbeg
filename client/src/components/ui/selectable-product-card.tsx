@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/utils";
 import { Product } from "@shared/schema";
 import { CheckCircle } from "lucide-react";
+import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
+
 
 interface SelectableProductCardProps {
   product: Product;
@@ -59,11 +61,12 @@ export function SelectableProductCard({
       >
         <div className="relative overflow-hidden group">
           <motion.img
-            src={imageUrl}
+            src={getFullImageUrl(imageUrl)}
             alt={name}
             className="w-full h-48 object-cover"
             animate={isHovered ? { scale: 1.1, filter: "brightness(1.1)" } : { scale: 1, filter: "brightness(1)" }}
             transition={{ duration: 0.5 }}
+            onError={(e) => handleImageError(e, imageUrl || undefined)}
           />
           <motion.div
             className="absolute inset-0 bg-gradient-to-t from-[#0e5841]/70 via-transparent to-[#0e5841]/30"

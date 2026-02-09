@@ -11,6 +11,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@shared/schema";
 import { motion } from "framer-motion";
+import { getFullImageUrl } from "@/lib/image-utils";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
@@ -153,7 +154,7 @@ export default function ProductDetails() {
             {/* Product Image - Smaller and Optimized */}
             <div className="relative">
               <img
-                src={product.imageUrl}
+                src={getFullImageUrl(product.imageUrl)}
                 alt={product.name}
                 className="w-full h-auto object-cover aspect-[4/3]"
               />
@@ -259,7 +260,7 @@ export default function ProductDetails() {
                     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                       <div className="h-24 overflow-hidden relative">
                         <img
-                          src={filteredProduct.imageUrl}
+                          src={getFullImageUrl(filteredProduct.imageUrl)}
                           alt={filteredProduct.name}
                           className="w-full h-full object-cover"
                         />

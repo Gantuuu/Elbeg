@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { getFullImageUrl } from "@/lib/image-utils";
+
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -337,7 +339,7 @@ const Column = ({ images, duration, reverse = false }: { images: string[], durat
       {[...images, ...images, ...images, ...images].map((src, index) => (
         <div key={index} className="relative rounded-xl overflow-hidden shadow-2xl w-full aspect-[3/4]">
           <img
-            src={src}
+            src={getFullImageUrl(src)}
             alt="background"
             className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500"
           />

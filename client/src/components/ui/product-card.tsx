@@ -85,15 +85,12 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${id}`}>
         <div className="relative overflow-hidden group">
           <motion.img
-            src={imageUrl ? `${imageUrl}?t=${new Date().getTime()}` : ''}
+            src={getFullImageUrl(imageUrl)}
             alt={name}
             className="w-full h-48 object-cover cursor-pointer transition-all duration-300"
             animate={isHovered ? { scale: 1.05, filter: "brightness(1.05)" } : { scale: 1, filter: "brightness(1)" }}
             transition={{ duration: 0.3 }}
-            onError={(e) => {
-              console.error('Image failed to load:', imageUrl);
-              e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+PHJlY3Qgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjQ1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMzMzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+0JfRg9GA0LDQsyDQsNC70LPQsDwvdGV4dD48cGF0aCBmaWxsPSIjNTU1IiBkPSJNNjUgNzBjMC04LjI4NCA2LjcxNi0xNSAxNS0xNSA4LjI4NCAwIDE1IDYuNzE2IDE1IDE1IDAgOC4yODQtNi43MTYgMTUtMTUgMTUtOC4yODQgMC0xNS02LjcxNi0xNS0xNXptNSAwYzAgNS41MjMgNC40NzcgMTAgMTAgMTAgNS41MjMgMCAxMC00LjQ3NyAxMC0xMCAwLTUuNTIzLTQuNDc3LTEwLTEwLTEwLTUuNTIzIDAtMTAgNC40NzctMTAgMTB6Ii8+PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjQiIGQ9Ik01NSA5MGMwLTEzLjgwNyAxMS4xOTMtMjUgMjUtMjVzMjUgMTEuMTkzIDI1IDI1djEwSDU1VjkweiIvPjwvc3ZnPg==';
-            }}
+            onError={(e) => handleImageError(e, imageUrl || undefined)}
           />
           {/* Discount badge removed */}
         </div>

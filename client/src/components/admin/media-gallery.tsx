@@ -9,6 +9,7 @@ import {
   Button,
   Input,
 } from '@/components/ui';
+import { getFullImageUrl } from '@/lib/image-utils';
 
 interface MediaItem {
   id: number;
@@ -41,7 +42,7 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
     }
   });
 
-  const filteredItems = mediaItems.filter(item => 
+  const filteredItems = mediaItems.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -60,15 +61,15 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
 
     try {
       await apiRequest('POST', '/api/media/upload', formData);
-      
+
       toast({
         title: 'Зураг амжилттай хуулагдлаа',
         description: `${uploadingFile.name} амжилттай хуулагдлаа.`,
       });
-      
+
       // Refresh media list
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
-      
+
       // Reset state
       setUploadingFile(null);
       setIsUploading(false);
@@ -85,12 +86,12 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
   const handleDeleteMedia = async (id: number) => {
     try {
       await apiRequest('DELETE', `/api/media/${id}`);
-      
+
       toast({
         title: 'Зураг устгагдлаа',
         description: 'Зураг амжилттай устгагдлаа.',
       });
-      
+
       // Refresh media list
       queryClient.invalidateQueries({ queryKey: ['/api/media'] });
     } catch (error) {
@@ -116,7 +117,7 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
         <div className="flex items-center">
           <h3 className="text-lg font-medium">Шинэ зураг нэмэх</h3>
           <div className="ml-2">
-            <HelpTooltip 
+            <HelpTooltip
               content={
                 <div>
                   <p className="font-medium mb-1">Шинэ зураг нэмэх:</p>
@@ -217,14 +218,13 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className={`relative group overflow-hidden rounded-md border shadow-sm hover:shadow-md transition-all ${
-                  selectable ? 'cursor-pointer' : ''
-                } ${selectedMediaId === item.id ? 'ring-2 ring-primary' : ''}`}
+                className={`relative group overflow-hidden rounded-md border shadow-sm hover:shadow-md transition-all ${selectable ? 'cursor-pointer' : ''
+                  } ${selectedMediaId === item.id ? 'ring-2 ring-primary' : ''}`}
                 onClick={() => selectable && handleSelect(item)}
               >
                 <div className="aspect-square overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
-                    src={item.url}
+                    src={getFullImageUrl(item.url)}
                     alt={item.name}
                     className="object-cover w-full h-full"
                   />

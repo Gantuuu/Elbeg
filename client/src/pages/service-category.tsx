@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useLocation } from "wouter";
 import { Store, ServiceCategory } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { getFullImageUrl } from "@/lib/image-utils";
 
 // Interface for the route parameters
 interface ServiceCategoryParams {
@@ -93,7 +94,7 @@ export default function ServiceCategoryPage() {
                       <div className="w-full sm:w-40 h-40 bg-gray-100">
                         {store.logoUrl ? (
                           <img
-                            src={store.logoUrl}
+                            src={getFullImageUrl(store.logoUrl)}
                             alt={store.name}
                             className="w-full h-full object-cover"
                           />
