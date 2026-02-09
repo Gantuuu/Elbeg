@@ -234,7 +234,7 @@ app.post('/logout', async (c) => {
 app.get('/user', (c) => {
     const user = c.get('user');
     if (!user) {
-        return c.json({ message: "Үйлдлийг гүйцэтгэхийн тулд нэвтрэх шаардлагатай" }, 401);
+        return c.json(null);
     }
     const { password: _, ...userWithoutPassword } = user;
     return c.json(userWithoutPassword);

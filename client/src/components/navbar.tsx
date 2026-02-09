@@ -43,7 +43,7 @@ export function Navbar() {
     queryKey: ['site-settings', 'site-name'],
     queryFn: async () => {
       try {
-        const res = await apiRequest("GET", "/api/site-settings/site_name");
+        const res = await apiRequest("GET", "/api/settings/site-name");
         return res;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
