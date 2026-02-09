@@ -77,7 +77,6 @@ export default function AuthPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      name: "",
       phone: "",
     },
   });
@@ -265,19 +264,6 @@ export default function AuthPage() {
                           <FormLabel>Нууц үг давтах</FormLabel>
                           <FormControl>
                             <Input type="password" placeholder="Нууц үг давтах" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Нэр (Заавал биш)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Таны нэр" {...field} value={field.value || ""} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
