@@ -64,7 +64,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/categories");
-        return await res.json();
+        return res;
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
