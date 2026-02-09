@@ -82,7 +82,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     category: product?.category || "Үхрийн мах",
     price: product ? product.price.toString() : "",
     imageUrl: product?.imageUrl || "",
-    stock: 999, // 재고 항상 999로 설정 - 2025-05-04
+    stock: 999, // Үлдэгдлийг үргэлж 999-өөр тохируулах - 2025-05-04
     minOrderQuantity: product ? product.minOrderQuantity?.toString() || "1" : "1",
   };
 
@@ -116,10 +116,10 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    logger.custom('⏳', '상품 저장 시작...');
+    logger.custom('⏳', 'Бүтээгдэхүүн хадгалж эхэллээ...');
 
     // Log data to be saved
-    logger.custom('📦', '저장 데이터:', {
+    logger.custom('📦', 'Хадгалах өгөгдөл:', {
       name: data.name,
       price: data.price,
       category: data.category,
@@ -178,7 +178,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ.",
         });
 
-        logger.success('상품 수정 성공:', {
+        logger.success('Бүтээгдэхүүн амжилттай засагдлаа:', {
           productId: product.id,
           changes: productData
         });
@@ -194,7 +194,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           description: "Шинэ бүтээгдэхүүн амжилттай нэмэгдлээ.",
         });
 
-        logger.success('상품 저장 성공:', {
+        logger.success('Бүтээгдэхүүн амжилттай хадгалагдлаа:', {
           // @ts-ignore
           productId: newProduct?.id,
           productName: productData.name,
@@ -221,7 +221,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     } catch (error: any) {
       console.error("Error submitting product form:", error);
 
-      logger.error('상품 저장 실패:', {
+      logger.error('Бүтээгдэхүүн хадгалахад алдаа гарлаа:', {
         formData: data,
         error: error.message,
         details: error
@@ -247,7 +247,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">상품명 *</FormLabel>
+                <FormLabel className="text-sm font-medium">Бүтээгдэхүүний нэр *</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Үхрийн мах"
@@ -268,7 +268,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">설명 *</FormLabel>
+                <FormLabel className="text-sm font-medium">Тайлбар *</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Бүтээгдэхүүний тайлбар"
@@ -368,7 +368,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   />
                 </FormControl>
                 <FormDescription className="text-xs">
-                  기본값: 1kg (4kg부터 주문 가능하게 하려면 4 입력)
+                  Анхдагч: 1кг (4кг-аас дээш захиалах боломжтой болгохын тулд 4 гэж оруулна)
                 </FormDescription>
                 <FormMessage className="text-xs md:text-sm" />
               </FormItem>
@@ -435,7 +435,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   <div className="mt-2 relative">
                     <img
                       src={getFullImageUrl(imagePreview)}
-                      alt="미리보기"
+                      alt="Урьдчилсан харагдац"
                       className="max-h-32 md:max-h-40 w-full rounded-md object-contain bg-gray-100"
                       onError={(e) => handleImageError(e, imagePreview)}
                     />
@@ -462,7 +462,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </div>
           </div>
 
-          {/* 재고 필드 삭제됨 - 2025-05-04 */}
+          {/* Үлдэгдлийн талбар устгагдсан - 2025-05-04 */}
           <div className="hidden">
             <input
               type="hidden"
