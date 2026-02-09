@@ -320,6 +320,7 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm">Чанар баталгааг амлая</p>
               </div>
               {/* Desktop: Grid layout */}
+              <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(Array.isArray(reviewsData) ? reviewsData : []).slice(0, 3).map((review) => (
                   <div
                     key={review.id}
@@ -354,31 +355,31 @@ export default function HomePage() {
                   {(() => {
                     const safeReviews = Array.isArray(reviewsData) ? reviewsData : [];
                     return [...safeReviews.slice(0, 3), ...safeReviews.slice(0, 3)].map((review, index) => (
-                    <div
-                      key={`${review.id}-${index}`}
-                      className="bg-white rounded-lg p-4 shadow-sm flex-shrink-0 w-[280px]"
-                      data-testid={`review-card-mobile-${review.id}-${index}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#0e5841] flex items-center justify-center text-white font-bold flex-shrink-0">
-                          {review.customerName.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-semibold text-sm">{review.customerName}</span>
-                            <div className="flex items-center gap-0.5">
-                              {Array.from({ length: 5 }).map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                                />
-                              ))}
-                            </div>
+                      <div
+                        key={`${review.id}-${index}`}
+                        className="bg-white rounded-lg p-4 shadow-sm flex-shrink-0 w-[280px]"
+                        data-testid={`review-card-mobile-${review.id}-${index}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-[#0e5841] flex items-center justify-center text-white font-bold flex-shrink-0">
+                            {review.customerName.charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-gray-600 text-xs line-clamp-3">{review.content}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-semibold text-sm">{review.customerName}</span>
+                              <div className="flex items-center gap-0.5">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-gray-600 text-xs line-clamp-3">{review.content}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
                     ));
                   })()}
                 </div>
@@ -572,12 +573,12 @@ export default function HomePage() {
         </section>
       </main>
       <Footer />
-      {/* Quantity Modal */ }
-  <QuantityModal
-    isOpen={isQuantityModalOpen}
-    onClose={handleCloseModal}
-    product={selectedProduct}
-  />
+      {/* Quantity Modal */}
+      <QuantityModal
+        isOpen={isQuantityModalOpen}
+        onClose={handleCloseModal}
+        product={selectedProduct}
+      />
     </div >
   );
 }
