@@ -28,11 +28,11 @@ export default function SiteSettingsPage() {
           cache: 'no-cache',
           mode: 'same-origin'
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch site name settings');
         }
-        
+
         return await response.json();
       } catch (error) {
         console.error('Error fetching site name settings:', error);
@@ -51,7 +51,7 @@ export default function SiteSettingsPage() {
   const updateSiteNameMutation = useMutation({
     mutationFn: async (data: { siteName: string }) => {
       const res = await apiRequest('PUT', '/api/settings/site-name', data);
-      return await res.json();
+      return res;
     },
     onSuccess: () => {
       toast({
@@ -87,7 +87,7 @@ export default function SiteSettingsPage() {
     <AdminLayout>
       <div className="container mx-auto py-6">
         <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#FF0033] to-[#0000CC] inline-block px-4 py-2 rounded-lg shadow-glow-sm">Сайтын тохиргоо</h1>
-        
+
         <div className="grid grid-cols-1 gap-6">
           <Card className="border border-[#FF0033]/20 shadow-md hover:shadow-glow-sm transition-all duration-300">
             <CardHeader className="border-b border-[#FF0033]/10">
@@ -111,10 +111,10 @@ export default function SiteSettingsPage() {
                     Энэ нэр нь сайтын дээд хэсэгт логоны оронд харагдах болно
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-2 pt-2">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="bg-gradient-to-r from-[#FF0033] to-[#0000CC] text-white hover:shadow-glow transition-all duration-300"
                     disabled={updateSiteNameMutation.isPending}
                   >
@@ -130,14 +130,14 @@ export default function SiteSettingsPage() {
                       <>Хадгалах</>
                     )}
                   </Button>
-                  
+
                   {updateSiteNameMutation.isSuccess && (
                     <div className="flex items-center text-green-500 bg-green-50 px-3 py-1.5 rounded-md border border-green-200 shadow-sm">
                       <CheckCircle2 className="h-5 w-5 mr-2 text-[#0000CC]" />
                       <span className="text-green-800 font-medium">Хадгалагдлаа</span>
                     </div>
                   )}
-                  
+
                   {updateSiteNameMutation.isError && (
                     <div className="flex items-center bg-red-50 px-3 py-1.5 rounded-md border border-red-200 shadow-sm">
                       <AlertCircle className="h-5 w-5 mr-2 text-[#FF0033]" />

@@ -54,8 +54,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
     mutationFn: async () => {
       const { apiRequest } = await import("@/lib/queryClient");
       const res = await apiRequest("PATCH", `/api/generated-meal-kits/${mealKit.id}`, { isAddedToCart: true });
-      if (!res.ok) throw new Error("Failed to update meal kit");
-      return await res.json();
+      return res;
     },
     onSuccess: () => {
       // Add all products to cart
@@ -92,8 +91,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   const deleteMealKitMutation = useMutation({
     mutationFn: async () => {
       const { apiRequest } = await import("@/lib/queryClient");
-      const res = await apiRequest("DELETE", `/api/generated-meal-kits/${mealKit.id}`);
-      if (!res.ok) throw new Error("Failed to delete meal kit");
+      await apiRequest("DELETE", `/api/generated-meal-kits/${mealKit.id}`);
       return true;
     },
     onSuccess: () => {

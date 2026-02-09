@@ -30,7 +30,7 @@ export function Navbar() {
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/navigation");
-        return await res.json();
+        return res;
       } catch (error) {
         console.error('Error fetching navigation:', error);
         return [];
@@ -44,7 +44,7 @@ export function Navbar() {
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/site-settings/site_name");
-        return await res.json();
+        return res;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
         return { value: "Элбэг мах хүнс" }; // Default site name

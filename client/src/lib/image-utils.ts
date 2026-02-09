@@ -14,9 +14,10 @@ export function getFullImageUrl(src: string | null | undefined): string {
   }
 
   // 상대 경로인 경우 절대 경로로 변환
-  // 마지막 쿼리 파라미터 추가로 캐시 방지
+  // Last query parameter addition for cache prevention
   const timestamp = new Date().getTime();
-  return `${window.location.origin}${src.startsWith('/') ? '' : '/'}${src}?t=${timestamp}`;
+  const separator = src.includes('?') ? '&' : '?';
+  return `${window.location.origin}${src.startsWith('/') ? '' : '/'}${src}${separator}t=${timestamp}`;
 }
 
 /**

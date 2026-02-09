@@ -40,11 +40,11 @@ export default function AdminCategories() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: categories = [], isLoading } = useQuery({
+  const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/categories");
-      return await res.json();
+      return res;
     }
   });
 
@@ -58,8 +58,6 @@ export default function AdminCategories() {
 
     try {
       await apiRequest("DELETE", `/api/categories/${categoryToDelete.id}`);
-
-      if (error) throw error;
 
       toast({
         title: 'Ангилал устгагдлаа',
