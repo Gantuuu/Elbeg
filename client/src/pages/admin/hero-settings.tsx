@@ -175,21 +175,21 @@ export default function HeroSettings() {
       <div className="flex-1 overflow-hidden flex flex-col">
         <AdminHeader
           title="Нүүр хуудас зураг"
-          description="배너 이미지, 제목 및 텍스트를 변경할 수 있습니다"
+          description=""
           icon={<Image className="h-6 w-6" />}
         />
 
         <div className="p-6 overflow-auto flex-1">
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Нүүр хуудасны слайдер (배너 슬라이더)</CardTitle>
+              <CardTitle>Нүүр хуудасны слайдер</CardTitle>
               <Button
                 onClick={() => append({ title: "", text: "", imageUrl: "" })}
                 variant="outline"
                 size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Слайд нэмэх (슬라이드 추가)
+                Слайд нэмэх
               </Button>
             </CardHeader>
             <CardContent>
@@ -206,7 +206,7 @@ export default function HeroSettings() {
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex justify-between items-center w-full pr-4">
                               <span className="font-medium">
-                                Слайд {index + 1}: {form.watch(`slides.${index}.title`) || "(Гарчиггүй - 제목 없음)"}
+                                Слайд {index + 1}: {form.watch(`slides.${index}.title`) || "(Гарчиггүй)"}
                               </span>
                             </div>
                           </AccordionTrigger>
@@ -218,7 +218,7 @@ export default function HeroSettings() {
                                   name={`slides.${index}.title`}
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>Гарчиг (제목)</FormLabel>
+                                      <FormLabel>Гарчиг</FormLabel>
                                       <FormControl>
                                         <Input placeholder="Шинэ, Шинэхэн, Чанартай Мах" {...field} />
                                       </FormControl>
@@ -232,7 +232,7 @@ export default function HeroSettings() {
                                   name={`slides.${index}.text`}
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>Тайлбар (설명)</FormLabel>
+                                      <FormLabel>Тайлбар</FormLabel>
                                       <FormControl>
                                         <Textarea
                                           placeholder="Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна."
@@ -250,7 +250,7 @@ export default function HeroSettings() {
                                   name={`slides.${index}.imageUrl`}
                                   render={({ field }) => (
                                     <FormItem>
-                                      <FormLabel>Зурагны URL (이미지 URL)</FormLabel>
+                                      <FormLabel>Зурагны URL</FormLabel>
                                       <FormControl>
                                         <div className="flex gap-2">
                                           <Input {...field} placeholder="https://example.com/image.jpg" />
@@ -282,7 +282,7 @@ export default function HeroSettings() {
                                     ) : (
                                       <Upload className="h-4 w-4 mr-2" />
                                     )}
-                                    Зураг хуулах (이미지 업로드)
+                                    Зураг хуулах
                                   </Button>
                                 </div>
 
@@ -294,13 +294,13 @@ export default function HeroSettings() {
                                     onClick={() => remove(index)}
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
-                                    Слайд устгах (슬라이드 삭제)
+                                    Слайд устгах
                                   </Button>
                                 )}
                               </div>
 
                               <div className="space-y-4">
-                                <div className="text-sm font-medium">Урьдчилсан харагдац (미리보기)</div>
+                                <div className="text-sm font-medium">Урьдчилсан харагдац</div>
                                 {form.watch(`slides.${index}.imageUrl`) ? (
                                   <div className="relative aspect-video rounded-md overflow-hidden border">
                                     <img
@@ -336,7 +336,7 @@ export default function HeroSettings() {
                         {isSubmitting && (
                           <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>
                         )}
-                        Хадгалах (저장)
+                        Хадгалах
                       </Button>
                     </div>
                   </form>
