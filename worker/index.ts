@@ -67,6 +67,13 @@ app.get('/uploads/*', async (c) => {
         object.writeHttpMetadata(headers);
         headers.set('etag', object.httpEtag);
 
+        // Add Cache-Control for long-term caching (1 year, immutable)
+        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+
+        // Ensure CORS headers are also present on direct R2 responses
+        headers.set('Access-Control-Allow-Origin', '*');
+        headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
         return new Response(object.body as any, {
             headers,
         });

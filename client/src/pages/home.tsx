@@ -179,91 +179,6 @@ export default function HomePage() {
     setLocation(`/products/${productId}`);
   }, [setLocation]);
 
-  // Optimized ProductCard component
-  const ProductCard = memo(({ product }: { product: Product }) => {
-    const fallbackImage = useMemo(() => {
-      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="180" height="128" viewBox="0 0 180 128">
-          <rect width="180" height="128" fill="#f3f4f6"/>
-          <text x="90" y="70" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#6b7280">IMG</text>
-        </svg>
-      `)}`;
-    }, []);
-
-    const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-      const target = e.target as HTMLImageElement;
-
-      // First try with cache-busting timestamp
-      if (!target.src.includes('?t=')) {
-        target.src = `${product.imageUrl}?t=${Date.now()}`;
-        return;
-      }
-
-      // If cache-busting failed, use gradient fallback
-      if (!target.src.includes('data:image/svg')) {
-        const cleanProductName = product.name.replace(/[^\w\s]/g, '');
-        target.src = `data:image/svg+xml;base64,${btoa(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="180" height="128" viewBox="0 0 180 128">
-            <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#0e5841;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#0e5841;stop-opacity:0.8" />
-              </linearGradient>
-            </defs>
-            <rect width="180" height="128" fill="url(#grad)"/>
-            <text x="90" y="55" font-family="Arial" font-size="11" text-anchor="middle" fill="white" font-weight="bold">${cleanProductName}</text>
-            <text x="90" y="75" font-family="Arial" font-size="9" text-anchor="middle" fill="white">Image Loading</text>
-          </svg>
-        `)}`;
-      }
-    }, [product.imageUrl, product.name]);
-
-    const price = useMemo(() => parseFloat(product.price.toString()), [product.price]);
-
-    return (
-      <div
-        className="flex-shrink-0 w-[150px] md:w-[180px]"
-        onClick={() => handleProductClick(product.id)}
-      >
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-          <div className="h-32 overflow-hidden relative">
-            <img
-              src={getFullImageUrl(product.imageUrl)}
-              alt={product.name}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              decoding="async"
-              onError={handleImageError}
-              sizes="(max-width: 768px) 150px, 180px"
-            />
-          </div>
-          <div className="p-2 space-y-2">
-            <h3 className="font-bold text-xs truncate leading-tight">{getLocalizedProductName(product, language)}</h3>
-            <p className="text-[9px] text-gray-500 h-4 overflow-hidden leading-tight">
-              {getLocalizedProductDescription(product, language)}
-            </p>
-            <div className="space-y-1">
-              <div className="text-center">
-                <span className="font-bold text-xs text-[#0e5841]">
-                  {price.toLocaleString()}₩
-                </span>
-              </div>
-              <button
-                className="w-full bg-[#0e5841] hover:brightness-105 text-white text-[9px] px-1 py-1.5 rounded-md font-bold"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleAddToCartClick(product);
-                }}
-              >
-                {t.addToCart}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  });
 
   // Check for upcoming non-delivery days to show warning banner
   const upcomingNonDeliveryDays = useMemo(() => {
@@ -468,7 +383,7 @@ export default function HomePage() {
                       >
                         <div className="aspect-square relative overflow-hidden bg-gray-50">
                           <img
-                            src={getFullImageUrl(product.imageUrl)}
+                            src={getFullImageUrl(product.thumbnailUrl || product.imageUrl)}
                             alt={getLocalizedProductName(product, language)}
                             className="w-full h-full object-cover transition-opacity duration-300"
                             loading="lazy"

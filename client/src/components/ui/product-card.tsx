@@ -85,12 +85,13 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${id}`}>
         <div className="relative overflow-hidden group">
           <motion.img
-            src={getFullImageUrl(imageUrl)}
+            src={getFullImageUrl(product.thumbnailUrl || imageUrl)}
             alt={name}
             className="w-full h-48 object-cover cursor-pointer transition-all duration-300"
+            loading="lazy"
             animate={isHovered ? { scale: 1.05, filter: "brightness(1.05)" } : { scale: 1, filter: "brightness(1)" }}
             transition={{ duration: 0.3 }}
-            onError={(e) => handleImageError(e, imageUrl || undefined)}
+            onError={(e) => handleImageError(e, (product.thumbnailUrl || imageUrl) || undefined)}
           />
           {/* Discount badge removed */}
         </div>

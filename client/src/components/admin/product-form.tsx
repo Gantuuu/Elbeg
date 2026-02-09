@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "lucide-react";
-import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
+import { getFullImageUrl, handleImageError, compressImage, generateThumbnail, uploadMedia } from "@/lib/image-utils";
 import { logger } from "@/lib/logger";
 
 
@@ -39,12 +39,13 @@ interface ProductFormProps {
 
 // Extend the product schema for form validation with multilingual fields
 const productFormSchema = insertProductSchema.extend({
-  price: z.string().min(1, "Үнэ оруулна уу"),
+  price: z.string().min(1, "Үнэ ору울на уу"),
   minOrderQuantity: z.string().min(1, "Хамгийн бага захиалгын хэмжээ оруулна уу").default("1"),
   nameRu: z.string().optional(),
   nameEn: z.string().optional(),
   descriptionRu: z.string().optional(),
   descriptionEn: z.string().optional(),
+  thumbnailUrl: z.string().optional().nullable(),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -133,24 +134,38 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       }
 
       let imageUrl = data.imageUrl;
+      let thumbnailUrl = product?.thumbnailUrl || null;
 
       // Upload image if selected
       if (selectedFile) {
         try {
-          const formData = new FormData();
-          formData.append('file', selectedFile);
+          logger.custom('🖼️', 'Compressing and generating thumbnail...');
 
-          const response = await fetch('/api/media', { // We should have an upload endpoint or use product POST
-            method: 'POST',
-            body: formData,
-          });
+          // 1. Compress original to WebP
+          const compressedFile = await compressImage(selectedFile, 1200); // 1200px is enough for product details
 
-          if (!response.ok) throw new Error("Image upload failed");
-          const uploadData = await response.json() as { url: string };
-          imageUrl = uploadData.url;
+          // 2. Generate thumbnail WebP
+          const thumbnailFile = await generateThumbnail(selectedFile, 300);
+
+          logger.custom('📤', 'Uploading images...');
+
+          // 3. Upload both
+          const [imageResult, thumbnailResult] = await Promise.all([
+            uploadMedia(compressedFile),
+            uploadMedia(thumbnailFile)
+          ]);
+
+          imageUrl = imageResult.url;
+          thumbnailUrl = thumbnailResult.url;
+
+          logger.info('이미지 업로드 완료:', { imageUrl, thumbnailUrl });
         } catch (uploadError) {
-          console.error("Image upload failed:", uploadError);
-          // Fallback: try direct upload if needed, but Worker is preferred
+          console.error("Image processing/upload failed:", uploadError);
+          toast({
+            title: "Зураг оруулахад алдаа гарлаа",
+            description: "Гэхдээ бүтээгдэхүүнийг хадгалахыг оролдож байна.",
+            variant: "destructive",
+          });
         }
       }
 
@@ -167,6 +182,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         stock: data.stock || 999,
         minOrderQuantity: parseFloat(data.minOrderQuantity || "1"),
         imageUrl: imageUrl || "",
+        thumbnailUrl: thumbnailUrl,
       };
 
       if (product) {

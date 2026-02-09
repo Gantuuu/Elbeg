@@ -82,6 +82,7 @@ app.post('/', requireAdmin, async (c) => {
             price: parseFloat(parsedData.price || body['price'] as string || '0'),
             category: parsedData.category || body['category'] as string,
             imageUrl: imageUrl || parsedData.imageUrl || parsedData.image_url || body['imageUrl'] as string || body['image_url'] as string || '',
+            thumbnailUrl: parsedData.thumbnailUrl || parsedData.thumbnail_url || body['thumbnailUrl'] as string || body['thumbnail_url'] as string || null,
             stock: parseInt(parsedData.stock || body['stock'] as string || '999'),
             minOrderQuantity: parseFloat(parsedData.minOrderQuantity || parsedData.min_order_quantity || body['minOrderQuantity'] as string || body['min_order_quantity'] as string || '1'),
             storeId: parsedData.storeId ? parseInt(parsedData.storeId) : (parsedData.store_id ? parseInt(parsedData.store_id) : (body['storeId'] ? parseInt(body['storeId'] as string) : (body['store_id'] ? parseInt(body['store_id'] as string) : undefined)))
@@ -135,6 +136,7 @@ app.put('/:id', requireAdmin, async (c) => {
         descriptionEn: parsedData.descriptionEn || body['descriptionEn'] || '',
         category: parsedData.category || body['category'],
         imageUrl: parsedData.imageUrl || body['imageUrl'] || '',
+        thumbnailUrl: parsedData.thumbnailUrl || body['thumbnailUrl'] || null,
     };
 
     // Clean up types

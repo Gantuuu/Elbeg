@@ -9,7 +9,8 @@ import {
   Button,
   Input,
 } from '@/components/ui';
-import { getFullImageUrl } from '@/lib/image-utils';
+import { getFullImageUrl, compressImage } from '@/lib/image-utils';
+import { logger } from '@/lib/logger';
 
 interface MediaItem {
   id: number;
@@ -60,7 +61,13 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
     formData.append('file', uploadingFile);
 
     try {
-      await apiRequest('POST', '/api/media/upload', formData);
+      logger.custom('🖼️', 'Compressing image before gallery upload...');
+      const compressedFile = await compressImage(uploadingFile, 1600);
+
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', compressedFile);
+
+      await apiRequest('POST', '/api/media', uploadFormData);
 
       toast({
         title: 'Зураг амжилттай хуулагдлаа',

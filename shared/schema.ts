@@ -20,6 +20,7 @@ export const products = sqliteTable("products", {
   category: text("category").notNull(),
   price: real("price").notNull(),
   imageUrl: text("image_url").notNull(),
+  thumbnailUrl: text("thumbnail_url"), // Added thumbnail URL for optimization
   stock: integer("stock").notNull().default(0),
   minOrderQuantity: real("min_order_quantity").default(1), // Minimum order quantity in kg
   storeId: integer("store_id"), // Added store ID reference

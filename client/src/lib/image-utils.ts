@@ -1,3 +1,4 @@
+
 /**
  * 이미지 URL을 올바른 형식으로 변환하는 유틸리티 함수
  * - 상대 경로를 절대 경로로 변환
@@ -23,12 +24,8 @@ export function getFullImageUrl(src: string | null | undefined): string {
   // URL 인코딩 처리 (공백 및 특수문자 대응)
   const encodedPath = encodeURI(cleanPath);
 
-  // 캐시 방지용 타임스탬프 추가
-  const timestamp = new Date().getTime();
-  const separator = encodedPath.includes('?') ? '&' : '?';
-
   // apiBaseUrl이 절대 경로인 경우를 위해 결합
-  const fullUrl = `${apiBaseUrl}${encodedPath}${separator}t=${timestamp}`;
+  const fullUrl = `${apiBaseUrl}${encodedPath}`;
 
   // 절대 URL이 아니면 현재 오리진을 붙여줌 (SSR 대응 보다는 안정성 위함)
   if (!fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
@@ -84,7 +81,7 @@ export function getCategoryFallbackImage(name: string, category?: string): strin
 
   // 제품명이 너무 길면 자르기
   const displayName = name.length > 20 ? name.substring(0, 20) + '...' : name;
-  const displayCategory = category || "Бүтээгдэхүүн"; // 카테고리가 없으면 '제품'으로 표시
+  const displayCategory = category || "Бүтээ그дэхүүн"; // 카테고리가 없으면 '제품'으로 표시
 
   // Base64 인코딩 전에 SVG 문자열 생성
   const svgContent = `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
@@ -160,8 +157,9 @@ export async function compressImage(file: File, maxWidth = 1920, quality = 0.8):
               return;
             }
 
-            // Create new File from Blob
-            const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+            // Create new File from Blob with .webp extension
+            const fileName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+            const newFile = new File([blob], fileName, {
               type: 'image/webp',
               lastModified: Date.now(),
             });
@@ -176,4 +174,42 @@ export async function compressImage(file: File, maxWidth = 1920, quality = 0.8):
     };
     reader.onerror = (error) => reject(error);
   });
+}
+
+/**
+ * Generates a thumbnail version of an image
+ * @param file Original file
+ * @param size Thumbnail size (default: 300px)
+ * @returns Thumbnail File object
+ */
+export async function generateThumbnail(file: File, size = 300): Promise<File> {
+  return compressImage(file, size, 0.7);
+}
+
+/**
+ * Uploads a file to the media library
+ * @param file File to upload
+ * @returns Promise with uploaded media item data
+ */
+export async function uploadMedia(file: File): Promise<{ url: string; id?: number }> {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const response = await fetch(`${apiBaseUrl}/api/media`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw error;
+  }
 }

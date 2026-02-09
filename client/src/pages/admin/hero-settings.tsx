@@ -22,7 +22,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Image, Plus, Trash2, Upload } from "lucide-react";
-import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
+import { getFullImageUrl, handleImageError, compressImage } from "@/lib/image-utils";
+import { logger } from "@/lib/logger";
 
 // Create form schema
 const slideSchema = z.object({
@@ -106,8 +107,12 @@ export default function HeroSettings() {
     setUploadingIndex(index);
 
     try {
+      logger.custom('🖼️', 'Compressing hero image...');
+      // Banner images can be large, compress to 1920px max width WebP
+      const compressedFile = await compressImage(file, 1920, 0.82);
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
 
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
       const response = await fetch(`${apiBaseUrl}/api/media`, {
