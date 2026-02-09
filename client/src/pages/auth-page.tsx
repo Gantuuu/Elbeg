@@ -30,19 +30,17 @@ export default function AuthPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const IMAGES = loginImagesData?.images || [
-    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+1",
-    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+2",
-    "https://placehold.co/600x800/f4a261/ffffff?text=Image+3",
-    "https://placehold.co/600x800/e76f51/ffffff?text=Image+4",
-    "https://placehold.co/600x800/264653/ffffff?text=Image+5",
-    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+6",
-    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+7",
-    "https://placehold.co/600x800/f4a261/ffffff?text=Image+8",
-    "https://placehold.co/600x800/e76f51/ffffff?text=Image+9",
-    "https://placehold.co/600x800/264653/ffffff?text=Image+10",
-    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+11",
-    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+12",
+  const IMAGES = (loginImagesData?.images && loginImagesData.images.length > 0) ? loginImagesData.images : [
+    "/uploads/제목을_입력해주세요_ (2)/001.png",
+    "/uploads/제목을_입력해주세요_ (2)/002.png",
+    "/uploads/제목을_입력해주세요_ (2)/003.png",
+    "/uploads/제목을_입력해주세요_ (2)/004.png",
+    "/uploads/제목을_입력해주세요_ (2)/005.png",
+    "/uploads/제목을_입력해주세요_ (2)/006.png",
+    "/uploads/제목을_입력해주세요_ (2)/007.png",
+    "/uploads/제목을_입력해주세요_ (2)/008.png",
+    "/uploads/제목을_입력해주세요_ (2)/009.png",
+    "/uploads/제목을_입력해주세요_ (2)/010.png",
   ];
 
   // Logic for columns based on current images
