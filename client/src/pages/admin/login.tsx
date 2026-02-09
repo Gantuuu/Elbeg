@@ -70,12 +70,12 @@ export default function AdminLogin() {
 
     try {
       // API Login
-      const res = await apiRequest("POST", "/api/login", {
+      const user = await apiRequest("POST", "/api/login", {
         username: data.email, // Use email as username for now or update API to accept email
         password: data.password,
       });
 
-      const user = await res.json();
+      // apiRequest handles response parsing, so 'user' is already the data
 
       toast({
         title: "Амжилттай нэвтэрлээ",
