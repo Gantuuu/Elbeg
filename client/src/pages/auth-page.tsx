@@ -50,12 +50,7 @@ export default function AuthPage() {
   const COLUMN_2 = IMAGES.slice(Math.ceil(IMAGES.length / 3), Math.ceil(IMAGES.length * 2 / 3));
   const COLUMN_3 = IMAGES.slice(Math.ceil(IMAGES.length * 2 / 3));
 
-  // Redirect if already logged in
-  if (user) {
-    return <Redirect to="/" />;
-  }
 
-  // Handle URL query params to switch tabs
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
@@ -90,6 +85,11 @@ export default function AuthPage() {
   const onRegisterSubmit = async (data: z.infer<typeof signupSchema>) => {
     registerMutation.mutate(data);
   };
+
+  // Redirect if already logged in
+  if (user) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-black flex flex-col items-center justify-center">
