@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Hero } from "@/components/sections/hero";
@@ -37,12 +37,8 @@ export default function HomePage() {
   const { data: serviceCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['service-categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('service_categories')
-        .select('*')
-        .eq('is_active', true);
-      if (error) throw error;
-      return data;
+      const data = await apiRequest('GET', '/api/service-categories');
+      return data.filter((cat: any) => cat.isActive);
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -51,9 +47,7 @@ export default function HomePage() {
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      return await response.json() as Product[];
+      return await apiRequest('GET', '/api/products');
     },
     staleTime: 2 * 60 * 1000,
   });
@@ -62,15 +56,7 @@ export default function HomePage() {
   const { data: deliverySettings } = useQuery<DeliverySettings>({
     queryKey: ['delivery-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('delivery_settings').select('*').single();
-      if (error) throw error;
-
-      // Map snake_case from Supabase to camelCase for the frontend
-      return {
-        cutoffHour: data.cutoff_hour,
-        cutoffMinute: data.cutoff_minute,
-        processingDays: data.processing_days
-      } as DeliverySettings;
+      return await apiRequest('GET', '/api/delivery-settings');
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -78,9 +64,7 @@ export default function HomePage() {
   const { data: nonDeliveryDays = [] } = useQuery<NonDeliveryDay[]>({
     queryKey: ['non-delivery-days'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('non_delivery_days').select('*');
-      if (error) throw error;
-      return data as NonDeliveryDay[];
+      return await apiRequest('GET', '/api/non-delivery-days');
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -89,9 +73,7 @@ export default function HomePage() {
   const { data: reviewsData = [] } = useQuery<Review[]>({
     queryKey: ['reviews'],
     queryFn: async () => {
-      const response = await fetch('/api/reviews');
-      if (!response.ok) throw new Error('Failed to fetch reviews');
-      return await response.json() as Review[];
+      return await apiRequest('GET', '/api/reviews');
     },
     staleTime: 5 * 60 * 1000,
   });

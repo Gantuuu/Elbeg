@@ -1,3 +1,5 @@
+import { D1Database, R2Bucket } from '@cloudflare/workers-types';
+
 export type Bindings = {
     DB: D1Database;
     BUCKET: R2Bucket;
@@ -6,10 +8,4 @@ export type Bindings = {
     GOOGLE_CLIENT_SECRET?: string;
     BASE_URL?: string;
     ASSETS: Fetcher;
-    // Supabase
-    SUPABASE_URL?: string;
-    SUPABASE_ANON_KEY?: string;
-    SUPABASE_SERVICE_ROLE_KEY?: string;
-    VITE_SUPABASE_URL?: string;
-    VITE_SUPABASE_ANON_KEY?: string;
 };

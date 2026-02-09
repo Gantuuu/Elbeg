@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Product, CartItem } from "@shared/schema";
 import { formatPrice } from "@/lib/utils";
 import { Loader2, ShoppingCart, CheckCircle2, PackageOpen, ChefHat } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function MealKitGenerator() {
   const [location, setLocation] = useLocation();
@@ -30,11 +30,10 @@ export default function MealKitGenerator() {
 
   // Fetch all meat products
   const { data: products, isLoading, error } = useQuery<Product[]>({
-    queryKey: ["products"],
+    queryKey: ["/api/products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      return data as Product[];
+      const data = await apiRequest("GET", "/api/products");
+      return data;
     },
     staleTime: 1000 * 30, // 30 seconds
   });
@@ -45,7 +44,7 @@ export default function MealKitGenerator() {
     const quantity = quantities[productId] || 1;
 
     if (product) {
-      return total + (parseFloat(product.price.toString()) * quantity);
+      return total + (Number(product.price) * quantity);
     }
     return total;
   }, 0);
@@ -117,37 +116,13 @@ export default function MealKitGenerator() {
   // Generate meal kit mutation
   const generateMealKitMutation = useMutation({
     mutationFn: async () => {
-      // 1. Create Meal Kit
-      const { data: mealKit, error: mealKitError } = await supabase
-        .from('generated_meal_kits')
-        .insert([{
-          name: mealKitName,
-          total_price: totalPrice,
-          user_id: user?.id ? parseInt(user.id.toString()) : null,
-          is_added_to_cart: false
-        }])
-        .select()
-        .single();
+      const payload = {
+        name: mealKitName,
+        productIds: selectedProducts,
+        quantities: quantities
+      };
 
-      if (mealKitError) throw mealKitError;
-
-      // 2. Create Components
-      const components = selectedProducts.map(productId => {
-        const product = products?.find(p => p.id === productId);
-        return {
-          generated_meal_kit_id: mealKit.id,
-          product_id: productId,
-          quantity: quantities[productId] || 1,
-          price: product ? parseFloat(product.price.toString()) : 0
-        };
-      });
-
-      const { error: componentsError } = await supabase
-        .from('generated_meal_kit_components')
-        .insert(components);
-
-      if (componentsError) throw componentsError;
-
+      const mealKit = await apiRequest("POST", "/api/generated-meal-kits/generate", payload);
       return mealKit;
     },
     onSuccess: (data) => {
@@ -156,7 +131,7 @@ export default function MealKitGenerator() {
         description: `"${data.name}" багцыг амжилттай үүсгэлээ.`,
       });
 
-      queryClient.invalidateQueries({ queryKey: ["generated-meal-kits"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/generated-meal-kits"] });
       setStep(3);
     },
     onError: (error: Error) => {
@@ -172,14 +147,9 @@ export default function MealKitGenerator() {
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (generatedMealKitId: number) => {
-      const { data, error } = await supabase
-        .from('generated_meal_kits')
-        .update({ is_added_to_cart: true })
-        .eq('id', generatedMealKitId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await apiRequest("PATCH", `/api/generated-meal-kits/${generatedMealKitId}`, {
+        is_added_to_cart: true
+      });
       return data;
     },
     onSuccess: (data) => {

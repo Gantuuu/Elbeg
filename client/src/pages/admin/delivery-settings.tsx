@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+
 import { NonDeliveryDay, DeliverySetting } from "@shared/schema";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths } from "date-fns";
 import { mn } from "date-fns/locale";
@@ -58,16 +58,11 @@ export default function DeliverySettings() {
   const { data: nonDeliveryDays = [], isLoading: isLoadingDays } = useQuery<NonDeliveryDay[]>({
     queryKey: ["non-delivery-days"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('non_delivery_days')
-        .select('*');
-      if (error) throw error;
-      return data.map((day: any) => ({
-        id: day.id,
+      const days = await apiRequest("GET", "/api/non-delivery-days");
+      return days.map((day: any) => ({
+        ...day,
         date: new Date(day.date),
-        reason: day.reason,
-        isRecurringYearly: day.is_recurring_yearly,
-        createdAt: day.created_at ? new Date(day.created_at) : null
+        createdAt: day.createdAt ? new Date(day.createdAt) : null
       }));
     }
   });
@@ -75,30 +70,10 @@ export default function DeliverySettings() {
   const { data: deliverySettings, isLoading: isLoadingSettings } = useQuery<DeliverySetting>({
     queryKey: ["delivery-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('delivery_settings')
-        .select('*')
-        .single();
-
-      if (error) {
-        // If no settings, return default (can happen if none inserted yet)
-        if (error.code === 'PGRST116') {
-          return {
-            cutoffHour: 18,
-            cutoffMinute: 30,
-            processingDays: 1,
-            id: 0,
-            updatedAt: null
-          };
-        }
-        throw error;
-      }
+      const settings = await apiRequest("GET", "/api/delivery-settings");
       return {
-        id: data.id,
-        cutoffHour: data.cutoff_hour,
-        cutoffMinute: data.cutoff_minute,
-        processingDays: data.processing_days,
-        updatedAt: data.updated_at ? new Date(data.updated_at) : null
+        ...settings,
+        updatedAt: settings.updatedAt ? new Date(settings.updatedAt) : null
       };
     }
   });
@@ -113,14 +88,7 @@ export default function DeliverySettings() {
 
   const createNonDeliveryDayMutation = useMutation({
     mutationFn: async (data: { date: string; reason: string; isRecurringYearly: boolean }) => {
-      const { error } = await supabase
-        .from('non_delivery_days')
-        .insert([{
-          date: data.date,
-          reason: data.reason,
-          is_recurring_yearly: data.isRecurringYearly
-        }]);
-      if (error) throw error;
+      await apiRequest("POST", "/api/non-delivery-days", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["non-delivery-days"] });
@@ -144,11 +112,7 @@ export default function DeliverySettings() {
 
   const deleteNonDeliveryDayMutation = useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await supabase
-        .from('non_delivery_days')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
+      await apiRequest("DELETE", `/api/non-delivery-days/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["non-delivery-days"] });
@@ -169,15 +133,7 @@ export default function DeliverySettings() {
 
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: { cutoffHour: number; cutoffMinute: number; processingDays: number }) => {
-      const { error } = await supabase
-        .from('delivery_settings')
-        .upsert({
-          id: 1, // Assume single row with ID 1
-          cutoff_hour: data.cutoffHour,
-          cutoff_minute: data.cutoffMinute,
-          processing_days: data.processingDays
-        });
-      if (error) throw error;
+      await apiRequest("PUT", "/api/delivery-settings", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["delivery-settings"] });

@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { Bindings } from './types';
 import { authMiddleware } from './middleware';
+import { D1Storage } from './storage';
+import { getDb } from './db';
 
 import authApp from './api/auth';
 import productsApp from './api/products';
@@ -10,14 +12,24 @@ import shopApp from './api/shop';
 import ordersApp from './api/orders';
 import cmsApp from './api/cms';
 
-const app = new Hono<{ Bindings: Bindings }>();
+import { IStorage } from './storage';
+
+type Env = {
+    Bindings: Bindings;
+    Variables: {
+        storage: IStorage;
+    };
+};
+
+const app = new Hono<Env>();
 
 // Global middleware
 app.use('*', async (c, next) => {
     // We need to initialize storage here to have access to DB and BUCKET from env
     if (!c.get('storage')) {
         const db = getDb(c.env.DB);
-        const storage = new D1Storage(db, c.env.BUCKET);
+        // Cast BUCKET to any to avoid type mismatch between different R2Bucket definitions
+        const storage = new D1Storage(db, c.env.BUCKET as any);
         c.set('storage', storage);
     }
     await next();

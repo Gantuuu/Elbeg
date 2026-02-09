@@ -62,15 +62,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     queryKey: ['categories'],
     queryFn: async () => {
       try {
-        const { supabase } = await import("@/lib/supabase");
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('order', { ascending: true });
-
-        if (error) throw error;
-        return data;
+        const res = await apiRequest("GET", "/api/categories");
+        return await res.json();
       } catch (error) {
         console.error('Error fetching categories:', error);
         return [];

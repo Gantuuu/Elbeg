@@ -3,7 +3,6 @@ import { getSignedCookie } from 'hono/cookie';
 import { Bindings } from './types';
 import { User, UserWithNullablePhone } from '@shared/schema';
 import { IStorage } from './storage';
-import { SupabaseStorage } from './supabase-storage';
 // import { getDb } from './db';
 // import { D1Storage } from './storage';
 
@@ -16,27 +15,18 @@ type Env = {
 };
 
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
-    // Initialize storage with Supabase
-    // const db = getDb(c.env.DB);
-    // const storage = new D1Storage(db);
+    // Storage is already initialized in worker/index.ts
+    const storage = c.get('storage');
 
-    // Fallback logic for VITE_ env vars vs standard
-    const supabaseUrl = c.env.VITE_SUPABASE_URL || c.env.SUPABASE_URL;
-    const supabaseKey = c.env.VITE_SUPABASE_ANON_KEY || c.env.SUPABASE_ANON_KEY;
-    const supabaseServiceKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-        console.error("Missing Supabase credentials in middleware");
+    if (!storage) {
+        console.error("Storage not initialized in middleware");
         c.set('user', null);
         await next();
         return;
     }
 
-    const storage = new SupabaseStorage(supabaseUrl, supabaseKey, supabaseServiceKey);
-    c.set('storage', storage);
-
     // Check for session cookie
-    const sessionSecret = c.env.SESSION_SECRET || 'gerinmah-secret-key'; // Fallback for dev
+    const sessionSecret = c.env.SESSION_SECRET || 'gerinmah-secret-key';
     const userIdCookie = await getSignedCookie(c, sessionSecret, 'auth_user_id');
 
     if (userIdCookie) {

@@ -24,7 +24,7 @@ export default function Contact() {
       {/* Image Section */}
       <div className="flex-1 bg-white">
         <img
-          src="https://hwwtcfkiqzpultolyewm.supabase.co/storage/v1/object/public/media/overview.png"
+          src="https://placehold.co/1200x400?text=Overview"
           alt="Overview"
           className="w-full h-auto"
         />

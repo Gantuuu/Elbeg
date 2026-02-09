@@ -15,6 +15,18 @@ type Env = {
 const app = new Hono<Env>();
 
 // Orders
+app.get('/orders/pending-count', requireAdmin, async (c) => {
+    const storage = c.get('storage');
+    const count = await storage.getPendingOrdersCount();
+    return c.json({ count });
+});
+
+app.get('/stats', requireAdmin, async (c) => {
+    const storage = c.get('storage');
+    const stats = await storage.getStats();
+    return c.json(stats);
+});
+
 app.get('/orders', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const startDateStr = c.req.query('startDate');

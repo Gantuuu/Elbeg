@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+
 
 interface GeneratedMealKitComponent {
   id: number;
@@ -52,15 +52,10 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   // Add meal kit to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase
-        .from('generated_meal_kits')
-        .update({ is_added_to_cart: true })
-        .eq('id', mealKit.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const { apiRequest } = await import("@/lib/queryClient");
+      const res = await apiRequest("PATCH", `/api/generated-meal-kits/${mealKit.id}`, { isAddedToCart: true });
+      if (!res.ok) throw new Error("Failed to update meal kit");
+      return await res.json();
     },
     onSuccess: () => {
       // Add all products to cart
@@ -96,12 +91,9 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   // Delete meal kit mutation
   const deleteMealKitMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('generated_meal_kits')
-        .delete()
-        .eq('id', mealKit.id);
-
-      if (error) throw error;
+      const { apiRequest } = await import("@/lib/queryClient");
+      const res = await apiRequest("DELETE", `/api/generated-meal-kits/${mealKit.id}`);
+      if (!res.ok) throw new Error("Failed to delete meal kit");
       return true;
     },
     onSuccess: () => {

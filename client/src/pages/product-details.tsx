@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -28,9 +28,7 @@ export default function ProductDetails() {
   } = useQuery<Product>({
     queryKey: [`products`, numericId],
     queryFn: async () => {
-      const response = await fetch(`/api/products/${numericId}`);
-      if (!response.ok) throw new Error('Failed to fetch product');
-      return await response.json() as Product;
+      return await apiRequest('GET', `/api/products/${numericId}`);
     },
     enabled: !isNaN(numericId),
   });
@@ -42,9 +40,7 @@ export default function ProductDetails() {
   } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      return await response.json() as Product[];
+      return await apiRequest('GET', '/api/products');
     },
     enabled: !!product,
   });

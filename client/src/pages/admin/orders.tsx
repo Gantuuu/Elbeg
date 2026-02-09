@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+
 import { useLanguage } from "@/contexts/language-context";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
@@ -110,60 +112,19 @@ export default function AdminOrders() {
       formatDateForQuery(endDate)
     ],
     queryFn: async () => {
-      const { supabase } = await import("@/lib/supabase");
-      let query = supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items (
-            *,
-            product:products (*)
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (startDate) {
-        query = query.gte('created_at', startDate.toISOString());
-      }
-
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate.toISOString());
       if (endDate) {
         // Add one day to end date to include the whole day
         const nextDay = new Date(endDate);
         nextDay.setDate(nextDay.getDate() + 1);
-        query = query.lt('created_at', nextDay.toISOString());
+        params.append('endDate', nextDay.toISOString());
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const queryString = params.toString();
+      const url = `/api/orders${queryString ? `?${queryString}` : ''}`;
 
-      // Map to match Order interface
-      return data.map((order: any) => ({
-        id: order.id,
-        customerName: order.customer_name,
-        customerEmail: order.customer_email,
-        customerPhone: order.customer_phone,
-        customerAddress: order.customer_address,
-        totalAmount: order.total_amount,
-        status: order.status,
-        createdAt: order.created_at,
-        userId: order.user_id,
-        items: (order.items || []).map((item: any) => ({
-          id: item.id,
-          orderId: item.order_id,
-          productId: item.product_id,
-          quantity: item.quantity,
-          price: item.price,
-          product: {
-            id: item.product?.id,
-            name: item.product?.name,
-            description: item.product?.description,
-            category: item.product?.category,
-            price: item.product?.price,
-            imageUrl: item.product?.image_url,
-            stock: item.product?.stock
-          }
-        }))
-      }));
+      return await apiRequest('GET', url);
     },
     refetchInterval: 15000, // Refresh every 15 seconds for orders page
     refetchOnWindowFocus: true, // Refetch when window gains focus

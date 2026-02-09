@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { UserIcon, ShoppingCartIcon, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { supabase } from "@/lib/supabase";
+
 
 // Site name interface
 interface SiteNameSettings {
@@ -29,15 +29,8 @@ export function Navbar() {
     queryKey: ['navigation'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('navigation_items')
-          .select('*')
-          .eq('is_active', true)
-          .is('parent_id', null)
-          .order('order', { ascending: true });
-
-        if (error) throw error;
-        return data || [];
+        const res = await apiRequest("GET", "/api/navigation");
+        return await res.json();
       } catch (error) {
         console.error('Error fetching navigation:', error);
         return [];
@@ -50,14 +43,8 @@ export function Navbar() {
     queryKey: ['site-settings', 'site-name'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('value')
-          .eq('key', 'site_name')
-          .single();
-
-        if (error) throw error;
-        return data as SiteNameSettings;
+        const res = await apiRequest("GET", "/api/site-settings/site_name");
+        return await res.json();
       } catch (error) {
         console.error('Error fetching site name settings:', error);
         return { value: "Элбэг мах хүнс" }; // Default site name

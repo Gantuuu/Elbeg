@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -19,11 +19,10 @@ export default function ProductsPage() {
 
   // Fetch products
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["products"],
+    queryKey: ["/api/products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      return data as Product[];
+      const data = await apiRequest("GET", "/api/products");
+      return data;
     },
   });
 
@@ -49,9 +48,9 @@ export default function ProductsPage() {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
-          return parseFloat(a.price) - parseFloat(b.price);
+          return a.price - b.price;
         case "price-high":
-          return parseFloat(b.price) - parseFloat(a.price);
+          return b.price - a.price;
         case "name":
         default:
           return a.name.localeCompare(b.name);

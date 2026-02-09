@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
@@ -9,7 +9,6 @@ import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { z } from "zod";
-import { supabase } from "../lib/supabase";
 
 // Types for our context
 type AuthContextType = {
@@ -34,20 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // Listen for auth state changes
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      } else if (event === 'SIGNED_OUT') {
-        queryClient.setQueryData(["/api/user"], null);
-        queryClient.clear();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   // Query to fetch the current user
   const {
     data: user,
@@ -56,103 +41,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: async () => {
-      // CHECK FOR LOCAL ADMIN BYPASS FIRST (DEV ONLY)
-      if (import.meta.env.DEV) {
-        const isLocalAdmin = localStorage.getItem('mock_admin_session') === 'true';
-        if (isLocalAdmin) {
-          return {
-            id: 999999,
-            username: "admin",
-            email: "admin@elbeg.com",
-            isAdmin: true,
-            role: "admin",
-            name: "Local Admin",
-            createdAt: new Date().toISOString(),
-          } as any;
-        }
+      const res = await fetch("/api/user");
+      if (!res.ok) {
+        if (res.status === 401) return null; // Not logged in
+        if (res.status === 403) return null; // Not authorized
+        throw new Error("Failed to fetch user");
       }
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return null;
-
-        const email = session.user.email;
-        if (!email) return null;
-
-        // Fetch user profile from public table using email
-        const { data: profile, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('email', email)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error fetching user profile:", error);
-          return null;
-        }
-
-        if (!profile) {
-          // If profile doesn't exist (e.g. just logged in via OAuth), 
-          // we might need to create it here or handle it in callback
-          return null;
-        }
-
-        // Map snake_case to camelCase for the User type
-        return {
-          ...profile,
-          isAdmin: profile.is_admin,
-          createdAt: profile.created_at,
-          googleId: profile.google_id,
-          profileImageUrl: profile.profile_image_url
-        } as User;
-      } catch (err) {
-        console.error("Auth query error:", err);
-        return null;
-      }
+      return await res.json();
     },
-    staleTime: Infinity, // Rely on auth state changes
+    retry: false,
+    staleTime: Infinity,
   });
 
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
-      // CHECK FOR LOCAL ADMIN BYPASS (DEV ONLY)
-      if (import.meta.env.DEV && data.username === 'admin' && data.password === 'admin123') {
-        localStorage.setItem('mock_admin_session', 'true');
-        return {
-          id: 999999,
-          username: "admin",
-          email: "admin@elbeg.com",
-          isAdmin: true,
-          role: "admin",
-          name: "Local Admin",
-          createdAt: new Date().toISOString(),
-        } as any;
-      }
-
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: data.username.includes('@') ? data.username : `${data.username}@placeholder.com`, // Support username if needed, but schema uses email
-        password: data.password,
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      if (authError) throw authError;
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Login failed");
+      }
 
-      // Fetch profile
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', authData.user.email)
-        .single();
-
-      if (profileError) throw profileError;
-
-      return {
-        ...profile,
-        isAdmin: profile.is_admin,
-        createdAt: profile.created_at,
-        googleId: profile.google_id,
-        profileImageUrl: profile.profile_image_url
-      } as User;
+      return await res.json();
     },
     onSuccess: (user) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -173,60 +88,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
-      // 1. Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            username: data.username,
-            full_name: data.name || data.username,
-          }
-        }
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Registration failed");
-
-      // 2. Create profile in our public users table
-      // We do this manually to ensure the users table is populated immediately
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .insert([{
-          username: data.username,
-          password: 'hashed_in_auth', // Placeholder as password is managed by Supabase Auth
-          email: data.email,
-          name: data.name || null,
-          phone: data.phone || null,
-          is_admin: false
-        }])
-        .select()
-        .single();
-
-      if (profileError) {
-        console.error("Error creating user profile:", profileError);
-        // If profile creation fails but auth succeeded, we might have a conflict or existing user
-        // Try to fetch existing profile before failing
-        const { data: existingProfile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('email', data.email)
-          .maybeSingle();
-
-        if (existingProfile) return {
-          ...existingProfile,
-          isAdmin: existingProfile.is_admin,
-          createdAt: existingProfile.created_at,
-        } as User;
-
-        throw profileError;
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Registration failed");
       }
 
-      return {
-        ...profile,
-        isAdmin: profile.is_admin,
-        createdAt: profile.created_at,
-      } as User;
+      const result = await res.json();
+      return result.user; // API returns { success: true, user: ..., message: ... }
     },
     onSuccess: (user) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -247,13 +121,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      // CLEAR LOCAL ADMIN SESSION
-      localStorage.removeItem('mock_admin_session');
-
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      const res = await fetch("/api/logout", { method: "POST" });
+      if (!res.ok) throw new Error("Logout failed");
     },
     onSuccess: () => {
+      queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
       toast({
         title: t.toast.logoutSuccess,
@@ -270,22 +142,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Google Login function
+  // Google Login function (Stubbed)
   const googleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+    toast({
+      title: "Not Implemented",
+      description: "Google Login is currently disabled in this version.",
+      variant: "default"
     });
-    if (error) {
-      toast({
-        title: "Google Login Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
   };
 
   return (

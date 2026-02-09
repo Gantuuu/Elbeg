@@ -72,35 +72,24 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
 
   const onSubmit = async (data: CategoryFormValues) => {
     try {
-      const { supabase } = await import("@/lib/supabase");
-
       const payload = {
         name: data.name,
         slug: data.slug,
         description: data.description,
-        image_url: data.imageUrl,
-        "order": data.order,
-        is_active: data.isActive
+        imageUrl: data.imageUrl,
+        order: data.order,
+        isActive: data.isActive
       };
 
       if (isEditing && category.id) {
-        const { error } = await supabase
-          .from('categories')
-          .update(payload)
-          .eq('id', category.id);
-
-        if (error) throw error;
+        await apiRequest("PATCH", `/api/categories/${category.id}`, payload);
 
         toast({
           title: 'Ангилал шинэчлэгдлээ',
           description: 'Ангилал амжилттай шинэчлэгдлээ.',
         });
       } else {
-        const { error } = await supabase
-          .from('categories')
-          .insert([payload]);
-
-        if (error) throw error;
+        await apiRequest("POST", "/api/categories", payload);
 
         toast({
           title: 'Ангилал үүсгэгдлээ',

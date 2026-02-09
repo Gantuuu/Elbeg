@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import { useLanguage } from "../contexts/language-context";
-import { supabase } from "@/lib/supabase";
+
 
 // Define a type for our footer settings data
 interface FooterSettings {

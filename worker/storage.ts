@@ -55,6 +55,7 @@ export interface IStorage {
     updateUserGoogleId(userId: number, googleId: string, profileImageUrl?: string): Promise<User | undefined>;
     getUserOrders(userId: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
     getPendingOrdersCount(): Promise<number>;
+    getStats(): Promise<{ totalOrders: number, totalSales: number, totalProducts: number, totalUsers: number }>;
 
     // Site Content operations (CMS)
     getSiteContents(): Promise<SiteContent[]>;
@@ -216,7 +217,7 @@ export class D1Storage implements IStorage {
 
     async deleteServiceCategory(id: number): Promise<boolean> {
         const result = await this.db.delete(serviceCategories).where(eq(serviceCategories.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Store operations
@@ -267,7 +268,7 @@ export class D1Storage implements IStorage {
 
     async deleteStore(id: number): Promise<boolean> {
         const result = await this.db.delete(stores).where(eq(stores.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Product operations
@@ -300,7 +301,7 @@ export class D1Storage implements IStorage {
 
     async deleteProduct(id: number): Promise<boolean> {
         const result = await this.db.delete(products).where(eq(products.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Order operations
@@ -416,10 +417,15 @@ export class D1Storage implements IStorage {
                         id: row.productId!,
                         name: row.productName!,
                         description: row.productDescription || '',
+                        nameRu: null,
+                        nameEn: null,
+                        descriptionRu: null,
+                        descriptionEn: null,
                         category: row.productCategory!,
                         price: row.productPrice!,
                         imageUrl: row.productImageUrl || '',
                         stock: row.productStock!,
+                        minOrderQuantity: 1,
                         storeId: row.productStoreId,
                         createdAt: row.productCreatedAt!
                     }
@@ -592,6 +598,30 @@ export class D1Storage implements IStorage {
         return result.length;
     }
 
+    async getStats(): Promise<{ totalOrders: number, totalSales: number, totalProducts: number, totalUsers: number }> {
+        try {
+            const [ordersCount] = await this.db.select({ count: sql<number>`count(*)` }).from(orders);
+            const [productsCount] = await this.db.select({ count: sql<number>`count(*)` }).from(products);
+            const [usersCount] = await this.db.select({ count: sql<number>`count(*)` }).from(users);
+            const [salesResult] = await this.db.select({ total: sql<number>`sum(${orders.totalAmount})` }).from(orders);
+
+            return {
+                totalOrders: Number(ordersCount?.count || 0),
+                totalSales: Number(salesResult?.total || 0),
+                totalProducts: Number(productsCount?.count || 0),
+                totalUsers: Number(usersCount?.count || 0)
+            };
+        } catch (error) {
+            console.error("Error fetching stats:", error);
+            return {
+                totalOrders: 0,
+                totalSales: 0,
+                totalProducts: 0,
+                totalUsers: 0
+            };
+        }
+    }
+
     // Site Content operations (CMS)
     async getSiteContents(): Promise<SiteContent[]> {
         return await this.db.select().from(siteContent);
@@ -620,7 +650,7 @@ export class D1Storage implements IStorage {
 
     async deleteSiteContent(id: number): Promise<boolean> {
         const result = await this.db.delete(siteContent).where(eq(siteContent.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Navigation Menu operations (CMS)
@@ -683,7 +713,7 @@ export class D1Storage implements IStorage {
 
     async deleteNavigationItem(id: number): Promise<boolean> {
         const result = await this.db.delete(navigationItems).where(eq(navigationItems.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Category operations (CMS)
@@ -730,7 +760,7 @@ export class D1Storage implements IStorage {
 
     async deleteCategory(id: number): Promise<boolean> {
         const result = await this.db.delete(categories).where(eq(categories.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Media Library operations (CMS)
@@ -758,7 +788,7 @@ export class D1Storage implements IStorage {
 
     async deleteMediaItem(id: number): Promise<boolean> {
         const result = await this.db.delete(mediaLibrary).where(eq(mediaLibrary.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Site Settings operations
@@ -886,7 +916,7 @@ export class D1Storage implements IStorage {
             return false;
         }
         const result = await this.db.delete(bankAccounts).where(eq(bankAccounts.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     async setDefaultBankAccount(id: number): Promise<boolean> {
@@ -979,7 +1009,7 @@ export class D1Storage implements IStorage {
     async deleteMealKit(id: number): Promise<boolean> {
         await this.db.delete(mealKitComponents).where(eq(mealKitComponents.mealKitId, id));
         const result = await this.db.delete(mealKits).where(eq(mealKits.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Meal Kit Component operations
@@ -1017,7 +1047,7 @@ export class D1Storage implements IStorage {
 
     async deleteMealKitComponent(id: number): Promise<boolean> {
         const result = await this.db.delete(mealKitComponents).where(eq(mealKitComponents.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Generated Meal Kit operations
@@ -1076,7 +1106,7 @@ export class D1Storage implements IStorage {
     async deleteGeneratedMealKit(id: number): Promise<boolean> {
         await this.db.delete(generatedMealKitComponents).where(eq(generatedMealKitComponents.generatedMealKitId, id));
         const result = await this.db.delete(generatedMealKits).where(eq(generatedMealKits.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Generated Meal Kit Component operations
@@ -1121,12 +1151,10 @@ export class D1Storage implements IStorage {
                 totalPrice += price;
 
                 componentData.push({
-                    generatedMealKitId: 0,
+                    generatedMealKitId: 0, // Placeholder, updated in batch or subsequent step
                     productId,
-                    quantity: quantity.toString(), // type mismatch handled in insert? converted to number in db? schema says real.
-                    price: price.toString() as any // Schema says real (number in sqlite), but TS might expect string if drizzle-zod inferred from decimal.
-                    // Wait, I changed schema to real (number). So TS should expect number.
-                    // However, price is number in sqlite real.
+                    quantity: quantity,
+                    price: price
                 });
                 // Correcting types: TS should see numbers for real.
                 // Let's cast to any to be safe or fix logic. `product.price` is now number.
@@ -1191,7 +1219,7 @@ export class D1Storage implements IStorage {
 
     async deleteNonDeliveryDay(id: number): Promise<boolean> {
         const result = await this.db.delete(nonDeliveryDays).where(eq(nonDeliveryDays.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     // Delivery settings operations
@@ -1254,7 +1282,7 @@ export class D1Storage implements IStorage {
 
     async deleteReview(id: number): Promise<boolean> {
         const result = await this.db.delete(reviews).where(eq(reviews.id, id));
-        return result.rowCount ? result.rowCount > 0 : true;
+        return result.meta.changes > 0;
     }
 
     async uploadFile(bucket: string, path: string, file: File): Promise<string> {

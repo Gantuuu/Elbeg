@@ -1,62 +1,32 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/use-auth';
 
 /**
  * Custom hook for managing order notifications
- * Monitors pending order count using Supabase Realtime
+ * Monitors pending order count using polling
  */
 export function useOrderNotifications() {
-  const [pendingCount, setPendingCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  // Ensure we only poll for admins
+  const isAdmin = user?.isAdmin || false;
 
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchPendingCount = async () => {
-      try {
-        const { count, error } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'pending');
-
-        if (error) throw error;
-        if (mounted) {
-          setPendingCount(count || 0);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error("Error fetching pending orders count:", error);
-        if (mounted) setIsLoading(false);
-      }
-    };
-
-    fetchPendingCount();
-
-    // Subscribe to changes in the orders table
-    const channel = supabase
-      .channel('orders_channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders'
-        },
-        () => {
-          // Re-fetch count on any change (insert, update, delete)
-          fetchPendingCount();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: ['/api/orders/pending-count'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/orders/pending-count');
+      return response;
+    },
+    // Only fetch if user is admin
+    enabled: !!user && isAdmin,
+    // Poll every 15 seconds
+    refetchInterval: 15000,
+    // Refetch even when window is not focused for notifications
+    refetchIntervalInBackground: true,
+  });
 
   return {
-    pendingCount,
+    pendingCount: data?.count || 0,
     isLoading
   };
 }

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/contexts/language-context";
 import { useQuery } from "@tanstack/react-query";
 import { Order, OrderItem, Product } from "@shared/schema";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
@@ -56,30 +56,11 @@ export default function MyPage() {
 
   // Fetch user orders
   const { data: orders, isLoading: isOrdersLoading, error: ordersError } = useQuery<OrderWithItems[]>({
-    queryKey: ["orders", user?.id],
+    queryKey: ["/api/user/orders"], // Changed queryKey to match API endpoint causing automatic invalidation when other components invalidate this key
     queryFn: async () => {
       try {
-        if (!user?.id) return [];
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*, items:order_items(*, product:products(*))')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        // Map snake_case to camelCase if necessary (matching OrderWithItems type)
-        return (data || []).map(order => ({
-          ...order,
-          createdAt: order.created_at,
-          customerName: order.customer_name,
-          customerEmail: order.customer_email,
-          customerPhone: order.customer_phone,
-          customerAddress: order.customer_address,
-          totalAmount: order.total_amount,
-          paymentMethod: order.payment_method,
-          // Items already mapped by 'items:order_items'
-        })) as any;
+        if (!user) return [];
+        return await apiRequest('GET', '/api/user/orders');
       } catch (err) {
         console.error("Error fetching orders:", err);
         return [];
@@ -87,7 +68,6 @@ export default function MyPage() {
     },
     enabled: !!user,
     refetchOnMount: true,
-    staleTime: 0
   });
 
   // Fetch user's generated meal kits
@@ -95,29 +75,10 @@ export default function MyPage() {
     queryKey: ["generated-meal-kits", user?.id],
     queryFn: async () => {
       try {
-        if (!user?.id) return [];
-        const { data, error } = await supabase
-          .from('generated_meal_kits')
-          .select('*, components:generated_meal_kit_components(*, product:products(*))')
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        return (data || []).map(kit => ({
-          id: kit.id,
-          userId: kit.user_id,
-          name: kit.name,
-          totalPrice: kit.total_price.toString(),
-          isAddedToCart: kit.is_added_to_cart,
-          createdAt: kit.created_at,
-          components: kit.components.map((c: any) => ({
-            id: c.id,
-            productId: c.product_id,
-            quantity: c.quantity.toString(),
-            price: c.price.toString(),
-            product: c.product
-          }))
-        })) as any;
+        if (!user) return [];
+        // Note: this endpoint might need to be verified or created if it doesn't exist yet for user-specific fetching
+        // Assuming /api/generated-meal-kits filters by user session/id internally as seen in worker/api/shop.ts
+        return await apiRequest('GET', '/api/generated-meal-kits');
       } catch (err) {
         console.error("Error fetching meal kits:", err);
         return [];
@@ -125,7 +86,6 @@ export default function MyPage() {
     },
     enabled: !!user,
     refetchOnMount: true,
-    staleTime: 0
   });
 
   // Fetch bank account settings
@@ -133,15 +93,11 @@ export default function MyPage() {
     queryKey: ["bank-accounts"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('bank_accounts')
-          .select('*')
-          .eq('is_active', true);
-        if (error) throw error;
-        return data.map(acc => ({
-          bankName: acc.bank_name,
-          accountNumber: acc.account_number,
-          accountHolder: acc.account_holder
+        const accounts = await apiRequest('GET', '/api/bank-accounts');
+        return accounts.map((acc: any) => ({
+          bankName: acc.bankName, // API returns camelCase
+          accountNumber: acc.accountNumber,
+          accountHolder: acc.accountHolder
         }));
       } catch (err) {
         console.error("Error fetching bank accounts:", err);

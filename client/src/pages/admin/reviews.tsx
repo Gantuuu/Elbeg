@@ -9,7 +9,7 @@ import { Review } from '@shared/schema';
 import { Loader2, Search, Star, Check, X, Trash2, MessageSquare } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,32 +29,13 @@ export default function AdminReviews() {
   const { data: reviews = [], isLoading } = useQuery<Review[]>({
     queryKey: ['reviews'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return data.map((review: any) => ({
-        id: review.id,
-        customerName: review.customer_name,
-        rating: review.rating,
-        content: review.content,
-        isApproved: review.is_approved,
-        createdAt: review.created_at ? new Date(review.created_at) : null
-      }));
+      return await apiRequest('GET', '/api/admin/reviews');
     }
   });
 
   const approveMutation = useMutation({
     mutationFn: async ({ id, isApproved }: { id: number; isApproved: boolean }) => {
-      const { error } = await supabase
-        .from('reviews')
-        .update({ is_approved: isApproved })
-        .eq('id', id);
-
-      if (error) throw error;
+      await apiRequest('PATCH', `/api/admin/reviews/${id}`, { isApproved });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
@@ -74,12 +55,7 @@ export default function AdminReviews() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const { error } = await supabase
-        .from('reviews')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await apiRequest('DELETE', `/api/admin/reviews/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });

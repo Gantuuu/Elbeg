@@ -9,7 +9,7 @@ import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/use-order-notifications";
-import { supabase } from "@/lib/supabase";
+
 
 export default function AdminDashboard() {
   const { toast } = useToast();
@@ -17,61 +17,31 @@ export default function AdminDashboard() {
   // Use order notifications
   const { pendingCount } = useOrderNotifications();
 
-  // Fetch orders for display in the dashboard
+  // Fetch stats
+  const { data: stats, isLoading: isStatsLoading } = useQuery({
+    queryKey: ['stats'],
+    queryFn: async () => {
+      return await apiRequest('GET', '/api/orders/stats');
+    }
+  });
+
+  // Fetch recent orders
   const { data: orders = [], isLoading: isOrdersLoading } = useQuery<any[]>({
     queryKey: ['orders'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items (
-            *,
-            product:products (*)
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
+      // We can reuse the orders endpoint, maybe add a limit query param later
+      // For now fetching all and slicing is fine for low volume
+      return await apiRequest('GET', '/api/orders');
     },
   });
-
-  // Fetch products to count total products
-  const { data: productsCount = 0, isLoading: isProductsLoading } = useQuery({
-    queryKey: ['products-count'],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
-      if (error) throw error;
-      return count || 0;
-    }
-  });
-
-  // Fetch all users to count total registered users
-  const { data: usersCount = 0, isLoading: isUsersLoading } = useQuery({
-    queryKey: ['users-count'],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true });
-      if (error) throw error;
-      return count || 0;
-    }
-  });
-
-
 
   // Get recent orders (last 5)
   const recentOrders = orders.slice(0, 5);
 
-  // Calculate statistics
-  // Calculate statistics
-  const totalOrders = orders.length;
-  const totalSales = orders.reduce((sum, order) => sum + parseFloat(order.total_amount?.toString() || "0"), 0);
-  const totalProducts = productsCount;
-  const totalCustomers = usersCount; // 전체 가입 사용자 수
+  const totalOrders = stats?.totalOrders || 0;
+  const totalSales = stats?.totalSales || 0;
+  const totalProducts = stats?.totalProducts || 0;
+  const totalCustomers = stats?.totalUsers || 0;
 
   return (
     <div className="min-h-screen bg-white flex">
@@ -94,7 +64,7 @@ export default function AdminDashboard() {
                   <div className="ml-4">
                     <p className="text-gray-500 text-sm">Захиалга</p>
                     <h3 className="font-bold text-2xl">
-                      {isOrdersLoading ? (
+                      {isStatsLoading ? (
                         <div className="h-6 w-12 bg-gray-200 animate-pulse rounded"></div>
                       ) : (
                         totalOrders
@@ -114,7 +84,7 @@ export default function AdminDashboard() {
                   <div className="ml-4">
                     <p className="text-gray-500 text-sm">Борлуулалт</p>
                     <h3 className="font-bold text-2xl">
-                      {isOrdersLoading ? (
+                      {isStatsLoading ? (
                         <div className="h-6 w-20 bg-gray-200 animate-pulse rounded"></div>
                       ) : (
                         formatPrice(totalSales).replace('₩', 'M₩')
@@ -134,7 +104,7 @@ export default function AdminDashboard() {
                   <div className="ml-4">
                     <p className="text-gray-500 text-sm">Бүтээгдэхүүн</p>
                     <h3 className="font-bold text-2xl">
-                      {isProductsLoading ? (
+                      {isStatsLoading ? (
                         <div className="h-6 w-12 bg-gray-200 animate-pulse rounded"></div>
                       ) : (
                         totalProducts
@@ -154,7 +124,7 @@ export default function AdminDashboard() {
                   <div className="ml-4">
                     <p className="text-gray-500 text-sm">Хэрэглэгч</p>
                     <h3 className="font-bold text-2xl">
-                      {isUsersLoading ? (
+                      {isStatsLoading ? (
                         <div className="h-6 w-12 bg-gray-200 animate-pulse rounded"></div>
                       ) : (
                         totalCustomers
@@ -213,19 +183,19 @@ export default function AdminDashboard() {
                           {formatOrderId(order.id)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {order.customer_name}
+                          {order.customerName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {order.items?.map((item: any) => item.product?.name).join(', ')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatPrice(order.total_amount)}
+                          {formatPrice(order.totalAmount)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <OrderStatusBadge status={order.status} orderId={order.id} isEditable={true} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatDate(order.created_at)}
+                          {formatDate(order.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link href={`/admin/orders?id=${order.id}`}>

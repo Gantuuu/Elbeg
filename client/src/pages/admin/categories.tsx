@@ -6,7 +6,7 @@ import { AdminLayout } from '@/components/admin/layout';
 import { CategoryForm } from '@/components/admin/category-form';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
+
 import {
   Button,
   Card,
@@ -43,13 +43,8 @@ export default function AdminCategories() {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('order', { ascending: true });
-
-      if (error) throw error;
-      return data as Category[];
+      const res = await apiRequest("GET", "/api/categories");
+      return await res.json();
     }
   });
 
@@ -62,10 +57,7 @@ export default function AdminCategories() {
     if (!categoryToDelete) return;
 
     try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', categoryToDelete.id);
+      await apiRequest("DELETE", `/api/categories/${categoryToDelete.id}`);
 
       if (error) throw error;
 

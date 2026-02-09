@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import { supabase } from "@/lib/supabase";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function CartPage() {
   const { items, totalPrice, updateQuantity, removeItem } = useCart();
@@ -38,13 +38,7 @@ export default function CartPage() {
     queryKey: ["shipping-fee"],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('site_settings')
-          .select('value')
-          .eq('key', 'shipping_fee')
-          .single();
-        if (error) throw error;
-        return data as { value: string };
+        return await apiRequest('GET', '/api/settings/shipping-fee');
       } catch (error) {
         console.error('Error fetching shipping fee:', error);
         return { value: "3000" }; // Default shipping fee

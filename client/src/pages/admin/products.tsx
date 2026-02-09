@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,7 @@ export default function AdminProducts() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ['products'],
     queryFn: async () => {
-      const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
-      return await response.json() as Product[];
+      return await apiRequest('GET', '/api/products');
     },
   });
 
@@ -88,10 +86,7 @@ export default function AdminProducts() {
   const handleEditProduct = async (product: Product) => {
     try {
       // Fetch the latest product data to ensure we have the most up-to-date information
-      // Fetch the latest product data to ensure we have the most up-to-date information
-      const response = await fetch(`/api/products/${product.id}`);
-      if (!response.ok) throw new Error('Failed to fetch product details');
-      const updatedProduct = await response.json() as Product;
+      const updatedProduct = await apiRequest('GET', `/api/products/${product.id}`);
 
       // Set the product for editing with the fresh data
       setEditingProduct(updatedProduct);

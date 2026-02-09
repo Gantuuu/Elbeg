@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase"; // Import Supabase client
+
 
 // Login form schema
 const loginFormSchema = z.object({
@@ -69,25 +69,13 @@ export default function AdminLogin() {
     }
 
     try {
-      // 1. Supabase Auth Login
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: data.email,
+      // API Login
+      const res = await apiRequest("POST", "/api/login", {
+        username: data.email, // Use email as username for now or update API to accept email
         password: data.password,
       });
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.session) {
-        throw new Error("No session created");
-      }
-
-      // 2. Sync Session with Backend
-      // Send the access token to the backend to create a secure session cookie
-      await apiRequest("POST", "/api/auth/sync-session", {
-        access_token: authData.session.access_token,
-      });
+      const user = await res.json();
 
       toast({
         title: "Амжилттай нэвтэрлээ",
@@ -101,24 +89,10 @@ export default function AdminLogin() {
         logMobileCookieDebug();
       }
 
-      // Wait for session to be properly set before redirecting
-      setTimeout(async () => {
-        try {
-          // Verify authentication status before redirecting
-          const authCheck = await apiRequest("GET", "/api/admin/check-auth");
-          if (authCheck.authenticated) {
-            setLocation("/admin");
-          } else {
-            // If auth check fails, try redirecting anyway after additional delay
-            setTimeout(() => {
-              setLocation("/admin");
-            }, 1000);
-          }
-        } catch (authError) {
-          console.log("Auth check failed, proceeding with redirect:", authError);
-          setLocation("/admin");
-        }
-      }, 1500);
+      // Wait for session to be properly set
+      setTimeout(() => {
+        setLocation("/admin");
+      }, 500);
 
     } catch (error: any) {
       console.error("Login error:", error);
