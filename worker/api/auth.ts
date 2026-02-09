@@ -186,10 +186,11 @@ app.post('/register', async (c) => {
     }
 
     // Check existence
-    const existingUser = await storage.getUserByUsername(body.username);
-    if (existingUser) {
-        return c.json({ success: false, message: "Энэ хэрэглэгчийн нэр аль хэдийн бүртгэгдсэн байна" }, 400);
-    }
+    // Username uniqueness check removed to allow duplicate names
+    // const existingUser = await storage.getUserByUsername(body.username);
+    // if (existingUser) {
+    //     return c.json({ success: false, message: "Энэ хэрэглэгчийн нэр аль хэдийн бүртгэгдсэн байна" }, 400);
+    // }
 
     const existingEmail = await storage.getUserByEmail(body.email);
     if (existingEmail) {

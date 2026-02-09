@@ -140,9 +140,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Хэрэглэгчийн нэр</FormLabel>
+                          <FormLabel>Имэйл эсвэл Хэрэглэгчийн нэр</FormLabel>
                           <FormControl>
-                            <Input placeholder="Хэрэглэгчийн нэр" {...field} />
+                            <Input placeholder="Имэйл эсвэл Хэрэглэгчийн нэр" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

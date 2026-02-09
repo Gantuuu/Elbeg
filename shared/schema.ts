@@ -68,7 +68,7 @@ export const insertOrderItemSchema = createInsertSchema(orderItems).omit({
 // Users table (both admin and customers)
 export const users = sqliteTable("users", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  username: text("username").notNull().unique(),
+  username: text("username").notNull(),
   password: text("password").notNull(),
   email: text("email").notNull().unique(),
   name: text("name"), // Made name optional
