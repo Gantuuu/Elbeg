@@ -92,14 +92,14 @@ export default function AuthPage() {
   return (
     <div className="relative w-full min-h-screen overflow-hidden bg-black flex flex-col items-center justify-center">
       {/* Scrolling Background */}
-      <div className="absolute inset-0 grid grid-cols-3 gap-6 opacity-40 select-none pointer-events-none -skew-y-6 scale-110 transform-gpu">
+      <div className="absolute inset-0 grid grid-cols-3 gap-6 opacity-60 select-none pointer-events-none -skew-y-6 scale-110 transform-gpu">
         <Column images={COLUMN_1} duration={45} />
         <Column images={COLUMN_2} duration={55} reverse />
         <Column images={COLUMN_3} duration={50} />
       </div>
 
       {/* Dark Gradient Overlay for Readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-md px-6 my-10">
