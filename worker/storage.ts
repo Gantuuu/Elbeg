@@ -184,9 +184,11 @@ export interface IStorage {
 
 export class D1Storage implements IStorage {
     db: DrizzleDB;
+    bucket?: R2Bucket;
 
-    constructor(db: DrizzleDB) {
+    constructor(db: DrizzleDB, bucket?: R2Bucket) {
         this.db = db;
+        this.bucket = bucket;
     }
 
     // Service Category operations
@@ -1256,6 +1258,24 @@ export class D1Storage implements IStorage {
     }
 
     async uploadFile(bucket: string, path: string, file: File): Promise<string> {
-        throw new Error("uploadFile not implemented for D1Storage. Use SupabaseStorage if R2 is not configured.");
+        if (!this.bucket) {
+            console.error("R2 Bucket not configured");
+            throw new Error("R2 Bucket not configured");
+        }
+
+        try {
+            await this.bucket.put(path, await file.arrayBuffer(), {
+                httpMetadata: { contentType: file.type }
+            });
+
+            // Assuming public access is enabled or mapped to a custom domain
+            // For now, returning a relative path or a standard R2 dev URL format if known.
+            // Since we don't have a custom domain in env yet, we'll assume a placeholder or relative if served via worker.
+            // Ideally should be Env var.
+            return `/uploads/${path}`;
+        } catch (error) {
+            console.error("R2 Upload Error:", error);
+            throw error;
+        }
     }
 }

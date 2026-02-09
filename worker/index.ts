@@ -13,6 +13,17 @@ import cmsApp from './api/cms';
 const app = new Hono<{ Bindings: Bindings }>();
 
 // Global middleware
+app.use('*', async (c, next) => {
+    // We need to initialize storage here to have access to DB and BUCKET from env
+    if (!c.get('storage')) {
+        const db = getDb(c.env.DB);
+        const storage = new D1Storage(db, c.env.BUCKET);
+        c.set('storage', storage);
+    }
+    await next();
+});
+
+// Global middleware
 app.use('*', logger());
 app.use('*', cors({
     origin: (origin) => origin, // Allow all origins for now

@@ -6,8 +6,8 @@ export default defineConfig({
   dialect: "sqlite",
   driver: "d1-http",
   dbCredentials: {
-    accountId: "To be configured",
-    databaseId: "elbeg-meat-db-id",
+    accountId: "a6e8bbf781104a317b3b7eb47256bcb8", // Found in error log
+    databaseId: "9314a1ba-863a-484f-b84f-1ffc4e017cce",
     token: "To be configured",
   },
 });
