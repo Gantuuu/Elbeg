@@ -222,6 +222,26 @@ app.post('/register', async (c) => {
     }, 201);
 });
 
+// Google OAuth Skeleton Routes
+app.get('/google', (c) => {
+    // In a real implementation, you would redirect to Google's OAuth consent screen
+    // Example: const googleConsentUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${c.env.GOOGLE_CLIENT_ID}...`;
+    // return c.redirect(googleConsentUrl);
+
+    return c.json({
+        message: "Google Login is not yet fully configured. Please provide GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.",
+        action: "Redirect to Google Auth"
+    }, 501);
+});
+
+app.get('/google/callback', async (c) => {
+    // This would handle the code from Google and exchange it for tokens
+    return c.json({
+        message: "Google Login callback received, but configuration is incomplete.",
+        status: "Development Phase"
+    }, 501);
+});
+
 app.post('/logout', async (c) => {
     deleteCookie(c, 'auth_user_id', { path: '/' });
     deleteCookie(c, 'sessionActive', { path: '/' });

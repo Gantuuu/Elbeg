@@ -86,19 +86,19 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 // Add login validation schema
 export const loginSchema = z.object({
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  username: z.string().min(3, { message: "Хэрэглэгчийн нэр дор хаяж 3 тэмдэгт байх ёстой" }),
+  password: z.string().min(6, { message: "Нууц үг дор хаяж 6 тэмдэгт байх ёстой" }),
 });
 
 // Add password validation to signup schema with required email validation
 export const signupSchema = insertUserSchema.extend({
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  password: z.string().min(6, { message: "Нууц үг дор хаяж 6 тэмдэгт байх ёстой" }),
   confirmPassword: z.string(),
   email: z.string()
-    .min(1, { message: "Email is required" })
-    .email({ message: "Invalid email address" }),
+    .min(1, { message: "Имэйл хаяг заавал байх ёстой" })
+    .email({ message: "Имэйл хаяг буруу байна" }),
 }).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "Нууц үг таарахгүй байна",
   path: ["confirmPassword"],
 });
 
