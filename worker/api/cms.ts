@@ -296,4 +296,74 @@ app.delete('/media/:id', requireAdmin, async (c) => {
     return c.json({ success: true });
 });
 
+
+// Login Background Images Settings
+app.get('/settings/login-images', async (c) => {
+    const storage = c.get('storage');
+    const setting = await storage.getSiteSettingByKey('login_images');
+
+    if (!setting) {
+        // Return default placeholders if not set
+        return c.json({
+            images: [
+                "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+1",
+                "https://placehold.co/600x800/e9c46a/ffffff?text=Image+2",
+                "https://placehold.co/600x800/f4a261/ffffff?text=Image+3",
+                "https://placehold.co/600x800/e76f51/ffffff?text=Image+4",
+                "https://placehold.co/600x800/264653/ffffff?text=Image+5",
+                "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+6",
+                "https://placehold.co/600x800/e9c46a/ffffff?text=Image+7",
+                "https://placehold.co/600x800/f4a261/ffffff?text=Image+8",
+                "https://placehold.co/600x800/e76f51/ffffff?text=Image+9",
+                "https://placehold.co/600x800/264653/ffffff?text=Image+10",
+                "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+11",
+                "https://placehold.co/600x800/e9c46a/ffffff?text=Image+12",
+            ]
+        });
+    }
+
+    try {
+        return c.json(JSON.parse(setting.value));
+    } catch (e) {
+        return c.json({ images: [] });
+    }
+});
+
+app.put('/settings/login-images', requireAdmin, async (c) => {
+    const storage = c.get('storage');
+
+    try {
+        const body = await c.req.json();
+
+        // Validate structure
+        if (!body.images || !Array.isArray(body.images)) {
+            return c.json({ message: "Invalid format. 'images' must be an array." }, 400);
+        }
+
+        const imageData = {
+            images: body.images
+        };
+
+        const existing = await storage.getSiteSettingByKey('login_images');
+
+        if (existing) {
+            await storage.updateSiteSettingByKey('login_images', JSON.stringify(imageData));
+        } else {
+            await storage.createSiteSetting({
+                key: 'login_images',
+                value: JSON.stringify(imageData),
+                description: 'Images for login page background'
+            });
+        }
+
+        return c.json(imageData);
+    } catch (error: any) {
+        console.error("Error updating login images:", error);
+        return c.json({
+            message: "Failed to update login images",
+            error: error.message
+        }, 500);
+    }
+});
+
 export default app;

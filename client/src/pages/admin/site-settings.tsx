@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 interface SiteNameSettings {
   siteName: string;
@@ -16,10 +16,11 @@ interface SiteNameSettings {
 export default function SiteSettingsPage() {
   const { toast } = useToast();
   const [siteName, setSiteName] = useState<string>("");
+  const [loginImages, setLoginImages] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Fetch site name settings
-  const { data: siteSettings, isLoading } = useQuery<SiteNameSettings>({
+  const { data: siteSettings } = useQuery<SiteNameSettings>({
     queryKey: ['/api/settings/site-name'],
     queryFn: async () => {
       try {
@@ -41,9 +42,31 @@ export default function SiteSettingsPage() {
     }
   });
 
-  // Initialize siteName state once data is loaded
-  if (siteSettings && !isInitialized) {
+  // Fetch login images settings
+  const { data: loginImagesData, isLoading: isLoadingImages } = useQuery<{ images: string[] }>({
+    queryKey: ['/api/settings/login-images'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/settings/login-images', {
+          credentials: 'include',
+          cache: 'no-cache',
+          mode: 'same-origin'
+        });
+        if (!response.ok) throw new Error('Failed to fetch login images');
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching login images:', error);
+        return { images: [] };
+      }
+    }
+  });
+
+  const isLoading = false; // We handle loading state differently now
+
+  // Initialize state once data is loaded
+  if (!isInitialized && siteSettings && loginImagesData) {
     setSiteName(siteSettings.siteName);
+    setLoginImages(loginImagesData.images.join('\n'));
     setIsInitialized(true);
   }
 
@@ -57,20 +80,34 @@ export default function SiteSettingsPage() {
       toast({
         title: "Амжилттай",
         description: "Сайтын нэр шинэчлэгдлээ",
-        variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/settings/site-name'] });
+    }
+  });
+
+  // Mutation to update login images
+  const updateLoginImagesMutation = useMutation({
+    mutationFn: async (images: string[]) => {
+      const res = await apiRequest('PUT', '/api/settings/login-images', { images });
+      return res;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Амжилттай",
+        description: "Нэвтрэх хэсгийн зураг шинэчлэгдлээ",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/settings/login-images'] });
     },
     onError: (error: any) => {
       toast({
         title: "Алдаа гарлаа",
-        description: error.message || "Сайтын нэр шинэчлэхэд алдаа гарлаа",
+        description: error.message || "Зураг шинэчлэхэд алдаа гарлаа",
         variant: "destructive",
       });
     }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitSiteName = (e: React.FormEvent) => {
     e.preventDefault();
     if (!siteName.trim()) {
       toast({
@@ -83,68 +120,85 @@ export default function SiteSettingsPage() {
     updateSiteNameMutation.mutate({ siteName });
   };
 
+  const handleSubmitLoginImages = (e: React.FormEvent) => {
+    e.preventDefault();
+    const imagesArray = loginImages
+      .split('\n')
+      .map(url => url.trim())
+      .filter(url => url !== "");
+
+    updateLoginImagesMutation.mutate(imagesArray);
+  };
+
   return (
     <AdminLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#FF0033] to-[#0000CC] inline-block px-4 py-2 rounded-lg shadow-glow-sm">Сайтын тохиргоо</h1>
+        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#0e5841] to-[#16a34a] inline-block px-4 py-2 rounded-lg shadow-sm">Сайтын тохиргоо</h1>
 
-        <div className="grid grid-cols-1 gap-6">
-          <Card className="border border-[#FF0033]/20 shadow-md hover:shadow-glow-sm transition-all duration-300">
-            <CardHeader className="border-b border-[#FF0033]/10">
-              <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF0033] to-[#0000CC]">Сайтын нэр</CardTitle>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-[#0e5841]">Сайтын нэр</CardTitle>
               <CardDescription>
                 Сайтын дээд хэсэгт харагдах нэр
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmitSiteName} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="siteName" className="text-[#FF0033] font-medium">Сайтын нэр</Label>
+                  <Label htmlFor="siteName">Сайтын нэр</Label>
                   <Input
                     id="siteName"
-                    placeholder="Жишээ: Гэрийн Мах"
                     value={siteName}
                     onChange={(e) => setSiteName(e.target.value)}
-                    className="max-w-md focus:border-[#FF0033] focus:ring-[#0000CC]/20 transition-all duration-300"
                   />
-                  <p className="text-sm text-[#0000CC]/70 italic">
-                    Энэ нэр нь сайтын дээд хэсэгт логоны оронд харагдах болно
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
                   <Button
                     type="submit"
-                    className="bg-gradient-to-r from-[#FF0033] to-[#0000CC] text-white hover:shadow-glow transition-all duration-300"
+                    className="bg-[#0e5841] hover:bg-[#084130]"
                     disabled={updateSiteNameMutation.isPending}
                   >
-                    {updateSiteNameMutation.isPending ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Хадгалж байна...
-                      </>
-                    ) : (
-                      <>Хадгалах</>
-                    )}
+                    {updateSiteNameMutation.isPending ? "Хадгалж байна..." : "Хадгалах"}
                   </Button>
 
                   {updateSiteNameMutation.isSuccess && (
-                    <div className="flex items-center text-green-500 bg-green-50 px-3 py-1.5 rounded-md border border-green-200 shadow-sm">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-[#0000CC]" />
-                      <span className="text-green-800 font-medium">Хадгалагдлаа</span>
-                    </div>
-                  )}
-
-                  {updateSiteNameMutation.isError && (
-                    <div className="flex items-center bg-red-50 px-3 py-1.5 rounded-md border border-red-200 shadow-sm">
-                      <AlertCircle className="h-5 w-5 mr-2 text-[#FF0033]" />
-                      <span className="text-red-800 font-medium">Алдаа гарлаа</span>
-                    </div>
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
                   )}
                 </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Login Background Images Card */}
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-[#0e5841]">Нэвтрэх хэсгийн зураг</CardTitle>
+              <CardDescription>Нэвтрэх болон бүртгүүлэх хэсгийн арын дэвсгэр зурагнууд</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitLoginImages} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="loginImages">Зургийн URL-ууд (Мөр бүрт нэг)</Label>
+                  <textarea
+                    id="loginImages"
+                    className="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                    value={loginImages}
+                    onChange={(e) => setLoginImages(e.target.value)}
+                  />
+                  <p className="text-xs text-gray-500">
+                    Cloudflare-т ору울сан зургийнхаа Public link-ийг энд нэг мөрөнд нэгийг бичээрэй.
+                  </p>
+                </div>
+                <Button
+                  type="submit"
+                  className="bg-[#0e5841] hover:bg-[#084130]"
+                  disabled={updateLoginImagesMutation.isPending}
+                >
+                  {updateLoginImagesMutation.isPending ? "Хадгалж байна..." : "Хадгалах"}
+                </Button>
               </form>
             </CardContent>
           </Card>

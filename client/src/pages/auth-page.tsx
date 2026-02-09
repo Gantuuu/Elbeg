@@ -11,34 +11,44 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-
-// Mongolia & Meat related images for the background
-const IMAGES = [
-  "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+1",
-  "https://placehold.co/600x800/e9c46a/ffffff?text=Image+2",
-  "https://placehold.co/600x800/f4a261/ffffff?text=Image+3",
-  "https://placehold.co/600x800/e76f51/ffffff?text=Image+4",
-  "https://placehold.co/600x800/264653/ffffff?text=Image+5",
-  "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+6",
-  "https://placehold.co/600x800/e9c46a/ffffff?text=Image+7",
-  "https://placehold.co/600x800/f4a261/ffffff?text=Image+8",
-  "https://placehold.co/600x800/e76f51/ffffff?text=Image+9",
-  "https://placehold.co/600x800/264653/ffffff?text=Image+10",
-  "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+11",
-  "https://placehold.co/600x800/e9c46a/ffffff?text=Image+12",
-];
-
-// Shuffle/Split images for columns
-const COLUMN_1 = IMAGES.slice(0, 4);
-const COLUMN_2 = IMAGES.slice(4, 8);
-const COLUMN_3 = IMAGES.slice(8, 12);
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const { toast } = useToast();
+
+  // Fetch background images
+  const { data: loginImagesData } = useQuery<{ images: string[] }>({
+    queryKey: ['/api/settings/login-images'],
+    queryFn: async () => {
+      const res = await fetch("/api/settings/login-images");
+      if (!res.ok) throw new Error("Failed to fetch images");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const IMAGES = loginImagesData?.images || [
+    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+1",
+    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+2",
+    "https://placehold.co/600x800/f4a261/ffffff?text=Image+3",
+    "https://placehold.co/600x800/e76f51/ffffff?text=Image+4",
+    "https://placehold.co/600x800/264653/ffffff?text=Image+5",
+    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+6",
+    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+7",
+    "https://placehold.co/600x800/f4a261/ffffff?text=Image+8",
+    "https://placehold.co/600x800/e76f51/ffffff?text=Image+9",
+    "https://placehold.co/600x800/264653/ffffff?text=Image+10",
+    "https://placehold.co/600x800/2a9d8f/ffffff?text=Image+11",
+    "https://placehold.co/600x800/e9c46a/ffffff?text=Image+12",
+  ];
+
+  // Logic for columns based on current images
+  const COLUMN_1 = IMAGES.slice(0, Math.ceil(IMAGES.length / 3));
+  const COLUMN_2 = IMAGES.slice(Math.ceil(IMAGES.length / 3), Math.ceil(IMAGES.length * 2 / 3));
+  const COLUMN_3 = IMAGES.slice(Math.ceil(IMAGES.length * 2 / 3));
 
   // Redirect if already logged in
   if (user) {
