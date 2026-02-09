@@ -240,28 +240,43 @@ app.get('/user', (c) => {
 });
 
 // Get user orders (Ported from server/auth.ts routes that were mixed in)
+// Initial Admin Setup Endpoint
 app.get('/setup-admin', async (c) => {
     try {
         const storage = c.get('storage');
-        const NEW_PASSWORD = 'admin123';
+        const email = c.req.query('email') || 'admin@example.com';
+        const username = c.req.query('username') || 'admin';
+        const password = c.req.query('password') || 'admin123';
 
-        // 1. Hash the password using the worker's OWN logic/environment
-        const hashedPassword = await hashPassword(NEW_PASSWORD);
+        // 1. Check if user exists
+        let user = await storage.getUserByEmail(email);
+        if (!user) {
+            user = await storage.getUserByUsername(username);
+        }
 
-        // 2. Update the user
-        const result = await c.env.DB.prepare(
-            "UPDATE users SET password = ? WHERE email = 'jaytour247@gmail.com'"
-        ).bind(hashedPassword).run();
+        const hashedPassword = await hashPassword(password);
 
-        // 3. Verify
-        const user = await storage.getUserByEmail('jaytour247@gmail.com');
+        let result;
+        if (user) {
+            // Update existing user to be admin and set password
+            result = await c.env.DB.prepare(
+                "UPDATE users SET password = ?, is_admin = 1 WHERE id = ?"
+            ).bind(hashedPassword, user.id).run();
+        } else {
+            // Create new admin user
+            result = await c.env.DB.prepare(
+                "INSERT INTO users (username, email, password, is_admin, name, created_at) VALUES (?, ?, ?, 1, 'Admin', ?)"
+            ).bind(username, email, hashedPassword, new Date().toISOString()).run();
+        }
 
         return c.json({
-            message: "Admin password reset successfully",
-            success: result.success,
-            newHashPrefix: hashedPassword.substring(0, 10),
-            storedHashPrefix: user?.password.substring(0, 10),
-            match: user ? (user.password === hashedPassword) : false
+            success: true,
+            message: user ? "Admin Updated" : "Admin Created",
+            credentials: {
+                username,
+                email,
+                password: password // meaningful only if they used the default
+            }
         });
     } catch (err: any) {
         return c.json({ error: err.message, stack: err.stack }, 500);
