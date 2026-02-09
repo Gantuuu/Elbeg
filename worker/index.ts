@@ -50,8 +50,30 @@ app.route('/api', shopApp); // shopApp mounts at root of /api (e.g. /api/categor
 app.route('/api', ordersApp); // ordersApp mounts at root of /api
 app.route('/api', cmsApp); // cmsApp mounts at root of /api
 
-app.get('/uploads/*', (c) => {
-    return c.text('Not Found (Use Supabase Storage URLs)', 404);
+app.get('/uploads/*', async (c) => {
+    try {
+        const key = c.req.path.replace(/^\/uploads\//, '');
+        // Decode URI component to handle spaces and special characters
+        const decodedKey = decodeURIComponent(key);
+
+        const object = await c.env.BUCKET.get(decodedKey);
+
+        if (!object) {
+            return c.text('Object Not Found', 404);
+        }
+
+        const headers = new Headers();
+        // @ts-ignore - Headers type mismatch between DOM and Workers types
+        object.writeHttpMetadata(headers);
+        headers.set('etag', object.httpEtag);
+
+        return new Response(object.body as any, {
+            headers,
+        });
+    } catch (e) {
+        console.error('Error serving file:', e);
+        return c.text('Internal Server Error', 500);
+    }
 });
 
 app.onError((err, c) => {
