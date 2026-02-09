@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Image as ImageIcon, Loader2 } from "lucide-react";
+import { Image as ImageIcon, Loader2, Upload, Trash2 } from "lucide-react";
+import { getFullImageUrl, compressImage, uploadMedia } from "@/lib/image-utils";
+import { logger } from "@/lib/logger";
 
 export default function LoginSettingsPage() {
     const { toast } = useToast();
@@ -61,6 +63,40 @@ export default function LoginSettingsPage() {
         }
     });
 
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            logger.custom('🖼️', 'Compressing login background image...');
+            const compressedFile = await compressImage(file, 1920, 0.85);
+
+            logger.custom('📤', 'Uploading to R2...');
+            const result = await uploadMedia(compressedFile);
+
+            const currentImages = loginImages.trim() ? loginImages.split('\n') : [];
+            setLoginImages([...currentImages, result.url].join('\n'));
+
+            toast({
+                title: "Амжилттай",
+                description: "Зураг амжилттай хуулагдаж, жаг사алтад нэмэгдлээ.",
+            });
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast({
+                title: "Алдаа",
+                description: "Зураг хуулахад алдаа гарлаа",
+                variant: "destructive",
+            });
+        } finally {
+            setIsUploading(false);
+            e.target.value = '';
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const imagesArray = loginImages
@@ -76,7 +112,7 @@ export default function LoginSettingsPage() {
             <div className="flex-1 overflow-hidden flex flex-col">
                 <AdminHeader
                     title="Нэвтрэх хэсгийн зураг"
-                    description="Нэвтрэх болон бүртгүүлэх хэсгийн арын дэвсгэр зурагнууд"
+                    description="Нэвтрэх болон бүртгүүлэх хэсгийн арын дэвс그эр зурагнууд"
                     icon={<ImageIcon className="h-6 w-6" />}
                 />
 
@@ -106,10 +142,35 @@ export default function LoginSettingsPage() {
                                         />
                                     </div>
 
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-xs text-gray-500 italic">
-                                            Зураг бүрийг шинэ мөрөнд бичнэ үү.
-                                        </p>
+                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between border-t pt-4">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="file"
+                                                id="file-upload"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={handleFileUpload}
+                                                disabled={isUploading}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="border-[#0e5841] text-[#0e5841] hover:bg-[#0e5841]/10"
+                                                onClick={() => document.getElementById('file-upload')?.click()}
+                                                disabled={isUploading}
+                                            >
+                                                {isUploading ? (
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Upload className="mr-2 h-4 w-4" />
+                                                )}
+                                                Зураг хуулах (WebP)
+                                            </Button>
+                                            <p className="text-[10px] text-gray-500">
+                                                * Автоматаар WebP формат руу хۆرвүүлж, хэмжээг оновчтой болгоно.
+                                            </p>
+                                        </div>
+
                                         <Button
                                             type="submit"
                                             className="bg-[#0e5841] hover:bg-[#084130] min-w-[120px]"
