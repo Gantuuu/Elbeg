@@ -58,6 +58,7 @@ export function AdminSidebar() {
     // CMS sections
     // "Сайтын агуулга" 링크가 제거되었습니다
     { path: "/admin/hero-settings", icon: "featured_video", label: "Нүүр хуудас зураг" },
+    { path: "/admin/login-settings", icon: "image", label: "Нэвтрэх хэсгийн зураг" },
 
 
 

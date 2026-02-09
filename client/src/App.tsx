@@ -42,6 +42,7 @@ const AdminHeroSettings = lazy(() => import("@/pages/admin/hero-settings"));
 const AdminLogoSettings = lazy(() => import("@/pages/admin/logo-settings"));
 const AdminFooterSettings = lazy(() => import("@/pages/admin/footer-settings"));
 const AdminSiteSettings = lazy(() => import("@/pages/admin/site-settings"));
+const AdminLoginSettings = lazy(() => import("@/pages/admin/login-settings"));
 const AdminDeliverySettings = lazy(() => import("@/pages/admin/delivery-settings"));
 const AdminReviews = lazy(() => import("@/pages/admin/reviews"));
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -170,6 +171,9 @@ function AppContent() {
             </Route>
             <Route path="/admin/delivery-settings">
               {() => <AdminRoute component={AdminDeliverySettings} />}
+            </Route>
+            <Route path="/admin/login-settings">
+              {() => <AdminRoute component={AdminLoginSettings} />}
             </Route>
             <Route path="/admin/reviews">
               {() => <AdminRoute component={AdminReviews} />}
