@@ -224,10 +224,10 @@ const translations: Record<Language, Translations> = {
     profile: 'Миний мэдээлэл',
     logout: 'Гарах',
     menu: 'Цэс',
-    siteTitle: 'Элбэг мах хүнс',
+    siteTitle: 'Найс Мах маркет',
 
     // 홈페이지
-    heroTitle: 'Элбэг мах хүнс',
+    heroTitle: 'Найс Мах маркет',
     heroSubtitle: 'Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна.',
     featuredProducts: 'Манай бүтээгдэхүүнүүд',
     featuredProductsDesc: 'Хамгийн амтлаг чанартайг та бүхэндээ',

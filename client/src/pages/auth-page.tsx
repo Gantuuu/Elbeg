@@ -112,7 +112,7 @@ export default function AuthPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl mb-2">
-            Элбэг мах хүнс
+            Найс Мах маркет
           </h1>
           <p className="text-gray-200 text-sm md:text-base font-medium">
             Шинэ, чанартай мах махан бүтээгдэхүүн
@@ -311,14 +311,16 @@ export default function AuthPage() {
       </div>
 
       {/* Only for admin bypass - hidden trigger (DEV ONLY) */}
-      {import.meta.env.DEV && (
-        <div
-          className="absolute bottom-0 right-0 w-10 h-10 cursor-alias z-50 opacity-0"
-          onClick={() => window.location.href = '/admin/login'}
-          title="Admin Login"
-        />
-      )}
-    </div>
+      {
+        import.meta.env.DEV && (
+          <div
+            className="absolute bottom-0 right-0 w-10 h-10 cursor-alias z-50 opacity-0"
+            onClick={() => window.location.href = '/admin/login'}
+            title="Admin Login"
+          />
+        )
+      }
+    </div >
   );
 }
 
