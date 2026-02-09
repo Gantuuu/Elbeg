@@ -115,26 +115,32 @@ export function Hero() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:from-black/40 md:via-black/10 md:to-transparent" />
 
                     {/* Text content */}
-                    <div className="absolute inset-0 flex flex-col justify-end md:justify-center items-center pb-8 md:pb-0 p-4">
-                      <div className="text-center max-w-3xl">
-                        <motion.h2
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="text-lg md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg mb-2 line-clamp-1"
-                        >
-                          {slide.title}
-                        </motion.h2>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.4 }}
-                          className="text-white/90 text-xs md:text-base font-medium drop-shadow-md hidden md:block line-clamp-1"
-                        >
-                          {slide.text}
-                        </motion.p>
+                    {(slide.title || slide.text) && (
+                      <div className="absolute inset-0 flex flex-col justify-end md:justify-center items-center pb-8 md:pb-0 p-4">
+                        <div className="text-center max-w-3xl">
+                          {slide.title && (
+                            <motion.h2
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 }}
+                              className="text-lg md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg mb-2 line-clamp-1"
+                            >
+                              {slide.title}
+                            </motion.h2>
+                          )}
+                          {slide.text && (
+                            <motion.p
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.4 }}
+                              className="text-white/90 text-xs md:text-base font-medium drop-shadow-md hidden md:block line-clamp-1"
+                            >
+                              {slide.text}
+                            </motion.p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </CarouselItem>

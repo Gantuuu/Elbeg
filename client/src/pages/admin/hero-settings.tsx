@@ -26,8 +26,8 @@ import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
 
 // Create form schema
 const slideSchema = z.object({
-  title: z.string().min(1, "Гарчиг оруулна уу"),
-  text: z.string().min(1, "Тайлбар оруулна уу"),
+  title: z.string().optional().or(z.literal('')),
+  text: z.string().optional().or(z.literal('')),
   imageUrl: z.string().optional(),
 });
 
@@ -109,9 +109,11 @@ export default function HeroSettings() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/media', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/media`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
 
       if (!response.ok) throw new Error('Failed to upload image');
