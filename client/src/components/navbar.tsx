@@ -47,7 +47,7 @@ export function Navbar() {
         return res;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
-        return { value: "Элбэг мах хүнс" }; // Default site name
+        return { value: "Нүүдэлчин хүнс" }; // Default site name
       }
     }
   });
@@ -78,20 +78,18 @@ export function Navbar() {
     : defaultNavLinks;
 
   return (
-    <header className="shadow-sm relative z-10 bg-white">
+    <header className="shadow-sm relative z-10 bg-[#3b2301]">
       {/* Top bar - Red-Blue gradient */}
-      <div className="h-1 bg-[#0e5841]"></div>
+      <div className="h-1 bg-[#553511]"></div>
 
-      <div className="bg-white">
+      <div className="bg-[#3b2301]">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            {/* Site Title */}
+            {/* Site Logo */}
             <div className="flex items-center space-x-4">
               <Link href="/">
                 <div className="flex-shrink-0 flex items-center cursor-pointer">
-                  <span className="font-bold text-base md:text-lg text-[#0e5841] hover:brightness-110 transition-all duration-300 whitespace-nowrap">
-                    {t.siteTitle}
-                  </span>
+                  <img src="/logo.png" alt={t.siteTitle} className="h-14 md:h-16 w-auto object-contain" />
                 </div>
               </Link>
 
@@ -106,13 +104,13 @@ export function Navbar() {
                     className={cn(
                       "px-3 py-2 font-medium cursor-pointer transition-all duration-200 relative group",
                       (location === link.href || (link.href === "/" && location === "/"))
-                        ? "text-[#0e5841] font-bold"
-                        : "text-gray-700 hover:text-[#0e5841]"
+                        ? "text-white font-bold"
+                        : "text-gray-300 hover:text-white"
                     )}
                   >
                     {link.label}
                     <span className={cn(
-                      "absolute bottom-0 left-0 w-0 h-0.5 bg-[#0e5841] transition-all duration-200 group-hover:w-full",
+                      "absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-200 group-hover:w-full",
                       (location === link.href || (link.href === "/" && location === "/")) && "w-full"
                     )}></span>
                   </div>
@@ -124,10 +122,10 @@ export function Navbar() {
             <div className="flex items-center space-x-1">
               {/* User Button - Desktop only */}
               <Link href={user ? "/my-page" : "/auth"} className="hidden md:block">
-                <div className="p-2 rounded-full hover:bg-gray-100 relative mr-1 transition-all duration-200">
+                <div className="p-2 rounded-full hover:bg-white/10 relative mr-1 transition-all duration-200">
                   <UserIcon className={cn(
                     "h-5 w-5 transition-all duration-200",
-                    user ? "text-[#0e5841]" : "text-gray-700 hover:text-[#0e5841]"
+                    user ? "text-white" : "text-gray-300 hover:text-white"
                   )} />
                 </div>
               </Link>
@@ -136,12 +134,12 @@ export function Navbar() {
               <div className="relative group hidden md:block">
                 <Link href="/cart">
                   <div
-                    className="p-2 rounded-full hover:bg-gray-100 relative transition-all duration-200 cursor-pointer"
+                    className="p-2 rounded-full hover:bg-white/10 relative transition-all duration-200 cursor-pointer"
                     aria-label={t.cart}
                   >
-                    <ShoppingCartIcon className="h-5 w-5 text-[#0e5841] transition-all duration-200" />
+                    <ShoppingCartIcon className="h-5 w-5 text-white transition-all duration-200" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-[#0e5841] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 bg-white text-[#3b2301] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                         {cartItemCount}
                       </span>
                     )}
@@ -160,9 +158,9 @@ export function Navbar() {
               <div className="md:hidden">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200"
+                  className="p-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
-                  <Menu className="h-5 w-5 text-gray-700" />
+                  <Menu className="h-5 w-5 text-white" />
                 </button>
               </div>
             </div>
@@ -183,8 +181,8 @@ export function Navbar() {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 hover:bg-gray-50 border-l-2",
                 (location === link.href || (link.href === "/" && location === "/"))
-                  ? "text-[#0e5841] border-[#0e5841]"
-                  : "text-gray-700 hover:text-[#0e5841] border-transparent hover:border-[#0e5841]/50"
+                  ? "text-[#553511] border-[#553511]"
+                  : "text-gray-700 hover:text-[#553511] border-transparent hover:border-[#553511]/50"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -195,13 +193,13 @@ export function Navbar() {
           {/* Cart nav link for mobile */}
           <Link href="/cart">
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0e5841] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0e5841]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#553511] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#553511]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <ShoppingCartIcon className="h-5 w-5 mr-2" />
               {t.cart}
               {cartItemCount > 0 && (
-                <span className="ml-2 bg-[#0e5841] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                <span className="ml-2 bg-[#553511] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                   {cartItemCount}
                 </span>
               )}
@@ -215,7 +213,7 @@ export function Navbar() {
           {/* User nav link for mobile */}
           <Link href={user ? "/my-page" : "/auth"}>
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0e5841] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0e5841]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#553511] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#553511]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserIcon className="h-5 w-5 mr-2" />

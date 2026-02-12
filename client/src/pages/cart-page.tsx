@@ -72,7 +72,7 @@ export default function CartPage() {
           </div>
         </div>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#0e5841] rounded-full"></div>
+          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#553511] rounded-full"></div>
         </div>
         <Footer />
       </div>
@@ -162,7 +162,7 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-gray-100">
                   <span className="text-foreground">{t.totalAmount}:</span>
-                  <span className="text-[#0e5841] font-bold">{formatPrice(finalTotalPrice)}</span>
+                  <span className="text-[#553511] font-bold">{formatPrice(finalTotalPrice)}</span>
                 </div>
               </div>
 

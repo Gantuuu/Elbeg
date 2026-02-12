@@ -224,10 +224,10 @@ const translations: Record<Language, Translations> = {
     profile: 'Миний мэдээлэл',
     logout: 'Гарах',
     menu: 'Цэс',
-    siteTitle: 'Найс Мах маркет',
+    siteTitle: 'Нүүдэлчин хүнс',
 
     // 홈페이지
-    heroTitle: 'Найс Мах маркет',
+    heroTitle: 'Нүүдэлчин хүнс',
     heroSubtitle: 'Хамгийн чанартайг хэрэглэгч та бүхэндээ хүргэж байна.',
     featuredProducts: 'Манай бүтээгдэхүүнүүд',
     featuredProductsDesc: 'Хамгийн амтлаг чанартайг та бүхэндээ',
@@ -293,7 +293,7 @@ const translations: Record<Language, Translations> = {
 
     // 푸터
     adminLogin: 'Админ нэвтрэх',
-    copyright: '© 2025 Элбэг мах хүнс. Бүх эрх хуулиар хамгаалагдсан.',
+    copyright: '© 2025 Нүүдэлчин хүнс. Бүх эрх хуулиар хамгаалагдсан.',
     visitPage: 'Хаяг руу очих',
 
     // 마이페이지
@@ -351,7 +351,7 @@ const translations: Record<Language, Translations> = {
     noAccount: 'Бүртгэлгүй юу?',
     phoneFormat: 'Солонгос утасны дугаар хэлбэр: 010-0000-0000',
     phoneHint: 'Солонгос утасны дугаар хэлбэр: 010-0000-0000',
-    authHeroTitle: 'Элбэг мах хүнс',
+    authHeroTitle: 'Нүүдэлчин хүнс',
     authHeroDesc: 'Хэрэглэгчийн бүртгэл үүсгээд захиалгынхаа түүхийг хянаарай',
     directDelivery: 'Үсэхсэн зах руу шууд хүргэлт',
     viewOrderHistory: 'Захиалгын түүхээ харах',
@@ -419,10 +419,10 @@ const translations: Record<Language, Translations> = {
     profile: 'Мой профиль',
     logout: 'Выйти',
     menu: 'Меню',
-    siteTitle: 'Мясной магазин Арвижих',
+    siteTitle: 'Нүүдэлчин хүнс',
 
     // 홈페이지
-    heroTitle: 'Мясной магазин Арвижих',
+    heroTitle: 'Нүүдэлчин хүнс',
     heroSubtitle: 'Не откладывай мясо, которое можно съесть сегодня, на завтра',
     featuredProducts: 'Рекомендуемые товары',
     featuredProductsDesc: 'Лучшие мясные продукты высокого качества в нашем магазине',
@@ -488,7 +488,7 @@ const translations: Record<Language, Translations> = {
 
     // 푸터
     adminLogin: 'Войти как админ',
-    copyright: '© 2025 Арвижих мясной магазин. Все права защищены.',
+    copyright: '© 2025 Нүүдэлчин хүнс. Все права защищены.',
     visitPage: 'Перейти на страницу',
 
     // 마이페이지
@@ -546,7 +546,7 @@ const translations: Record<Language, Translations> = {
     noAccount: 'Нет аккаунта?',
     phoneFormat: 'Формат корейского номера: 010-0000-0000',
     phoneHint: 'Формат корейского номера: 010-0000-0000',
-    authHeroTitle: 'МЯСНОЙ МАГАЗИН АРВИЖИХ',
+    authHeroTitle: 'НҮҮДЭЛЧИН ХҮНС',
     authHeroDesc: 'Создайте учетную запись и отслеживайте историю заказов',
     directDelivery: 'Прямая доставка на рынок',
     viewOrderHistory: 'Просмотр истории заказов',
@@ -614,10 +614,10 @@ const translations: Record<Language, Translations> = {
     profile: 'My Profile',
     logout: 'Logout',
     menu: 'Menu',
-    siteTitle: 'Arvijikh Meat Store',
+    siteTitle: 'Нүүдэлчин хүнс',
 
     // 홈페이지
-    heroTitle: 'Arvijikh Meat Store',
+    heroTitle: 'Нүүдэлчин хүнс',
     heroSubtitle: 'Don\'t put off eating the meat you can enjoy today until tomorrow',
     featuredProducts: 'Featured Products',
     featuredProductsDesc: 'The finest quality meat products from our store',
@@ -683,7 +683,7 @@ const translations: Record<Language, Translations> = {
 
     // 푸터
     adminLogin: 'Admin Login',
-    copyright: '© 2025 Arvijikh Meat Store. All rights reserved.',
+    copyright: '© 2025 Нүүдэлчин хүнс. All rights reserved.',
     visitPage: 'Visit Page',
 
     // 마이페이지
@@ -741,7 +741,7 @@ const translations: Record<Language, Translations> = {
     noAccount: 'Don\'t have an account?',
     phoneFormat: 'Korean phone format: 010-0000-0000',
     phoneHint: 'Korean phone format: 010-0000-0000',
-    authHeroTitle: 'ARVIJIKH MEAT STORE',
+    authHeroTitle: 'НҮҮДЭЛЧИН ХҮНС',
     authHeroDesc: 'Create an account and track your order history',
     directDelivery: 'Direct delivery to market',
     viewOrderHistory: 'View order history',

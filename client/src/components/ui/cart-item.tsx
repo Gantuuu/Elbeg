@@ -41,7 +41,7 @@ export function CartItemComponent({ item }: CartItemProps) {
       <div className="ml-4 flex-grow">
         <h3 className="font-medium text-foreground">{item.name}</h3>
         <p className="text-muted-foreground text-sm">{formatPrice(item.price)} / кг</p>
-        <p className="text-[#0e5841] font-medium text-sm mt-1">
+        <p className="text-[#553511] font-medium text-sm mt-1">
           {t.total}: {formatPrice(item.price * item.quantity)}
         </p>
       </div>
@@ -68,8 +68,8 @@ export function CartItemComponent({ item }: CartItemProps) {
           className="hover:opacity-80 transition-colors flex items-center text-xs font-medium"
           aria-label={t.remove}
         >
-          <span className="material-icons text-xl mr-1 text-[#0e5841]">delete</span>
-          <span className="text-[#0e5841]">{t.remove}</span>
+          <span className="material-icons text-xl mr-1 text-[#553511]">delete</span>
+          <span className="text-[#553511]">{t.remove}</span>
         </button>
       </div>
     </div>

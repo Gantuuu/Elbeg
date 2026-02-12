@@ -165,7 +165,7 @@ export default function ProductDetails() {
               <div className="flex justify-between items-start mb-1">
                 <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
                 <div>
-                  <p className="text-lg font-bold text-[#0e5841]">
+                  <p className="text-lg font-bold text-[#553511]">
                     {formatPrice(parseFloat(product.price.toString()) * quantity)}
                   </p>
                   <p className="text-[10px] text-gray-500 text-right">
@@ -192,7 +192,7 @@ export default function ProductDetails() {
                   <span className="px-3 text-sm font-medium">{quantity}</span>
                   <button
                     onClick={() => handleQuantityChange(quantity + 1)}
-                    className="w-7 h-7 flex items-center justify-center bg-[#0e5841] rounded-full"
+                    className="w-7 h-7 flex items-center justify-center bg-[#553511] rounded-full"
                   >
                     <span className="text-white text-sm">+</span>
                   </button>
@@ -201,7 +201,7 @@ export default function ProductDetails() {
 
               {/* Add to Cart Button - Trendy Style */}
               <Button
-                className="w-full bg-[#0e5841] text-white py-2.5 px-4 rounded-full flex items-center justify-center transition-all hover:shadow-md text-sm"
+                className="w-full bg-[#553511] text-white py-2.5 px-4 rounded-full flex items-center justify-center transition-all hover:shadow-md text-sm"
                 onClick={handleAddToCart}
               >
                 <span className="material-icons text-sm mr-1.5">shopping_cart</span>
@@ -215,7 +215,7 @@ export default function ProductDetails() {
       {/* Categories Section - Mobile Optimized */}
       <section className="py-6 bg-neutral">
         <div className="max-w-md mx-auto px-4">
-          <h2 className="text-lg font-bold mb-4 text-[#0e5841]">Ангилал бүтээгдэхүүн</h2>
+          <h2 className="text-lg font-bold mb-4 text-[#553511]">Ангилал бүтээгдэхүүн</h2>
 
           {/* Category Pills - Smaller */}
           <div className="mb-4">
@@ -224,7 +224,7 @@ export default function ProductDetails() {
                 <button
                   key={category}
                   className={`min-w-[80px] px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedCategory === category
-                    ? "bg-[#0e5841] text-white"
+                    ? "bg-[#553511] text-white"
                     : "bg-gray-100/80 text-gray-700"
                     }`}
                   onClick={() => setSelectedCategory(category)}
@@ -268,10 +268,10 @@ export default function ProductDetails() {
                       <div className="p-2">
                         <h3 className="font-bold text-xs truncate">{filteredProduct.name}</h3>
                         <div className="flex justify-between items-center mt-1">
-                          <span className="font-bold text-[10px] text-[#0e5841]">
+                          <span className="font-bold text-[10px] text-[#553511]">
                             {parseFloat(filteredProduct.price.toString()).toLocaleString()}₩
                           </span>
-                          <button className="bg-[#0e5841] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                          <button className="bg-[#553511] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                             +
                           </button>
                         </div>

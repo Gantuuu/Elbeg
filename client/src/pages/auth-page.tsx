@@ -112,7 +112,7 @@ export default function AuthPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl mb-2">
-            Найс Мах маркет
+            <img src="/logo.png" alt="Нүүдэлчин хүнс" className="h-16 md:h-24 w-auto object-contain mx-auto" />
           </h1>
           <p className="text-gray-200 text-sm md:text-base font-medium">
             Шинэ, чанартай мах махан бүтээгдэхүүн
@@ -127,8 +127,8 @@ export default function AuthPage() {
         >
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 p-1 bg-gray-100/50">
-              <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-[#0e5841] font-bold">Нэвтрэх</TabsTrigger>
-              <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-[#0e5841] font-bold">Бүртгүүлэх</TabsTrigger>
+              <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-[#553511] font-bold">Нэвтрэх</TabsTrigger>
+              <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-[#553511] font-bold">Бүртгүүлэх</TabsTrigger>
             </TabsList>
 
             <div className="p-6">
@@ -163,7 +163,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full bg-[#0e5841] hover:brightness-110 text-white font-bold h-11"
+                      className="w-full bg-[#553511] hover:brightness-110 text-white font-bold h-11"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? (
@@ -286,7 +286,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full bg-[#0e5841] hover:brightness-110 text-white font-bold h-11"
+                      className="w-full bg-[#553511] hover:brightness-110 text-white font-bold h-11"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? (

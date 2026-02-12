@@ -304,7 +304,7 @@ export default function StoreRegisterPage() {
                       </Button>
                       <Button
                         type="submit"
-                        className="bg-[#0e5841] text-white"
+                        className="bg-[#553511] text-white"
                         disabled={createStoreMutation.isPending}
                       >
                         {createStoreMutation.isPending ? "Бүртгэж байна..." : "Дэлгүүр бүртгүүлэх"}

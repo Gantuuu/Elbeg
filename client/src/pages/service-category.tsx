@@ -55,7 +55,7 @@ export default function ServiceCategoryPage() {
 
       <main className="flex-grow">
         {/* Category Header */}
-        <section className="bg-[#0e5841] text-white py-8">
+        <section className="bg-[#553511] text-white py-8">
           <div className="container mx-auto px-4">
             {categoryLoading ? (
               <div className="space-y-4">
@@ -121,7 +121,7 @@ export default function ServiceCategoryPage() {
                           <div className="mt-4">
                             <Button
                               size="sm"
-                              className="bg-[#0e5841] text-white"
+                              className="bg-[#553511] text-white"
                             >
                               Дэлгэрэнгүй үзэх
                             </Button>
@@ -161,7 +161,7 @@ export default function ServiceCategoryPage() {
             </p>
             <Button
               size="lg"
-              className="bg-[#0e5841] text-white"
+              className="bg-[#553511] text-white"
               onClick={() => setLocation("/store/register")}
             >
               Одоо бүртгүүлэх

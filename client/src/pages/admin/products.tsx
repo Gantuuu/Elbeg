@@ -335,7 +335,7 @@ export default function AdminProducts() {
                               {product.category}
                             </span>
                           </div>
-                          <p className="mt-1 text-sm font-semibold text-[#0e5841]">
+                          <p className="mt-1 text-sm font-semibold text-[#553511]">
                             {formatPrice(product.price)}
                           </p>
                           <p className="mt-1 text-xs text-gray-500 line-clamp-2">
