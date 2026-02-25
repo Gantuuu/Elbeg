@@ -106,7 +106,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
 
           </div>
-          <span className="font-bold text-lg text-[#553511]">
+          <span className="font-bold text-lg text-[#0d5c03]">
             {formatPrice(price)}
           </span>
         </div>
@@ -125,7 +125,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
         <button
-          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#553511] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
+          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#0d5c03] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
           onClick={handleAddToCart}
           disabled={isLoading}
         >

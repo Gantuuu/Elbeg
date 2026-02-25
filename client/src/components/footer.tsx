@@ -78,7 +78,7 @@ export function Footer() {
 
   // Set default values if data hasn't loaded yet
   const {
-    companyName = "Нүүдэлчин хүнс",
+    companyName = "Содон хүнс",
     description = "Чанартай махны бүтээгдэхүүн",
     address = "대전광역시 동구 계족로 489번길 상가동 112호 용전동 한숲아파트",
     phone = "010 5940 0081",

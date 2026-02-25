@@ -78,12 +78,12 @@ export default function SiteSettingsPage() {
   return (
     <AdminLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#553511] to-[#16a34a] inline-block px-4 py-2 rounded-lg shadow-sm">Сайтын тохиргоо</h1>
+        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#0d5c03] to-[#16a34a] inline-block px-4 py-2 rounded-lg shadow-sm">Сайтын тохиргоо</h1>
 
         <div className="grid grid-cols-1 gap-6">
           <Card className="shadow-md max-w-2xl">
             <CardHeader>
-              <CardTitle className="text-[#553511]">Сайтын нэр</CardTitle>
+              <CardTitle className="text-[#0d5c03]">Сайтын нэр</CardTitle>
               <CardDescription>
                 Сайтын дээд хэсэгт харагдах нэр
               </CardDescription>
@@ -102,7 +102,7 @@ export default function SiteSettingsPage() {
                 <div className="flex items-center gap-2 pt-2">
                   <Button
                     type="submit"
-                    className="bg-[#553511] hover:bg-[#084130]"
+                    className="bg-[#0d5c03] hover:bg-[#084130]"
                     disabled={updateSiteNameMutation.isPending}
                   >
                     {updateSiteNameMutation.isPending ? "Хадгалж байна..." : "Хадгалах"}

@@ -47,7 +47,7 @@ export function Navbar() {
         return res;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
-        return { value: "Нүүдэлчин хүнс" }; // Default site name
+        return { value: "Содон хүнс" }; // Default site name
       }
     }
   });
@@ -78,11 +78,11 @@ export function Navbar() {
     : defaultNavLinks;
 
   return (
-    <header className="shadow-sm relative z-10 bg-[#3b2301]">
-      {/* Top bar - Red-Blue gradient */}
-      <div className="h-1 bg-[#553511]"></div>
+    <header className="shadow-sm relative z-10 bg-[#0d5c03]">
+      {/* Top bar */}
+      <div className="h-1 bg-[#107004]"></div>
 
-      <div className="bg-[#3b2301]">
+      <div className="bg-[#0d5c03]">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Site Logo */}
@@ -139,7 +139,7 @@ export function Navbar() {
                   >
                     <ShoppingCartIcon className="h-5 w-5 text-white transition-all duration-200" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-white text-[#3b2301] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 bg-white text-[#0d5c03] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                         {cartItemCount}
                       </span>
                     )}
@@ -181,8 +181,8 @@ export function Navbar() {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 hover:bg-gray-50 border-l-2",
                 (location === link.href || (link.href === "/" && location === "/"))
-                  ? "text-[#553511] border-[#553511]"
-                  : "text-gray-700 hover:text-[#553511] border-transparent hover:border-[#553511]/50"
+                  ? "text-[#0d5c03] border-[#0d5c03]"
+                  : "text-gray-700 hover:text-[#0d5c03] border-transparent hover:border-[#0d5c03]/50"
               )}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -193,13 +193,13 @@ export function Navbar() {
           {/* Cart nav link for mobile */}
           <Link href="/cart">
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#553511] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#553511]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0d5c03] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0d5c03]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <ShoppingCartIcon className="h-5 w-5 mr-2" />
               {t.cart}
               {cartItemCount > 0 && (
-                <span className="ml-2 bg-[#553511] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                <span className="ml-2 bg-[#0d5c03] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                   {cartItemCount}
                 </span>
               )}
@@ -213,7 +213,7 @@ export function Navbar() {
           {/* User nav link for mobile */}
           <Link href={user ? "/my-page" : "/auth"}>
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#553511] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#553511]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0d5c03] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0d5c03]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserIcon className="h-5 w-5 mr-2" />

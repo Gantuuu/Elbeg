@@ -94,7 +94,7 @@ export default function StoreDashboard() {
             </CardHeader>
             <CardContent className="flex justify-center">
               <Button
-                className="bg-[#553511] text-white"
+                className="bg-[#0d5c03] text-white"
                 onClick={() => setLocation('/store/register')}
               >
                 Шинэ дэлгүүр бүртгүүлэх
@@ -245,7 +245,7 @@ export default function StoreDashboard() {
                   </div>
                   <Button
                     onClick={() => setLocation(`/store/products/add`)}
-                    className="bg-[#553511] text-white"
+                    className="bg-[#0d5c03] text-white"
                   >
                     Бүтээгдэхүүн нэмэх
                   </Button>
@@ -322,7 +322,7 @@ export default function StoreDashboard() {
                       </p>
                       <Button
                         onClick={() => setLocation(`/store/products/add`)}
-                        className="bg-[#553511] text-white"
+                        className="bg-[#0d5c03] text-white"
                       >
                         Бүтээгдэхүүн нэмэх
                       </Button>

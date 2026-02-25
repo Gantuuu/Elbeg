@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#553511] text-white">
+                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
                     <span className="material-icons">shopping_basket</span>
                   </div>
                   <div className="ml-4">
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#553511] text-white">
+                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
                     <span className="material-icons">receipt_long</span>
                   </div>
                   <div className="ml-4">
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#553511] text-white">
+                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
                     <span className="material-icons">inventory_2</span>
                   </div>
                   <div className="ml-4">
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#553511] text-white">
+                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
                     <span className="material-icons">person</span>
                   </div>
                   <div className="ml-4">
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
               <h2 className="font-bold text-lg">Сүүлийн захиалгууд</h2>
               <Button
                 variant="link"
-                className="text-[#553511] font-medium"
+                className="text-[#0d5c03] font-medium"
                 asChild
               >
                 <Link href="/admin/orders">Бүгдийг харах</Link>
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link href={`/admin/orders?id=${order.id}`}>
-                            <a className="text-[#553511] hover:brightness-125 mr-3 font-medium">Харах</a>
+                            <a className="text-[#0d5c03] hover:brightness-125 mr-3 font-medium">Харах</a>
                           </Link>
                         </td>
                       </tr>
@@ -215,7 +215,7 @@ export default function AdminDashboard() {
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h2 className="font-bold text-lg">Бүтээгдэхүүний удирдлага</h2>
               <Button
-                className="bg-[#553511] hover:brightness-105 text-white font-medium py-2 px-4 rounded flex items-center"
+                className="bg-[#0d5c03] hover:brightness-105 text-white font-medium py-2 px-4 rounded flex items-center"
                 asChild
               >
                 <Link href="/admin/products?new=true">
@@ -227,18 +227,18 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <Link href="/admin/products">
-                  <Button variant="outline" className="w-full md:w-auto border-[#553511] hover:border-[#553511] hover:text-[#553511]">
+                  <Button variant="outline" className="w-full md:w-auto border-[#0d5c03] hover:border-[#0d5c03] hover:text-[#0d5c03]">
                     Бүтээгдэхүүний жагсаалт руу очих
                     <span className="material-icons ml-2">arrow_forward</span>
                   </Button>
                 </Link>
               </div>
 
-              <div className="bg-amber-50 border border-[#553511]/20 rounded-lg p-4 mb-4">
+              <div className="bg-amber-50 border border-[#0d5c03]/20 rounded-lg p-4 mb-4">
                 <div className="flex items-start">
-                  <span className="material-icons text-[#553511] mr-2">info</span>
+                  <span className="material-icons text-[#0d5c03] mr-2">info</span>
                   <div>
-                    <h3 className="font-bold text-[#553511]">Өнөөдрийн статистик</h3>
+                    <h3 className="font-bold text-[#0d5c03]">Өнөөдрийн статистик</h3>
                     <p className="text-sm text-gray-700">
                       Нийт {totalProducts} төрлийн бүтээгдэхүүнтэй, {totalOrders} захиалга хүлээн авсан.
                       Одоогоор {totalCustomers} харилцагч бүртгэлтэй байна.

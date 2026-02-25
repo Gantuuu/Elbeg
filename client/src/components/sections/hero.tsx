@@ -70,7 +70,7 @@ export function Hero() {
   }, [heroData, t]);
 
   return (
-    <section className="bg-[#553511] pt-3 pb-8">
+    <section className="bg-[#0d5c03] pt-3 pb-8">
       <div className="container mx-auto px-0 md:px-6">
         {/* Scrolling delivery message */}
         <div className="px-4 md:px-0">

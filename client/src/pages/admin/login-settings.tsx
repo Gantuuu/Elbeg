@@ -119,7 +119,7 @@ export default function LoginSettingsPage() {
                 <div className="p-6 overflow-auto flex-1">
                     <Card className="shadow-md max-w-4xl">
                         <CardHeader>
-                            <CardTitle className="text-[#553511]">Нэвтрэх хэсгийн зураг</CardTitle>
+                            <CardTitle className="text-[#0d5c03]">Нэвтрэх хэсгийн зураг</CardTitle>
                             <CardDescription>
                                 Cloudflare-т оруулсан зургийнхаа Public link-ийг энд нэг мөрөнд нэгийг бичээрэй.
                             </CardDescription>
@@ -127,7 +127,7 @@ export default function LoginSettingsPage() {
                         <CardContent>
                             {isLoading ? (
                                 <div className="flex justify-center py-12">
-                                    <Loader2 className="h-8 w-8 animate-spin text-[#553511]" />
+                                    <Loader2 className="h-8 w-8 animate-spin text-[#0d5c03]" />
                                 </div>
                             ) : (
                                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,7 +155,7 @@ export default function LoginSettingsPage() {
                                             <Button
                                                 type="button"
                                                 variant="outline"
-                                                className="border-[#553511] text-[#553511] hover:bg-[#553511]/10"
+                                                className="border-[#0d5c03] text-[#0d5c03] hover:bg-[#0d5c03]/10"
                                                 onClick={() => document.getElementById('file-upload')?.click()}
                                                 disabled={isUploading}
                                             >
@@ -173,7 +173,7 @@ export default function LoginSettingsPage() {
 
                                         <Button
                                             type="submit"
-                                            className="bg-[#553511] hover:bg-[#084130] min-w-[120px]"
+                                            className="bg-[#0d5c03] hover:bg-[#084130] min-w-[120px]"
                                             disabled={updateLoginImagesMutation.isPending}
                                         >
                                             {updateLoginImagesMutation.isPending ? (
@@ -192,7 +192,7 @@ export default function LoginSettingsPage() {
                     {/* Preview Section */}
                     {!isLoading && loginImages.trim() && (
                         <div className="mt-8">
-                            <h3 className="text-lg font-semibold mb-4 text-[#553511]">Урьдчилсан харагдац</h3>
+                            <h3 className="text-lg font-semibold mb-4 text-[#0d5c03]">Урьдчилсан харагдац</h3>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {loginImages.split('\n').filter(url => url.trim()).map((url, idx) => (
                                     <div key={idx} className="aspect-[3/4] rounded-lg overflow-hidden border shadow-sm">

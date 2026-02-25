@@ -133,7 +133,7 @@ export default function MyPage() {
       <Navbar />
 
       {/* Page header with Red-Blue gradient */}
-      <div className="w-full bg-[#553511] py-8 mb-8">
+      <div className="w-full bg-[#0d5c03] py-8 mb-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-white text-center drop-shadow-md">
             {t.myPage}
@@ -222,20 +222,20 @@ export default function MyPage() {
                 ) : ordersError ? (
                   <div className="py-12 text-center">
                     <p className="text-red-500">{t.error}: {ordersError.message}</p>
-                    <Button onClick={() => window.location.reload()} className="mt-4 bg-[#553511] text-white hover:opacity-90">
+                    <Button onClick={() => window.location.reload()} className="mt-4 bg-[#0d5c03] text-white hover:opacity-90">
                       {t.retry}
                     </Button>
                   </div>
                 ) : sortedOrders.length === 0 ? (
                   <div className="py-12 text-center">
-                    <div className="w-20 h-20 rounded-full bg-[#553511] flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 rounded-full bg-[#0d5c03] flex items-center justify-center mx-auto mb-4">
                       <ShoppingCart className="h-10 w-10 text-white" />
                     </div>
                     <h3 className="text-lg font-medium mb-2" style={blackTextStyle}>{t.noOrders}</h3>
                     <p className="mb-4" style={blackTextStyle}>{t.noOrdersDesc}</p>
                     <Button
                       onClick={() => setLocation("/")}
-                      className="mt-2 bg-[#553511] text-white hover:brightness-105 transition-all"
+                      className="mt-2 bg-[#0d5c03] text-white hover:brightness-105 transition-all"
                     >
                       {t.viewProducts}
                     </Button>
@@ -437,7 +437,7 @@ function OrderCard({ order, bankAccounts }: { order: OrderWithItems; bankAccount
             onClick={toggleExpand}
             className={expanded
               ? "border-blue-200 text-blue-700 hover:bg-blue-50 transition-all"
-              : "bg-[#553511] text-white hover:brightness-105 transition-all"
+              : "bg-[#0d5c03] text-white hover:brightness-105 transition-all"
             }
             size="sm"
           >

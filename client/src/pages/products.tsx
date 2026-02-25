@@ -81,7 +81,7 @@ export default function ProductsPage() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <div className="bg-[#553511] text-white py-16">
+        <div className="bg-[#0d5c03] text-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Бүтээгдэхүүн
@@ -149,7 +149,7 @@ export default function ProductsPage() {
                 className={cn(
                   "transition-all duration-200",
                   selectedCategory === "all"
-                    ? "bg-[#553511] text-white"
+                    ? "bg-[#0d5c03] text-white"
                     : "hover:bg-gray-100"
                 )}
               >
@@ -164,7 +164,7 @@ export default function ProductsPage() {
                   className={cn(
                     "transition-all duration-200",
                     selectedCategory === category
-                      ? "bg-[#553511] text-white"
+                      ? "bg-[#0d5c03] text-white"
                       : "hover:bg-gray-100"
                   )}
                 >
@@ -177,7 +177,7 @@ export default function ProductsPage() {
           {/* Products Display */}
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#553511] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0d5c03] border-t-transparent"></div>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-20">
@@ -198,7 +198,7 @@ export default function ProductsPage() {
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
                       {category}
                     </h2>
-                    <div className="flex-1 h-px bg-[#553511]"></div>
+                    <div className="flex-1 h-px bg-[#0d5c03]"></div>
                     <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border">
                       {categoryProducts.length} бүтээгдэхүүн
                     </span>
@@ -220,7 +220,7 @@ export default function ProductsPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 hover:text-[#553511] transition-all duration-200"
+                className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 hover:text-[#0d5c03] transition-all duration-200"
               >
                 Нүүр хуудас руу буцах
               </Button>

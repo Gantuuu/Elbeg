@@ -69,7 +69,7 @@ export function SelectableProductCard({
             onError={(e) => handleImageError(e, imageUrl || undefined)}
           />
           <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-[#553511]/70 via-transparent to-[#553511]/30"
+            className="absolute inset-0 bg-gradient-to-t from-[#0d5c03]/70 via-transparent to-[#0d5c03]/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered || isSelected ? 1 : 0 }}
             transition={{ duration: 0.4 }}
@@ -92,13 +92,13 @@ export function SelectableProductCard({
             <div>
               <h3 className="font-bold text-lg mb-1">{name}</h3>
               <motion.span
-                className="inline-block bg-[#553511]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#553511]/20 text-[#553511]"
+                className="inline-block bg-[#0d5c03]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#0d5c03]/20 text-[#0d5c03]"
               >
                 {category}
               </motion.span>
             </div>
             <motion.span
-              className="font-bold text-lg text-[#553511]"
+              className="font-bold text-lg text-[#0d5c03]"
               animate={isHovered ? {
                 scale: 1.1
               } : {
@@ -115,7 +115,7 @@ export function SelectableProductCard({
       {isSelected && (
         <div className="p-4 pt-0">
           <div className="flex items-center">
-            <label className="text-sm mr-2 text-[#553511] font-medium">Хэмжээ:</label>
+            <label className="text-sm mr-2 text-[#0d5c03] font-medium">Хэмжээ:</label>
             <input
               type="number"
               min="1"
