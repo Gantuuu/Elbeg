@@ -62,10 +62,10 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
       // Create form data
       const formData = new FormData();
       formData.append('file', file);
-      
+
       // Add metadata if needed
       if (file.type.startsWith('image/')) {
-        const img = new Image();
+        const img = new window.Image();
         img.src = URL.createObjectURL(file);
         await new Promise<void>((resolve) => {
           img.onload = () => {
@@ -140,7 +140,7 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
       </CardHeader>
       <CardContent>
         {!file ? (
-          <div 
+          <div
             className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => document.getElementById('file-upload')?.click()}
           >
@@ -166,9 +166,9 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
                 <p className="text-sm text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
               </div>
               {!uploading && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleCancel}
                   className="text-gray-500"
                 >

@@ -33,22 +33,39 @@ export default function CartPage() {
     }
   }, [user, isLoadingAuth, setLocation, toast]);
 
-  // Fetch shipping fee from the server
-  const { data: shippingFeeData, isLoading: isLoadingShippingFee } = useQuery<{ value: string }>({
+  // Fetch shipping fee rules from the server
+  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery<{ min: number, max: number, fee: number }[]>({
     queryKey: ["shipping-fee"],
     queryFn: async () => {
       try {
-        return await apiRequest('GET', '/api/settings/shipping-fee');
+        const res = await apiRequest('GET', '/api/settings/shipping-fee');
+        if (res && res.value) {
+          return JSON.parse(res.value);
+        }
       } catch (error) {
-        console.error('Error fetching shipping fee:', error);
-        return { value: "3000" }; // Default shipping fee
+        console.error('Error fetching shipping rules:', error);
       }
+      return [];
     },
     enabled: !isEmpty && !!user,
   });
 
-  // Parse shipping fee
-  const shippingFee = shippingFeeData?.value ? parseInt(shippingFeeData.value) : 0;
+  // Calculate total weight (assuming 1 quantity = 1 kg for now)
+  const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Calculate dynamic shipping fee
+  let shippingFee = 0;
+  if (shippingRulesData && shippingRulesData.length > 0) {
+    const applicableRule = shippingRulesData.find(rule => totalWeight >= rule.min && totalWeight <= rule.max);
+    if (applicableRule) {
+      shippingFee = applicableRule.fee;
+    } else {
+      const maxRule = [...shippingRulesData].sort((a, b) => b.max - a.max)[0];
+      shippingFee = maxRule ? maxRule.fee : 0;
+    }
+  } else if (!isLoadingShippingFee) {
+    shippingFee = 3000;
+  }
 
   // Calculate final total price
   const finalTotalPrice = totalPrice + shippingFee;
@@ -138,8 +155,8 @@ export default function CartPage() {
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t.totalQuantity}:</span>
-                  <span className="font-medium">{items.reduce((acc, item) => acc + item.quantity, 0)} {t.pieces}</span>
+                  <span className="text-muted-foreground">Нийт жин / тоо хэмжээ:</span>
+                  <span className="font-medium">{totalWeight} кг / ширхэг</span>
                 </div>
               </div>
 

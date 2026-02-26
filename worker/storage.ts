@@ -369,6 +369,7 @@ export class D1Storage implements IStorage {
             productCategory: products.category,
             productPrice: products.price,
             productImageUrl: products.imageUrl,
+            productThumbnailUrl: products.thumbnailUrl,
             productStock: products.stock,
             productStoreId: products.storeId,
             productCreatedAt: products.createdAt
@@ -424,6 +425,7 @@ export class D1Storage implements IStorage {
                         category: row.productCategory!,
                         price: row.productPrice!,
                         imageUrl: row.productImageUrl || '',
+                        thumbnailUrl: row.productThumbnailUrl || null,
                         stock: row.productStock!,
                         minOrderQuantity: 1,
                         storeId: row.productStoreId,

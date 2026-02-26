@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  GripVertical, 
-  ChevronRight, 
+import {
+  GripVertical,
+  ChevronRight,
   ChevronDown,
   Loader2
 } from 'lucide-react';
@@ -32,7 +32,7 @@ export function NavigationSort() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Fetch navigation tree
   const { data: navItems = [], isLoading } = useQuery({
     queryKey: ['/api/navigation/tree'],
@@ -44,31 +44,31 @@ export function NavigationSort() {
 
   // Flatten the tree for easier manipulation
   const flattenTree = (
-    items: NavigationItem[], 
-    result: NavigationItem[] = [], 
+    items: NavigationItem[],
+    result: any[] = [],
     level = 0,
-    parentOrder: number | null = null
-  ): NavigationItem[] => {
+    parentOrder: string | null = null
+  ): any[] => {
     items.forEach((item, index) => {
       // Create a flat version of the item with level info
-      const flatItem = { 
-        ...item, 
-        level, 
-        parentOrder: parentOrder !== null ? `${parentOrder}-${index}` : `${index}` 
+      const flatItem = {
+        ...item,
+        level,
+        parentOrder: parentOrder !== null ? `${parentOrder}-${index}` : `${index}`
       };
-      
+
       // Add to results
       result.push(flatItem as any);
-      
+
       // Process children if expanded
       if (item.children && item.children.length > 0 && expanded.has(item.id)) {
         flattenTree(item.children, result, level + 1, flatItem.parentOrder);
       }
     });
-    
+
     return result;
   };
-  
+
   const flatItems = flattenTree(navItems);
 
   const toggleExpand = (id: number) => {
@@ -96,34 +96,34 @@ export function NavigationSort() {
 
   const handleDrop = async (e: React.DragEvent, targetId: number) => {
     e.preventDefault();
-    
+
     const sourceId = parseInt(e.dataTransfer.getData('text/plain'));
     if (sourceId === targetId) return;
-    
+
     // Find the source and target items
     const sourceItem = flatItems.find(item => item.id === sourceId);
     const targetItem = flatItems.find(item => item.id === targetId);
-    
+
     if (!sourceItem || !targetItem) return;
-    
+
     // If dropping on a parent item, make the source a child of the target
     if (targetItem.level === sourceItem.level && !expanded.has(targetId)) {
       try {
         setIsSaving(true);
-        
+
         await apiRequest('PUT', `/api/navigation/${sourceId}`, {
           ...sourceItem,
           parentId: targetId
         });
-        
+
         // Expand the target to show the newly added child
-        setExpanded(prev => new Set([...prev, targetId]));
-        
+        setExpanded(prev => { const s = new Set(prev); s.add(targetId); return s; });
+
         toast({
           title: 'Амжилттай',
           description: 'Цэсний бүтэц шинэчлэгдлээ.',
         });
-        
+
         // Refetch navigation
         queryClient.invalidateQueries({ queryKey: ['/api/navigation/tree'] });
       } catch (error) {
@@ -138,39 +138,39 @@ export function NavigationSort() {
       }
       return;
     }
-    
+
     // Otherwise, reorder items at the same level
     let itemIds: number[] = [];
-    
+
     // Get all items at the same level as the target
-    const siblingItems = flatItems.filter(item => 
-      item.level === targetItem.level && 
+    const siblingItems = flatItems.filter(item =>
+      item.level === targetItem.level &&
       item.parentId === targetItem.parentId
     );
-    
+
     // Create a new order
     itemIds = siblingItems.map(item => item.id);
-    
+
     // Remove source item from its current position
     itemIds = itemIds.filter(id => id !== sourceId);
-    
+
     // Find the index of the target
     const targetIndex = itemIds.indexOf(targetId);
-    
+
     // Insert source before target
     itemIds.splice(targetIndex, 0, sourceId);
-    
+
     try {
       setIsSaving(true);
-      
+
       // Update the order
       await apiRequest('POST', '/api/navigation/order', { itemIds });
-      
+
       toast({
         title: 'Амжилттай',
         description: 'Цэсний дараалал шинэчлэгдлээ.',
       });
-      
+
       // Refetch navigation
       queryClient.invalidateQueries({ queryKey: ['/api/navigation/tree'] });
     } catch (error) {
@@ -219,7 +219,7 @@ export function NavigationSort() {
                 <div className="p-3 cursor-grab">
                   <GripVertical className="h-4 w-4 text-gray-400" />
                 </div>
-                
+
                 <div className="flex-1 py-3 flex items-center">
                   {item.children && item.children.length > 0 ? (
                     <Button
@@ -237,13 +237,13 @@ export function NavigationSort() {
                   ) : (
                     <div className="w-7 mr-1"></div>
                   )}
-                  
+
                   <div>
                     <div className="font-medium">{item.title}</div>
                     <div className="text-xs text-gray-500">{item.url}</div>
                   </div>
                 </div>
-                
+
                 <div className="p-3 text-xs text-gray-500">
                   ID: {item.id}
                 </div>
@@ -251,7 +251,7 @@ export function NavigationSort() {
             ))}
           </div>
         )}
-        
+
         <div className="mt-4 text-sm text-gray-500">
           <p>Чирж эрэмбэ өөрчлөх боломжтой. Мөн дэд цэс болгохын тулд хүссэн цэс дээр чирнэ үү.</p>
         </div>

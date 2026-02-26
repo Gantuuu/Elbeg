@@ -47,7 +47,7 @@ export function Navbar() {
         return res;
       } catch (error) {
         console.error('Error fetching site name settings:', error);
-        return { value: "Содон хүнс" }; // Default site name
+        return { value: "Ивээл махны дэлгүүр" }; // Default site name
       }
     }
   });
@@ -89,7 +89,7 @@ export function Navbar() {
             <div className="flex items-center space-x-4">
               <Link href="/">
                 <div className="flex-shrink-0 flex items-center cursor-pointer">
-                  <img src="/logo.png" alt={t.siteTitle} className="h-14 md:h-16 w-auto object-contain" />
+                  <img src="/logo-new.png" alt={t.siteTitle} className="h-14 md:h-16 w-auto object-contain" />
                 </div>
               </Link>
 

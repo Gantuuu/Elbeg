@@ -92,7 +92,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-black flex flex-col items-center justify-center">
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#0d5c03] flex flex-col items-center justify-center">
       {/* Scrolling Background */}
       <div className="absolute inset-0 grid grid-cols-3 gap-6 opacity-60 select-none pointer-events-none -skew-y-6 scale-110 transform-gpu">
         <Column images={COLUMN_1} duration={45} />
@@ -101,7 +101,7 @@ export default function AuthPage() {
       </div>
 
       {/* Dark Gradient Overlay for Readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a4202]/70 via-[#0d5c03]/50 to-[#072e01]/80 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-md px-6 my-10">
@@ -112,7 +112,7 @@ export default function AuthPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl mb-2">
-            <img src="/logo.png" alt="Содон хүнс" className="h-16 md:h-24 w-auto object-contain mx-auto" />
+            <img src="/logo-new.png" alt="Ивээл махны дэлгүүр" className="h-16 md:h-24 w-auto object-contain mx-auto" />
           </h1>
           <p className="text-gray-200 text-sm md:text-base font-medium">
             Шинэ, чанартай мах махан бүтээгдэхүүн

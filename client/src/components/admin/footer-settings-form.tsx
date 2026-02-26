@@ -43,9 +43,9 @@ export function FooterSettingsForm() {
   const [quickLinks, setQuickLinks] = useState<Array<{ title: string; url: string }>>([]);
   const [newQuickLinkTitle, setNewQuickLinkTitle] = useState("");
   const [newQuickLinkUrl, setNewQuickLinkUrl] = useState("");
-  
+
   // Fetch existing footer settings
-  const { data: footerSettings, isLoading } = useQuery({
+  const { data: footerSettings, isLoading } = useQuery<any>({
     queryKey: ["/api/settings/footer"],
     queryFn: async () => {
       const res = await fetch("/api/settings/footer");
@@ -53,7 +53,7 @@ export function FooterSettingsForm() {
       return res.json();
     }
   });
-  
+
   // Setup form with default values
   const form = useForm<FooterFormValues>({
     resolver: zodResolver(footerSettingsSchema),
@@ -71,7 +71,7 @@ export function FooterSettingsForm() {
       youtube: ""
     }
   });
-  
+
   // Update form when data is loaded
   useEffect(() => {
     if (footerSettings && !isLoading) {
@@ -90,19 +90,19 @@ export function FooterSettingsForm() {
         instagram: footerSettings.socialLinks?.instagram || "",
         youtube: footerSettings.socialLinks?.youtube || "",
       });
-      
+
       // Set quick links
       if (footerSettings.quickLinks && Array.isArray(footerSettings.quickLinks)) {
         setQuickLinks(footerSettings.quickLinks);
       }
-      
+
       // Set preview URL for logo if it exists
       if (footerSettings.logoUrl) {
         setPreviewUrl(footerSettings.logoUrl);
       }
     }
   }, [footerSettings, isLoading, form]);
-  
+
   // Handle file selection for logo upload
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -112,7 +112,7 @@ export function FooterSettingsForm() {
       setPreviewUrl(fileUrl);
     }
   };
-  
+
   // Handle adding a new quick link
   const handleAddQuickLink = () => {
     if (newQuickLinkTitle && newQuickLinkUrl) {
@@ -126,20 +126,20 @@ export function FooterSettingsForm() {
       });
     }
   };
-  
+
   // Handle removing a quick link
   const handleRemoveQuickLink = (index: number) => {
     const newLinks = [...quickLinks];
     newLinks.splice(index, 1);
     setQuickLinks(newLinks);
   };
-  
+
   // Submit data to backend
   const updateFooterMutation = useMutation({
     mutationFn: async (data: FooterFormValues) => {
       // Create a FormData object to handle file uploads
       const formData = new FormData();
-      
+
       // Add basic form fields
       formData.append("companyName", data.companyName);
       formData.append("description", data.description);
@@ -147,14 +147,14 @@ export function FooterSettingsForm() {
       formData.append("phone", data.phone);
       formData.append("email", data.email);
       formData.append("copyrightText", data.copyrightText);
-      
+
       // Add logo if one is selected
       if (selectedFile) {
         formData.append("footerLogo", selectedFile);
       } else if (data.logoUrl) {
         formData.append("logoUrl", data.logoUrl);
       }
-      
+
       // Add social links
       const socialLinks = {
         facebook: data.facebook,
@@ -163,21 +163,21 @@ export function FooterSettingsForm() {
         youtube: data.youtube
       };
       formData.append("socialLinks", JSON.stringify(socialLinks));
-      
+
       // Add quick links
       formData.append("quickLinks", JSON.stringify(quickLinks));
-      
+
       // Send the data to the server
       const response = await fetch("/api/settings/footer", {
         method: "PUT",
         body: formData,
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as { message?: string };
         throw new Error(errorData.message || "Failed to update footer settings");
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -187,7 +187,7 @@ export function FooterSettingsForm() {
         description: "Хөлны тохиргоо шинэчлэгдлээ",
         variant: "default"
       });
-      
+
       // Invalidate the footer settings query to refresh the data
       queryClient.invalidateQueries({ queryKey: ["/api/settings/footer"] });
     },
@@ -200,15 +200,15 @@ export function FooterSettingsForm() {
       });
     }
   });
-  
+
   const onSubmit = (data: FooterFormValues) => {
     updateFooterMutation.mutate(data);
   };
-  
+
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">Ачааллаж байна...</div>;
   }
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -219,7 +219,7 @@ export function FooterSettingsForm() {
             <TabsTrigger value="social">Сошиал хаягууд</TabsTrigger>
             <TabsTrigger value="links">Холбоос</TabsTrigger>
           </TabsList>
-          
+
           {/* General Settings Tab */}
           <TabsContent value="general" className="space-y-4">
             <Card>
@@ -243,7 +243,7 @@ export function FooterSettingsForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="description"
@@ -251,17 +251,17 @@ export function FooterSettingsForm() {
                     <FormItem>
                       <FormLabel>Тайлбар</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Монголын хамгийн чанартай махыг танд хүргэж байна." 
-                          className="resize-none" 
-                          {...field} 
+                        <Textarea
+                          placeholder="Монголын хамгийн чанартай махыг танд хүргэж байна."
+                          className="resize-none"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="copyrightText"
@@ -269,25 +269,25 @@ export function FooterSettingsForm() {
                     <FormItem>
                       <FormLabel>Зохиогчийн эрхийн тэмдэглэл</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder={`© ${new Date().getFullYear()} Герин Мах. Бүх эрх хуулиар хамгаалагдсан.`} 
-                          {...field} 
+                        <Input
+                          placeholder={`© ${new Date().getFullYear()} Герин Мах. Бүх эрх хуулиар хамгаалагдсан.`}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <div className="space-y-2">
                   <FormLabel htmlFor="footerLogo">Хөлний лого (хэрэв шаардлагатай бол)</FormLabel>
                   <div className="flex flex-col space-y-2">
                     {previewUrl && (
                       <div className="relative w-48 h-24 bg-gray-100 rounded-md overflow-hidden">
-                        <img 
-                          src={previewUrl} 
-                          alt="Footer logo preview" 
-                          className="object-contain w-full h-full" 
+                        <img
+                          src={previewUrl}
+                          alt="Footer logo preview"
+                          className="object-contain w-full h-full"
                         />
                       </div>
                     )}
@@ -303,7 +303,7 @@ export function FooterSettingsForm() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Contact Information Tab */}
           <TabsContent value="contact" className="space-y-4">
             <Card>
@@ -324,17 +324,17 @@ export function FooterSettingsForm() {
                         Хаяг
                       </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Улаанбаатар хот, Монгол Улс" 
-                          className="resize-none" 
-                          {...field} 
+                        <Textarea
+                          placeholder="Улаанбаатар хот, Монгол Улс"
+                          className="resize-none"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="phone"
@@ -351,7 +351,7 @@ export function FooterSettingsForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -371,7 +371,7 @@ export function FooterSettingsForm() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Social Media Tab */}
           <TabsContent value="social" className="space-y-4">
             <Card>
@@ -398,7 +398,7 @@ export function FooterSettingsForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="twitter"
@@ -415,7 +415,7 @@ export function FooterSettingsForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="instagram"
@@ -432,7 +432,7 @@ export function FooterSettingsForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="youtube"
@@ -452,7 +452,7 @@ export function FooterSettingsForm() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Quick Links Tab */}
           <TabsContent value="links" className="space-y-4">
             <Card>
@@ -473,10 +473,10 @@ export function FooterSettingsForm() {
                             <p className="font-medium">{link.title}</p>
                             <p className="text-sm text-muted-foreground">{link.url}</p>
                           </div>
-                          <Button 
-                            type="button" 
-                            variant="destructive" 
-                            size="sm" 
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
                             onClick={() => handleRemoveQuickLink(index)}
                           >
                             Устгах
@@ -490,29 +490,29 @@ export function FooterSettingsForm() {
                     <p className="text-muted-foreground">Одоогоор холбоос байхгүй байна</p>
                   </div>
                 )}
-                
+
                 <Separator />
-                
+
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Шинэ холбоос нэмэх</h3>
                   <div className="flex gap-2 flex-col sm:flex-row">
                     <div className="flex-1">
-                      <Input 
-                        placeholder="Гарчиг (жнь: Бидний тухай)" 
+                      <Input
+                        placeholder="Гарчиг (жнь: Бидний тухай)"
                         value={newQuickLinkTitle}
                         onChange={(e) => setNewQuickLinkTitle(e.target.value)}
                       />
                     </div>
                     <div className="flex-1">
-                      <Input 
-                        placeholder="URL (жнь: /about)" 
+                      <Input
+                        placeholder="URL (жнь: /about)"
                         value={newQuickLinkUrl}
                         onChange={(e) => setNewQuickLinkUrl(e.target.value)}
                       />
                     </div>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={handleAddQuickLink}
                     >
                       Нэмэх
@@ -526,10 +526,10 @@ export function FooterSettingsForm() {
             </Card>
           </TabsContent>
         </Tabs>
-        
+
         <div className="flex justify-end">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             size="lg"
             disabled={updateFooterMutation.isPending}
             className="w-full sm:w-auto"

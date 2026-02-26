@@ -268,16 +268,23 @@ export class DatabaseStorage implements IStorage {
   private async initializeDatabase() {
     try {
       // Check if we have default shipping fee setting
-      const shippingFeeSetting = await this.getSiteSettingByKey("shipping_fee");
+      const shippingRulesSetting = await this.getSiteSettingByKey("shipping_rules");
 
-      if (!shippingFeeSetting) {
-        // Create default shipping fee setting
+      if (!shippingRulesSetting) {
+        // Create default shipping rules setting
         await this.createSiteSetting({
-          key: "shipping_fee",
-          value: "3000", // Default 3000 KRW shipping fee
-          description: "Default shipping fee in KRW"
+          key: "shipping_rules",
+          value: JSON.stringify([
+            { min: 0, max: 4, fee: 5700 },
+            { min: 5, max: 8, fee: 6200 },
+            { min: 9, max: 11, fee: 6700 },
+            { min: 12, max: 14, fee: 8000 },
+            { min: 15, max: 18, fee: 9500 },
+            { min: 18, max: 9999, fee: 9500 }
+          ]),
+          description: "Dynamic shipping rules"
         });
-        console.log("Default shipping fee setting created");
+        console.log("Default shipping rules setting created");
       }
 
       // Check if we already have any products

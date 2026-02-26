@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { insertSiteContentSchema } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { WYSIWYGEditor } from './wysiwyg-editor';
+import { WysiwygEditor } from './wysiwyg-editor';
 import {
   Form,
   FormControl,
@@ -93,9 +93,9 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
                   <FormItem>
                     <FormLabel>Түлхүүр (key)</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="home_hero" 
-                        {...field} 
+                      <Input
+                        placeholder="home_hero"
+                        {...field}
                         disabled={isEditing}
                       />
                     </FormControl>
@@ -126,7 +126,7 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
                 <FormItem>
                   <FormLabel>Зурган хаяг (URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
+                    <Input placeholder="https://example.com/image.jpg" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,10 +140,9 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
                 <FormItem>
                   <FormLabel>Агуулга</FormLabel>
                   <FormControl>
-                    <WYSIWYGEditor 
-                      content={field.value} 
-                      onChange={field.onChange} 
-                      placeholder="Агуулгаа энд оруулна уу..."
+                    <WysiwygEditor
+                      content={field.value}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

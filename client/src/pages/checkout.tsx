@@ -87,27 +87,42 @@ export default function Checkout() {
     }
   }, [user, isAuthLoading, setLocation, toast]);
 
-  // Fetch shipping fee from server
-  const { data: shippingFeeData, isLoading: isLoadingShippingFee } = useQuery({
+  // Calculate total weight (assuming 1 quantity = 1 kg for now)
+  const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Fetch shipping rules from server
+  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery({
     queryKey: ['shipping-fee'],
     queryFn: async () => {
       try {
         const data = await apiRequest('GET', '/api/settings/shipping-fee');
-        return data; // returns { value: "3000" } or similar
+        if (data && data.value) {
+          return JSON.parse(data.value) as { min: number, max: number, fee: number }[];
+        }
       } catch (error) {
         console.error('Error fetching shipping fee:', error);
-        return { value: "3000" }; // Default
       }
+      return []; // Default
     }
   });
 
-  // Update shipping fee when data changes
+  // Update shipping fee when data or weight changes
   useEffect(() => {
-    if (shippingFeeData && shippingFeeData.value) {
-      console.log("Setting shipping fee to:", shippingFeeData.value);
-      setShippingFee(Number(shippingFeeData.value));
+    let fee = 0;
+    if (shippingRulesData && shippingRulesData.length > 0) {
+      const applicableRule = shippingRulesData.find(rule => totalWeight >= rule.min && totalWeight <= rule.max);
+      if (applicableRule) {
+        fee = applicableRule.fee;
+      } else {
+        const maxRule = [...shippingRulesData].sort((a, b) => b.max - a.max)[0];
+        fee = maxRule ? maxRule.fee : 0;
+      }
+    } else if (!isLoadingShippingFee) {
+      fee = 3000;
     }
-  }, [shippingFeeData]);
+    console.log(`Calculated shipping fee: ${fee} for weight: ${totalWeight}`);
+    setShippingFee(fee);
+  }, [shippingRulesData, totalWeight, isLoadingShippingFee]);
 
   // Fetch all bank accounts
   const { data: bankAccounts = [], isLoading: isBankAccountsLoading } = useQuery<BankAccount[]>({

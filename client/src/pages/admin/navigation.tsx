@@ -57,18 +57,18 @@ export default function AdminNavigation() {
 
   const handleDelete = async () => {
     if (!navItemToDelete) return;
-    
+
     try {
       await apiRequest('DELETE', `/api/navigation/${navItemToDelete.id}`);
-      
+
       toast({
         title: 'Цэс устгагдлаа',
         description: 'Цэсний элемент амжилттай устгагдлаа.',
       });
-      
+
       // Refresh navigation list
       queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
-      
+
       setIsDeleteDialogOpen(false);
       setNavItemToDelete(null);
     } catch (error) {
@@ -83,17 +83,17 @@ export default function AdminNavigation() {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedNavItem(null);
-    
+
     // Refresh navigation list
     queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
   };
 
   const handleSortSuccess = () => {
     setIsSortOpen(false);
-    
+
     // Refresh navigation list
     queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
-    
+
     toast({
       title: 'Цэс шинэчлэгдлээ',
       description: 'Цэсний дараалал амжилттай шинэчлэгдлээ.',
@@ -104,7 +104,7 @@ export default function AdminNavigation() {
   const processNavigationItems = (items: NavigationItem[]) => {
     const topLevel = items.filter(item => item.parentId === null);
     const childrenMap = new Map<number, NavigationItem[]>();
-    
+
     items.forEach(item => {
       if (item.parentId !== null) {
         if (!childrenMap.has(item.parentId)) {
@@ -113,12 +113,12 @@ export default function AdminNavigation() {
         childrenMap.get(item.parentId)?.push(item);
       }
     });
-    
+
     const result = topLevel.map(item => ({
       ...item,
       children: childrenMap.get(item.id) || []
     }));
-    
+
     // Sort by order
     result.sort((a, b) => a.order - b.order);
     result.forEach(item => {
@@ -126,7 +126,7 @@ export default function AdminNavigation() {
         item.children.sort((a, b) => a.order - b.order);
       }
     });
-    
+
     return result;
   };
 
@@ -139,7 +139,7 @@ export default function AdminNavigation() {
           <div className="flex items-center">
             <AdminHeader title="Цэс удирдлага" />
             <div className="ml-2">
-              <HelpTooltip 
+              <HelpTooltip
                 content={
                   <div>
                     <p className="font-medium mb-1">Цэс удирдлага:</p>
@@ -158,8 +158,8 @@ export default function AdminNavigation() {
             </div>
           </div>
           <div className="space-x-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsSortOpen(true)}
               className="mr-2"
             >
@@ -334,7 +334,7 @@ export default function AdminNavigation() {
                 {selectedNavItem ? 'Цэс засах' : 'Шинэ цэс нэмэх'}
               </h2>
               <div className="ml-2">
-                <HelpTooltip 
+                <HelpTooltip
                   content={
                     <div>
                       <p className="font-medium mb-1">Цэс засах:</p>
@@ -356,7 +356,6 @@ export default function AdminNavigation() {
             </div>
             <NavigationForm
               navigationItem={selectedNavItem}
-              allNavigationItems={navigationItems}
               onSuccess={handleFormSuccess}
               onCancel={() => {
                 setIsFormOpen(false);
@@ -374,7 +373,7 @@ export default function AdminNavigation() {
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">Цэсний дараалал өөрчлөх</h2>
               <div className="ml-2">
-                <HelpTooltip 
+                <HelpTooltip
                   content={
                     <div>
                       <p className="font-medium mb-1">Дараалал өөрчлөх:</p>
@@ -392,11 +391,7 @@ export default function AdminNavigation() {
                 />
               </div>
             </div>
-            <NavigationSort
-              navigationItems={hierarchicalNavItems}
-              onSuccess={handleSortSuccess}
-              onCancel={() => setIsSortOpen(false)}
-            />
+            <NavigationSort />
           </div>
         </div>
       )}

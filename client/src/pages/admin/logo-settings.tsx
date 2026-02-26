@@ -49,7 +49,7 @@ export default function LogoSettings() {
       } catch (error) {
         console.error("Error fetching logo settings:", error);
         return {
-          logoUrl: "/logo.png" // Default logo
+          logoUrl: "/logo-new.png" // Default logo
         };
       }
     }
@@ -61,7 +61,7 @@ export default function LogoSettings() {
       form.reset({
         logoUrl: logoSettings.logoUrl
       });
-      
+
       if (logoSettings.logoUrl) {
         setImagePreview(logoSettings.logoUrl);
       }
@@ -80,14 +80,14 @@ export default function LogoSettings() {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      
+
       // Create image preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-      
+
       // Clear logoUrl field when uploading a new file
       form.setValue("logoUrl", "");
     }
@@ -98,39 +98,39 @@ export default function LogoSettings() {
     try {
       // Create FormData object for file upload
       const formData = new FormData();
-      
+
       // Add the file if one was selected
       if (selectedFile) {
         formData.append("logo", selectedFile);
       }
-      
+
       // Only add logoUrl if no file is selected
       if (!selectedFile && data.logoUrl) {
         formData.append("logoUrl", data.logoUrl);
       }
-      
+
       // Send request to update logo settings
       const response = await fetch("/api/settings/logo", {
         method: "PUT",
         credentials: "include",
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to update logo settings");
       }
-      
+
       const updatedSettings = await response.json();
-      
+
       // Show success toast
       toast({
         title: "Амжилттай шинэчлэгдлээ",
         description: "Логог амжилттай хадгалагдлаа",
       });
-      
+
       // Invalidate logo settings cache
       queryClient.invalidateQueries({ queryKey: ['/api/settings/logo'] });
-      
+
     } catch (error) {
       console.error("Error updating logo settings:", error);
       toast({
@@ -146,10 +146,10 @@ export default function LogoSettings() {
   return (
     <div className="min-h-screen bg-neutral flex">
       <AdminSidebar />
-      
+
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Лого тохиргоо" />
-        
+
         <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
           <Card>
             <CardHeader>
@@ -172,9 +172,9 @@ export default function LogoSettings() {
                             <FormItem>
                               <FormLabel>Лого URL</FormLabel>
                               <FormControl>
-                                <Input 
-                                  placeholder="https://example.com/logo.png" 
-                                  {...field} 
+                                <Input
+                                  placeholder="https://example.com/logo-new.png"
+                                  {...field}
                                   disabled={!!selectedFile}
                                 />
                               </FormControl>
@@ -185,15 +185,15 @@ export default function LogoSettings() {
                             </FormItem>
                           )}
                         />
-                        
+
                         {/* Logo upload component */}
                         <div className="mt-4">
                           <div className="flex items-center mb-2">
                             <span className="text-sm font-medium">Лого оруулах</span>
                           </div>
-                          
+
                           <div className="flex flex-col gap-2">
-                            <div 
+                            <div
                               className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
                               onClick={() => fileInputRef.current?.click()}
                             >
@@ -217,16 +217,16 @@ export default function LogoSettings() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Logo preview */}
                       <div>
                         <div className="text-sm font-medium mb-2">Лого урьдчилсан харагдац</div>
                         {imagePreview ? (
                           <div className="relative bg-gray-100 dark:bg-gray-800 p-4 rounded-md flex items-center justify-center">
-                            <img 
-                              src={imagePreview} 
-                              alt="Logo Preview" 
-                              className="max-h-32 max-w-full object-contain" 
+                            <img
+                              src={imagePreview}
+                              alt="Logo Preview"
+                              className="max-h-32 max-w-full object-contain"
                             />
                             {selectedFile && (
                               <button
@@ -253,7 +253,7 @@ export default function LogoSettings() {
                             <span className="text-gray-400">Лого байхгүй байна</span>
                           </div>
                         )}
-                        
+
                         <div className="mt-4">
                           <h4 className="text-sm font-medium mb-2">Зөвлөмж:</h4>
                           <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
@@ -264,9 +264,9 @@ export default function LogoSettings() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex justify-end">
-                      <Button 
+                      <Button
                         type="submit"
                         disabled={isSubmitting || (!form.getValues("logoUrl") && !selectedFile)}
                       >
@@ -281,7 +281,7 @@ export default function LogoSettings() {
               )}
             </CardContent>
           </Card>
-          
+
           {/* Usage in Navbar preview */}
           <Card className="mt-6">
             <CardHeader>
@@ -294,10 +294,10 @@ export default function LogoSettings() {
                 <div className="bg-gray-100 p-4 rounded-md">
                   <div className="flex items-center">
                     {imagePreview ? (
-                      <img 
-                        src={imagePreview || logoSettings?.logoUrl} 
-                        alt="Logo" 
-                        className="h-10 mr-2" 
+                      <img
+                        src={imagePreview || logoSettings?.logoUrl}
+                        alt="Logo"
+                        className="h-10 mr-2"
                       />
                     ) : (
                       <div className="h-10 w-32 bg-gray-200 animate-pulse rounded"></div>
@@ -310,17 +310,17 @@ export default function LogoSettings() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Navbar dark mode preview */}
               <div>
                 <h3 className="text-sm font-medium mb-2">Харанхуй өнгөтэй дэвсгэр:</h3>
                 <div className="bg-gray-800 p-4 rounded-md">
                   <div className="flex items-center">
                     {imagePreview ? (
-                      <img 
-                        src={imagePreview || logoSettings?.logoUrl} 
-                        alt="Logo" 
-                        className="h-10 mr-2" 
+                      <img
+                        src={imagePreview || logoSettings?.logoUrl}
+                        alt="Logo"
+                        className="h-10 mr-2"
                       />
                     ) : (
                       <div className="h-10 w-32 bg-gray-700 animate-pulse rounded"></div>
