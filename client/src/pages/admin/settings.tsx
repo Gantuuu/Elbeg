@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, Loader2, Plus, Trash2 } from 'lucide-react';
-import { AdminHeader } from '@/components/admin/header';
-import { AdminLayout } from '@/components/admin/layout';
-import { HelpTooltip } from '@/components/admin/help-tooltip';
-import { helpIllustrations } from '@/assets/help/index';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Save, Loader2, Plus, Trash2 } from "lucide-react";
+import { AdminHeader } from "@/components/admin/header";
+import { AdminLayout } from "@/components/admin/layout";
+import { HelpTooltip } from "@/components/admin/help-tooltip";
+import { helpIllustrations } from "@/assets/help/index";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Button,
   Card,
@@ -20,10 +20,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+} from "@/components/ui";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 // Define our validation schema
 const ruleSchema = z.object({
@@ -33,7 +33,7 @@ const ruleSchema = z.object({
 });
 
 const shippingRulesSchema = z.object({
-  rules: z.array(ruleSchema)
+  rules: z.array(ruleSchema),
 });
 
 type ShippingRulesFormValues = z.infer<typeof shippingRulesSchema>;
@@ -44,18 +44,22 @@ export default function AdminSettings() {
 
   // Fetch the current shipping rules
   const { data: shippingRulesData, isLoading } = useQuery({
-    queryKey: ['/api/settings/shipping-fee'],
+    queryKey: ["/api/settings/shipping-fee"],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/settings/shipping-fee');
+      const response = await apiRequest("GET", "/api/settings/shipping-fee");
       try {
         if (response && response.value) {
-          return JSON.parse(response.value) as { min: number, max: number, fee: number }[];
+          return JSON.parse(response.value) as {
+            min: number;
+            max: number;
+            fee: number;
+          }[];
         }
       } catch (e) {
         console.error("Failed to parse shipping rules", e);
       }
       return [];
-    }
+    },
   });
 
   // Set up the form with react-hook-form
@@ -68,14 +72,18 @@ export default function AdminSettings() {
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "rules"
+    name: "rules",
   });
 
   // Update form when data loads
   useEffect(() => {
     if (shippingRulesData && shippingRulesData.length > 0) {
       form.reset({ rules: shippingRulesData });
-    } else if (shippingRulesData && shippingRulesData.length === 0 && fields.length === 0) {
+    } else if (
+      shippingRulesData &&
+      shippingRulesData.length === 0 &&
+      fields.length === 0
+    ) {
       form.reset({ rules: [{ min: 0, max: 4, fee: 5700 }] });
     }
   }, [shippingRulesData, form, fields.length]);
@@ -83,14 +91,18 @@ export default function AdminSettings() {
   // Update shipping rules mutation
   const { mutate: updateShippingRules, isPending } = useMutation({
     mutationFn: async (data: ShippingRulesFormValues) => {
-      return apiRequest('PUT', '/api/settings/shipping-fee', { value: JSON.stringify(data.rules) });
+      return apiRequest("PUT", "/api/settings/shipping-fee", {
+        value: JSON.stringify(data.rules),
+      });
     },
     onSuccess: () => {
       toast({
         title: "Хүргэлтийн дүрэм шинэчлэгдлээ",
         description: "Шинэ хүргэлтийн жингийн интервалууд хадгалагдлаа.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/settings/shipping-fee'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/settings/shipping-fee"],
+      });
     },
     onError: () => {
       toast({
@@ -98,7 +110,7 @@ export default function AdminSettings() {
         description: "Дахин оролдоно уу.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   function onSubmit(data: ShippingRulesFormValues) {
@@ -117,7 +129,9 @@ export default function AdminSettings() {
                   Энэ хэсэгт та веб дэлгүүрийн ерөнхий тохиргоог хийх боломжтой.
                 </p>
                 <p>
-                  <strong>Хүргэлтийн төлбөр:</strong> Энэ тохиргоо нь захиалга хийх үед нийт жингээс хамаарч бодогдох хүргэлтийн төлбөрийг тохируулна.
+                  <strong>Хүргэлтийн төлбөр:</strong> Энэ тохиргоо нь захиалга
+                  хийх үед нийт жингээс хамаарч бодогдох хүргэлтийн төлбөрийг
+                  тохируулна.
                 </p>
               </div>
             }
@@ -127,9 +141,14 @@ export default function AdminSettings() {
 
         <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle>Хүргэлтийн төлбөрийн тохиргоо (Жингийн хамаарал)</CardTitle>
+            <CardTitle>
+              Хүргэлтийн төлбөрийн тохиргоо (Жингийн хамаарал)
+            </CardTitle>
             <div className="text-sm text-gray-500 mt-1">
-              Захиалга хийх үед барааны нийт жингээс хамаарч автоматаар нэмэгдэх хүргэлтийн төлбөрийг тохируулна. Хэрэв сагсан дахь нийт жин интервалд багтахгүй бол хамгийн дээд интервалын төлбөрийг авах болно.
+              Захиалга хийх үед барааны нийт жингээс хамаарч автоматаар нэмэгдэх
+              хүргэлтийн төлбөрийг тохируулна. Хэрэв сагсан дахь нийт жин
+              интервалд багтахгүй бол хамгийн дээд интервалын төлбөрийг авах
+              болно.
             </div>
           </CardHeader>
           <CardContent>
@@ -139,8 +158,10 @@ export default function AdminSettings() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   <div className="space-y-4">
                     <div className="flex items-center justify-end">
                       <Button
@@ -161,7 +182,10 @@ export default function AdminSettings() {
                     )}
 
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex items-end gap-4 p-4 border rounded-md relative bg-gray-50/50">
+                      <div
+                        key={field.id}
+                        className="flex items-end gap-4 p-4 border rounded-md relative bg-gray-50/50"
+                      >
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                           <FormField
                             control={form.control}

@@ -9,7 +9,6 @@ import { ShoppingCart, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFullImageUrl } from "@/lib/image-utils";
 
-
 interface GeneratedMealKitComponent {
   id: number;
   generatedMealKitId: number;
@@ -54,12 +53,16 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   const addToCartMutation = useMutation({
     mutationFn: async () => {
       const { apiRequest } = await import("@/lib/queryClient");
-      const res = await apiRequest("PATCH", `/api/generated-meal-kits/${mealKit.id}`, { isAddedToCart: true });
+      const res = await apiRequest(
+        "PATCH",
+        `/api/generated-meal-kits/${mealKit.id}`,
+        { isAddedToCart: true },
+      );
       return res;
     },
     onSuccess: () => {
       // Add all products to cart
-      mealKit.components.forEach(component => {
+      mealKit.components.forEach((component) => {
         addItem({
           productId: component.product.id,
           name: component.product.name,
@@ -79,13 +82,15 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
     onError: (error: Error) => {
       toast({
         title: "Алдаа гарлаа",
-        description: error.message || "Хоолны багцыг сагсанд нэмэхэд алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          error.message ||
+          "Хоолны багцыг сагсанд нэмэхэд алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
     },
     onSettled: () => {
       setIsAddingToCart(false);
-    }
+    },
   });
 
   // Delete meal kit mutation
@@ -106,10 +111,12 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
     onError: (error: Error) => {
       toast({
         title: "Алдаа гарлаа",
-        description: error.message || "Хоолны багцыг устгахад алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          error.message ||
+          "Хоолны багцыг устгахад алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Handle add to cart
@@ -126,14 +133,20 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
   };
 
   // Calculate total quantity of items
-  const totalItems = mealKit.components.reduce((sum, component) => sum + parseInt(component.quantity), 0);
+  const totalItems = mealKit.components.reduce(
+    (sum, component) => sum + parseInt(component.quantity),
+    0,
+  );
 
   // Format created date
-  const formattedDate = new Date(mealKit.createdAt).toLocaleDateString("mn-MN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  const formattedDate = new Date(mealKit.createdAt).toLocaleDateString(
+    "mn-MN",
+    {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    },
+  );
 
   return (
     <motion.div
@@ -150,7 +163,9 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
               {formattedDate} - {totalItems} ширхэг
             </p>
           </div>
-          <div className="text-xl font-bold gradient-text">{formatPrice(mealKit.totalPrice)}</div>
+          <div className="text-xl font-bold gradient-text">
+            {formatPrice(mealKit.totalPrice)}
+          </div>
         </div>
       </div>
 
@@ -159,7 +174,10 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center -space-x-2">
             {mealKit.components.slice(0, 3).map((component) => (
-              <div key={component.id} className="w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm">
+              <div
+                key={component.id}
+                className="w-8 h-8 rounded-full overflow-hidden border border-white shadow-sm"
+              >
                 <img
                   src={getFullImageUrl(component.product.imageUrl)}
                   alt={component.product.name}
@@ -192,10 +210,15 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
       {/* Expanded meal kit details */}
       {isExpanded && (
         <div className="p-4 border-t border-gray-100">
-          <h4 className="font-medium mb-2 text-gray-700">Багцын бүрэлдэхүүн:</h4>
+          <h4 className="font-medium mb-2 text-gray-700">
+            Багцын бүрэлдэхүүн:
+          </h4>
           <ul className="space-y-2">
             {mealKit.components.map((component) => (
-              <li key={component.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+              <li
+                key={component.id}
+                className="flex justify-between items-center p-2 bg-gray-50 rounded"
+              >
                 <div className="flex items-center">
                   <img
                     src={getFullImageUrl(component.product.imageUrl)}
@@ -203,13 +226,19 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
                     className="w-8 h-8 rounded object-cover mr-2"
                   />
                   <div>
-                    <p className="text-sm font-medium">{component.product.name}</p>
-                    <p className="text-xs text-gray-500">{component.product.category}</p>
+                    <p className="text-sm font-medium">
+                      {component.product.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {component.product.category}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <span className="text-sm mr-2">{component.quantity}x</span>
-                  <span className="text-sm font-medium">{formatPrice(component.price)}</span>
+                  <span className="text-sm font-medium">
+                    {formatPrice(component.price)}
+                  </span>
                 </div>
               </li>
             ))}
@@ -236,10 +265,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
 
         <div className="flex space-x-2">
           <Link href={`/meal-kit-generator`}>
-            <Button
-              variant="outline"
-              size="sm"
-            >
+            <Button variant="outline" size="sm">
               Шинэ багц үүсгэх
             </Button>
           </Link>
@@ -249,7 +275,7 @@ export function GeneratedMealKitCard({ mealKit }: GeneratedMealKitCardProps) {
             size="sm"
             onClick={handleAddToCart}
             disabled={isAddingToCart || mealKit.isAddedToCart}
-            className={`${mealKit.isAddedToCart ? 'bg-green-600 hover:bg-green-700' : 'btn-gradient'}`}
+            className={`${mealKit.isAddedToCart ? "bg-green-600 hover:bg-green-700" : "btn-gradient"}`}
           >
             {isAddingToCart ? (
               <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-1"></div>

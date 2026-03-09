@@ -12,7 +12,12 @@ export interface AdminHeaderProps {
   showBackButton?: boolean;
 }
 
-export function AdminHeader({ title, description, icon, showBackButton = true }: AdminHeaderProps) {
+export function AdminHeader({
+  title,
+  description,
+  icon,
+  showBackButton = true,
+}: AdminHeaderProps) {
   // This would come from the admin's session in a real app
   const adminName = "Админ";
 
@@ -30,7 +35,7 @@ export function AdminHeader({ title, description, icon, showBackButton = true }:
   const pendingOrdersCount = pendingCount || pendingData?.count || 0;
 
   return (
-    <header className="bg-[#0d5c03] shadow">
+    <header className="bg-[#3c8fb8] shadow">
       <div className="flex items-center justify-between px-4 md:px-6 py-4 md:py-4">
         <div className="flex items-center">
           {showBackButton && (
@@ -44,10 +49,12 @@ export function AdminHeader({ title, description, icon, showBackButton = true }:
           <div>
             <div className="flex items-center">
               {icon && <div className="mr-2 text-white">{icon}</div>}
-              <h1 className={cn(
-                "font-bold text-white",
-                "text-xl md:text-2xl", // Smaller on mobile, larger on desktop
-              )}>
+              <h1
+                className={cn(
+                  "font-bold text-white",
+                  "text-xl md:text-2xl", // Smaller on mobile, larger on desktop
+                )}
+              >
                 {title}
               </h1>
             </div>
@@ -64,13 +71,17 @@ export function AdminHeader({ title, description, icon, showBackButton = true }:
             Админ: {adminName}
           </span>
           <button className="p-1 md:p-1.5 rounded-full hover:bg-white/10 relative">
-            <span className="material-icons text-base md:text-lg text-white">notifications</span>
-            <span className={cn(
-              "absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center",
-              pendingOrdersCount > 0
-                ? "bg-red-500 animate-pulse"
-                : "bg-[#0d5c03]"
-            )}>
+            <span className="material-icons text-base md:text-lg text-white">
+              notifications
+            </span>
+            <span
+              className={cn(
+                "absolute -top-1 -right-1 text-white text-xs font-bold rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center",
+                pendingOrdersCount > 0
+                  ? "bg-red-500 animate-pulse"
+                  : "bg-[#3c8fb8]",
+              )}
+            >
               {pendingOrdersCount}
             </span>
           </button>

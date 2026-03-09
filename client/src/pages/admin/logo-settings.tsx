@@ -42,24 +42,24 @@ export default function LogoSettings() {
 
   // Fetch current logo settings
   const { data: logoSettings, isLoading } = useQuery<LogoSettings>({
-    queryKey: ['/api/settings/logo'],
+    queryKey: ["/api/settings/logo"],
     queryFn: async () => {
       try {
-        return await apiRequest('GET', '/api/settings/logo');
+        return await apiRequest("GET", "/api/settings/logo");
       } catch (error) {
         console.error("Error fetching logo settings:", error);
         return {
-          logoUrl: "/logo-new.png" // Default logo
+          logoUrl: "/logo-new.png", // Default logo
         };
       }
-    }
+    },
   });
 
   // Set default form values and image preview when data loads
   useEffect(() => {
     if (logoSettings) {
       form.reset({
-        logoUrl: logoSettings.logoUrl
+        logoUrl: logoSettings.logoUrl,
       });
 
       if (logoSettings.logoUrl) {
@@ -71,8 +71,8 @@ export default function LogoSettings() {
   const form = useForm<LogoFormValues>({
     resolver: zodResolver(logoFormSchema),
     defaultValues: {
-      logoUrl: ""
-    }
+      logoUrl: "",
+    },
   });
 
   // Handle file selection
@@ -129,8 +129,7 @@ export default function LogoSettings() {
       });
 
       // Invalidate logo settings cache
-      queryClient.invalidateQueries({ queryKey: ['/api/settings/logo'] });
-
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/logo"] });
     } catch (error) {
       console.error("Error updating logo settings:", error);
       toast({
@@ -150,7 +149,10 @@ export default function LogoSettings() {
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Лого тохиргоо" />
 
-        <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
+        <div
+          className="p-6 overflow-auto"
+          style={{ height: "calc(100vh - 70px)" }}
+        >
           <Card>
             <CardHeader>
               <CardTitle>Вебсайт лого</CardTitle>
@@ -162,7 +164,10 @@ export default function LogoSettings() {
                 </div>
               ) : (
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <FormField
@@ -179,7 +184,8 @@ export default function LogoSettings() {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Лого зурагны URL хаяг эсвэл доор шинэ лого файл оруулна уу
+                                Лого зурагны URL хаяг эсвэл доор шинэ лого файл
+                                оруулна уу
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -189,7 +195,9 @@ export default function LogoSettings() {
                         {/* Logo upload component */}
                         <div className="mt-4">
                           <div className="flex items-center mb-2">
-                            <span className="text-sm font-medium">Лого оруулах</span>
+                            <span className="text-sm font-medium">
+                              Лого оруулах
+                            </span>
                           </div>
 
                           <div className="flex flex-col gap-2">
@@ -220,7 +228,9 @@ export default function LogoSettings() {
 
                       {/* Logo preview */}
                       <div>
-                        <div className="text-sm font-medium mb-2">Лого урьдчилсан харагдац</div>
+                        <div className="text-sm font-medium mb-2">
+                          Лого урьдчилсан харагдац
+                        </div>
                         {imagePreview ? (
                           <div className="relative bg-gray-100 dark:bg-gray-800 p-4 rounded-md flex items-center justify-center">
                             <img
@@ -234,14 +244,29 @@ export default function LogoSettings() {
                                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                                 onClick={() => {
                                   setSelectedFile(null);
-                                  setImagePreview(logoSettings?.logoUrl || null);
-                                  form.setValue("logoUrl", logoSettings?.logoUrl || "");
+                                  setImagePreview(
+                                    logoSettings?.logoUrl || null,
+                                  );
+                                  form.setValue(
+                                    "logoUrl",
+                                    logoSettings?.logoUrl || "",
+                                  );
                                   if (fileInputRef.current) {
-                                    fileInputRef.current.value = '';
+                                    fileInputRef.current.value = "";
                                   }
                                 }}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
                                   <line x1="18" y1="6" x2="6" y2="18"></line>
                                   <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -250,7 +275,9 @@ export default function LogoSettings() {
                           </div>
                         ) : (
                           <div className="border border-dashed border-gray-300 rounded-md p-4 h-40 flex items-center justify-center">
-                            <span className="text-gray-400">Лого байхгүй байна</span>
+                            <span className="text-gray-400">
+                              Лого байхгүй байна
+                            </span>
                           </div>
                         )}
 
@@ -258,7 +285,10 @@ export default function LogoSettings() {
                           <h4 className="text-sm font-medium mb-2">Зөвлөмж:</h4>
                           <ul className="text-xs text-gray-500 space-y-1 list-disc pl-4">
                             <li>Хамгийн сайн харагдах хэмжээ: 200x60 пиксел</li>
-                            <li>Дэвсгэр нь тунгалаг байх нь зүйтэй (PNG эсвэл SVG зураг)</li>
+                            <li>
+                              Дэвсгэр нь тунгалаг байх нь зүйтэй (PNG эсвэл SVG
+                              зураг)
+                            </li>
                             <li>Файлын хэмжээ: 2MB-с бага байх</li>
                           </ul>
                         </div>
@@ -268,7 +298,10 @@ export default function LogoSettings() {
                     <div className="flex justify-end">
                       <Button
                         type="submit"
-                        disabled={isSubmitting || (!form.getValues("logoUrl") && !selectedFile)}
+                        disabled={
+                          isSubmitting ||
+                          (!form.getValues("logoUrl") && !selectedFile)
+                        }
                       >
                         {isSubmitting && (
                           <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>
@@ -290,7 +323,9 @@ export default function LogoSettings() {
             <CardContent>
               {/* Navbar light mode preview */}
               <div className="mb-4">
-                <h3 className="text-sm font-medium mb-2">Цайвар өнгөтэй дэвсгэр:</h3>
+                <h3 className="text-sm font-medium mb-2">
+                  Цайвар өнгөтэй дэвсгэр:
+                </h3>
                 <div className="bg-gray-100 p-4 rounded-md">
                   <div className="flex items-center">
                     {imagePreview ? (
@@ -313,7 +348,9 @@ export default function LogoSettings() {
 
               {/* Navbar dark mode preview */}
               <div>
-                <h3 className="text-sm font-medium mb-2">Харанхуй өнгөтэй дэвсгэр:</h3>
+                <h3 className="text-sm font-medium mb-2">
+                  Харанхуй өнгөтэй дэвсгэр:
+                </h3>
                 <div className="bg-gray-800 p-4 rounded-md">
                   <div className="flex items-center">
                     {imagePreview ? (

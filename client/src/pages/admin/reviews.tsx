@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/layout';
-import { AdminHeader } from '@/components/admin/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Review } from '@shared/schema';
-import { Loader2, Search, Star, Check, X, Trash2, MessageSquare } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { AdminLayout } from "@/components/admin/layout";
+import { AdminHeader } from "@/components/admin/header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Review } from "@shared/schema";
+import {
+  Loader2,
+  Search,
+  Star,
+  Check,
+  X,
+  Trash2,
+  MessageSquare,
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   AlertDialog,
@@ -22,23 +30,29 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function AdminReviews() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [deleteReviewId, setDeleteReviewId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const { data: reviews = [], isLoading } = useQuery<Review[]>({
-    queryKey: ['reviews'],
+    queryKey: ["reviews"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/admin/reviews');
-    }
+      return await apiRequest("GET", "/api/admin/reviews");
+    },
   });
 
   const approveMutation = useMutation({
-    mutationFn: async ({ id, isApproved }: { id: number; isApproved: boolean }) => {
-      await apiRequest('PATCH', `/api/admin/reviews/${id}`, { isApproved });
+    mutationFn: async ({
+      id,
+      isApproved,
+    }: {
+      id: number;
+      isApproved: boolean;
+    }) => {
+      await apiRequest("PATCH", `/api/admin/reviews/${id}`, { isApproved });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
       toast({
         title: "Амжилттай",
         description: "Сэтгэгдэл шинэчлэгдлээ",
@@ -55,10 +69,10 @@ export default function AdminReviews() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest('DELETE', `/api/admin/reviews/${id}`);
+      await apiRequest("DELETE", `/api/admin/reviews/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
       toast({
         title: "Амжилттай",
         description: "Сэтгэгдэл устгагдлаа",
@@ -74,9 +88,10 @@ export default function AdminReviews() {
     },
   });
 
-  const filteredReviews = reviews.filter(review =>
-    review.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    review.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredReviews = reviews.filter(
+    (review) =>
+      review.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      review.content?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const renderStars = (rating: number) => {
@@ -85,7 +100,7 @@ export default function AdminReviews() {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`h-4 w-4 ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+            className={`h-4 w-4 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
           />
         ))}
       </div>
@@ -129,9 +144,13 @@ export default function AdminReviews() {
                   <thead>
                     <tr className="text-left border-b">
                       <th className="px-4 py-3 text-sm font-medium">ID</th>
-                      <th className="px-4 py-3 text-sm font-medium">Хэрэглэгч</th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Хэрэглэгч
+                      </th>
                       <th className="px-4 py-3 text-sm font-medium">Үнэлгээ</th>
-                      <th className="px-4 py-3 text-sm font-medium">Сэтгэгдэл</th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Сэтгэгдэл
+                      </th>
                       <th className="px-4 py-3 text-sm font-medium">Төлөв</th>
                       <th className="px-4 py-3 text-sm font-medium">Огноо</th>
                       <th className="px-4 py-3 text-sm font-medium">Үйлдэл</th>
@@ -140,17 +159,31 @@ export default function AdminReviews() {
                   <tbody>
                     {filteredReviews.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-4 text-center text-muted-foreground">
+                        <td
+                          colSpan={7}
+                          className="px-4 py-4 text-center text-muted-foreground"
+                        >
                           Сэтгэгдэл олдсонгүй
                         </td>
                       </tr>
                     ) : (
                       filteredReviews.map((review) => (
-                        <tr key={review.id} className="border-b hover:bg-muted/50" data-testid={`row-review-${review.id}`}>
+                        <tr
+                          key={review.id}
+                          className="border-b hover:bg-muted/50"
+                          data-testid={`row-review-${review.id}`}
+                        >
                           <td className="px-4 py-3 text-sm">{review.id}</td>
-                          <td className="px-4 py-3 text-sm font-medium">{review.customerName}</td>
-                          <td className="px-4 py-3 text-sm">{renderStars(review.rating)}</td>
-                          <td className="px-4 py-3 text-sm max-w-xs truncate" title={review.content}>
+                          <td className="px-4 py-3 text-sm font-medium">
+                            {review.customerName}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {renderStars(review.rating)}
+                          </td>
+                          <td
+                            className="px-4 py-3 text-sm max-w-xs truncate"
+                            title={review.content}
+                          >
                             {review.content}
                           </td>
                           <td className="px-4 py-3 text-sm">
@@ -166,8 +199,10 @@ export default function AdminReviews() {
                           </td>
                           <td className="px-4 py-3 text-sm">
                             {review.createdAt
-                              ? new Date(review.createdAt).toLocaleDateString('mn-MN')
-                              : '-'}
+                              ? new Date(review.createdAt).toLocaleDateString(
+                                  "mn-MN",
+                                )
+                              : "-"}
                           </td>
                           <td className="px-4 py-3 text-sm">
                             <div className="flex gap-2">
@@ -176,7 +211,12 @@ export default function AdminReviews() {
                                   size="sm"
                                   variant="outline"
                                   className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  onClick={() => approveMutation.mutate({ id: review.id, isApproved: true })}
+                                  onClick={() =>
+                                    approveMutation.mutate({
+                                      id: review.id,
+                                      isApproved: true,
+                                    })
+                                  }
                                   disabled={approveMutation.isPending}
                                   data-testid={`button-approve-${review.id}`}
                                 >
@@ -187,7 +227,12 @@ export default function AdminReviews() {
                                   size="sm"
                                   variant="outline"
                                   className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
-                                  onClick={() => approveMutation.mutate({ id: review.id, isApproved: false })}
+                                  onClick={() =>
+                                    approveMutation.mutate({
+                                      id: review.id,
+                                      isApproved: false,
+                                    })
+                                  }
                                   disabled={approveMutation.isPending}
                                   data-testid={`button-unapprove-${review.id}`}
                                 >
@@ -216,18 +261,26 @@ export default function AdminReviews() {
         </Card>
       </div>
 
-      <AlertDialog open={deleteReviewId !== null} onOpenChange={(open) => !open && setDeleteReviewId(null)}>
+      <AlertDialog
+        open={deleteReviewId !== null}
+        onOpenChange={(open) => !open && setDeleteReviewId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Сэтгэгдэл устгах</AlertDialogTitle>
             <AlertDialogDescription>
-              Та энэ сэтгэгдлийг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
+              Та энэ сэтгэгдлийг устгахдаа итгэлтэй байна уу? Энэ үйлдлийг
+              буцаах боломжгүй.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Цуцлах</AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">
+              Цуцлах
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteReviewId && deleteMutation.mutate(deleteReviewId)}
+              onClick={() =>
+                deleteReviewId && deleteMutation.mutate(deleteReviewId)
+              }
               className="bg-red-600 hover:bg-red-700"
               data-testid="button-confirm-delete"
             >

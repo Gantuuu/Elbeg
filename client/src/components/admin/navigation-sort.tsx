@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  GripVertical,
-  ChevronRight,
-  ChevronDown,
-  Loader2
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { GripVertical, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui';
-import { apiRequest } from '@/lib/queryClient';
+} from "@/components/ui";
+import { apiRequest } from "@/lib/queryClient";
 
 interface NavigationItem {
   id: number;
@@ -35,11 +30,11 @@ export function NavigationSort() {
 
   // Fetch navigation tree
   const { data: navItems = [], isLoading } = useQuery({
-    queryKey: ['/api/navigation/tree'],
+    queryKey: ["/api/navigation/tree"],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/navigation/tree');
+      const data = await apiRequest("GET", "/api/navigation/tree");
       return data as NavigationItem[];
-    }
+    },
   });
 
   // Flatten the tree for easier manipulation
@@ -47,14 +42,15 @@ export function NavigationSort() {
     items: NavigationItem[],
     result: any[] = [],
     level = 0,
-    parentOrder: string | null = null
+    parentOrder: string | null = null,
   ): any[] => {
     items.forEach((item, index) => {
       // Create a flat version of the item with level info
       const flatItem = {
         ...item,
         level,
-        parentOrder: parentOrder !== null ? `${parentOrder}-${index}` : `${index}`
+        parentOrder:
+          parentOrder !== null ? `${parentOrder}-${index}` : `${index}`,
       };
 
       // Add to results
@@ -72,7 +68,7 @@ export function NavigationSort() {
   const flatItems = flattenTree(navItems);
 
   const toggleExpand = (id: number) => {
-    setExpanded(prev => {
+    setExpanded((prev) => {
       const newExpanded = new Set(prev);
       if (newExpanded.has(id)) {
         newExpanded.delete(id);
@@ -85,24 +81,24 @@ export function NavigationSort() {
 
   const handleDragStart = (e: React.DragEvent, id: number) => {
     setDraggingId(id);
-    e.dataTransfer.setData('text/plain', id.toString());
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData("text/plain", id.toString());
+    e.dataTransfer.effectAllowed = "move";
   };
 
   const handleDragOver = (e: React.DragEvent, id: number) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   };
 
   const handleDrop = async (e: React.DragEvent, targetId: number) => {
     e.preventDefault();
 
-    const sourceId = parseInt(e.dataTransfer.getData('text/plain'));
+    const sourceId = parseInt(e.dataTransfer.getData("text/plain"));
     if (sourceId === targetId) return;
 
     // Find the source and target items
-    const sourceItem = flatItems.find(item => item.id === sourceId);
-    const targetItem = flatItems.find(item => item.id === targetId);
+    const sourceItem = flatItems.find((item) => item.id === sourceId);
+    const targetItem = flatItems.find((item) => item.id === targetId);
 
     if (!sourceItem || !targetItem) return;
 
@@ -111,26 +107,30 @@ export function NavigationSort() {
       try {
         setIsSaving(true);
 
-        await apiRequest('PUT', `/api/navigation/${sourceId}`, {
+        await apiRequest("PUT", `/api/navigation/${sourceId}`, {
           ...sourceItem,
-          parentId: targetId
+          parentId: targetId,
         });
 
         // Expand the target to show the newly added child
-        setExpanded(prev => { const s = new Set(prev); s.add(targetId); return s; });
+        setExpanded((prev) => {
+          const s = new Set(prev);
+          s.add(targetId);
+          return s;
+        });
 
         toast({
-          title: 'Амжилттай',
-          description: 'Цэсний бүтэц шинэчлэгдлээ.',
+          title: "Амжилттай",
+          description: "Цэсний бүтэц шинэчлэгдлээ.",
         });
 
         // Refetch navigation
-        queryClient.invalidateQueries({ queryKey: ['/api/navigation/tree'] });
+        queryClient.invalidateQueries({ queryKey: ["/api/navigation/tree"] });
       } catch (error) {
         toast({
-          title: 'Алдаа гарлаа',
-          description: 'Цэсний бүтэц шинэчлэх үед алдаа гарлаа.',
-          variant: 'destructive',
+          title: "Алдаа гарлаа",
+          description: "Цэсний бүтэц шинэчлэх үед алдаа гарлаа.",
+          variant: "destructive",
         });
       } finally {
         setIsSaving(false);
@@ -143,16 +143,17 @@ export function NavigationSort() {
     let itemIds: number[] = [];
 
     // Get all items at the same level as the target
-    const siblingItems = flatItems.filter(item =>
-      item.level === targetItem.level &&
-      item.parentId === targetItem.parentId
+    const siblingItems = flatItems.filter(
+      (item) =>
+        item.level === targetItem.level &&
+        item.parentId === targetItem.parentId,
     );
 
     // Create a new order
-    itemIds = siblingItems.map(item => item.id);
+    itemIds = siblingItems.map((item) => item.id);
 
     // Remove source item from its current position
-    itemIds = itemIds.filter(id => id !== sourceId);
+    itemIds = itemIds.filter((id) => id !== sourceId);
 
     // Find the index of the target
     const targetIndex = itemIds.indexOf(targetId);
@@ -164,20 +165,20 @@ export function NavigationSort() {
       setIsSaving(true);
 
       // Update the order
-      await apiRequest('POST', '/api/navigation/order', { itemIds });
+      await apiRequest("POST", "/api/navigation/order", { itemIds });
 
       toast({
-        title: 'Амжилттай',
-        description: 'Цэсний дараалал шинэчлэгдлээ.',
+        title: "Амжилттай",
+        description: "Цэсний дараалал шинэчлэгдлээ.",
       });
 
       // Refetch navigation
-      queryClient.invalidateQueries({ queryKey: ['/api/navigation/tree'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/navigation/tree"] });
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Цэсний дараалал шинэчлэх үед алдаа гарлаа.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Цэсний дараалал шинэчлэх үед алдаа гарлаа.",
+        variant: "destructive",
       });
     } finally {
       setIsSaving(false);
@@ -206,9 +207,9 @@ export function NavigationSort() {
                 key={item.id}
                 className={`
                   flex items-center border-b last:border-b-0 
-                  ${draggingId === item.id ? 'bg-blue-50' : 'hover:bg-gray-50'}
+                  ${draggingId === item.id ? "bg-blue-50" : "hover:bg-gray-50"}
                   transition-colors
-                  ${!item.isActive ? 'opacity-50' : ''}
+                  ${!item.isActive ? "opacity-50" : ""}
                 `}
                 style={{ paddingLeft: `${item.level * 1.5 + 0.75}rem` }}
                 draggable
@@ -244,16 +245,17 @@ export function NavigationSort() {
                   </div>
                 </div>
 
-                <div className="p-3 text-xs text-gray-500">
-                  ID: {item.id}
-                </div>
+                <div className="p-3 text-xs text-gray-500">ID: {item.id}</div>
               </div>
             ))}
           </div>
         )}
 
         <div className="mt-4 text-sm text-gray-500">
-          <p>Чирж эрэмбэ өөрчлөх боломжтой. Мөн дэд цэс болгохын тулд хүссэн цэс дээр чирнэ үү.</p>
+          <p>
+            Чирж эрэмбэ өөрчлөх боломжтой. Мөн дэд цэс болгохын тулд хүссэн цэс
+            дээр чирнэ үү.
+          </p>
         </div>
       </CardContent>
     </Card>

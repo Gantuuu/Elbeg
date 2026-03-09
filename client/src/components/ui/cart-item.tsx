@@ -4,7 +4,6 @@ import { useCart } from "@/hooks/use-cart";
 import { useLanguage } from "@/contexts/language-context";
 import { getFullImageUrl } from "@/lib/image-utils";
 
-
 interface CartItemProps {
   item: CartItem;
 }
@@ -40,8 +39,10 @@ export function CartItemComponent({ item }: CartItemProps) {
       </div>
       <div className="ml-4 flex-grow">
         <h3 className="font-medium text-foreground">{item.name}</h3>
-        <p className="text-muted-foreground text-sm">{formatPrice(item.price)} / кг</p>
-        <p className="text-[#0d5c03] font-medium text-sm mt-1">
+        <p className="text-muted-foreground text-sm">
+          {formatPrice(item.price)} / кг
+        </p>
+        <p className="text-[#3c8fb8] font-medium text-sm mt-1">
           {t.total}: {formatPrice(item.price * item.quantity)}
         </p>
       </div>
@@ -54,7 +55,9 @@ export function CartItemComponent({ item }: CartItemProps) {
           >
             <span className="material-icons text-sm">remove</span>
           </button>
-          <span className="mx-2 min-w-[20px] text-center font-medium text-sm">{item.quantity}</span>
+          <span className="mx-2 min-w-[20px] text-center font-medium text-sm">
+            {item.quantity}
+          </span>
           <button
             onClick={handleIncrement}
             className="p-1 hover:bg-secondary/10 transition-colors text-foreground"
@@ -68,8 +71,10 @@ export function CartItemComponent({ item }: CartItemProps) {
           className="hover:opacity-80 transition-colors flex items-center text-xs font-medium"
           aria-label={t.remove}
         >
-          <span className="material-icons text-xl mr-1 text-[#0d5c03]">delete</span>
-          <span className="text-[#0d5c03]">{t.remove}</span>
+          <span className="material-icons text-xl mr-1 text-[#3c8fb8]">
+            delete
+          </span>
+          <span className="text-[#3c8fb8]">{t.remove}</span>
         </button>
       </div>
     </div>

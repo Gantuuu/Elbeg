@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/use-auth';
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 /**
  * Custom hook for managing order notifications
@@ -12,9 +12,9 @@ export function useOrderNotifications() {
   const isAdmin = user?.isAdmin || false;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['/api/orders/pending-count'],
+    queryKey: ["/api/orders/pending-count"],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/orders/pending-count');
+      const response = await apiRequest("GET", "/api/orders/pending-count");
       return response;
     },
     // Only fetch if user is admin
@@ -27,6 +27,6 @@ export function useOrderNotifications() {
 
   return {
     pendingCount: data?.count || 0,
-    isLoading
+    isLoading,
   };
 }

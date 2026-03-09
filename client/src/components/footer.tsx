@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import { useLanguage } from "../contexts/language-context";
 
-
 // Define a type for our footer settings data
 interface FooterSettings {
   companyName: string;
@@ -32,15 +31,16 @@ export function Footer() {
 
   // Fetch footer settings from API
   const { data: footerData, isLoading } = useQuery<FooterSettings>({
-    queryKey: ['footer-settings'],
+    queryKey: ["footer-settings"],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/settings/footer');
-        if (!response.ok) throw new Error('Failed to fetch footer settings');
-        const footerInfo = await response.json() as any;
+        const response = await fetch("/api/settings/footer");
+        if (!response.ok) throw new Error("Failed to fetch footer settings");
+        const footerInfo = (await response.json()) as any;
 
         // If API returns empty object
-        if (!footerInfo || Object.keys(footerInfo).length === 0) return {} as FooterSettings;
+        if (!footerInfo || Object.keys(footerInfo).length === 0)
+          return {} as FooterSettings;
 
         // Map API response (camelCase from Drizzle) to Component state
         return {
@@ -53,17 +53,18 @@ export function Footer() {
           socialLinks: footerInfo.socialLinks || footerInfo.social_links || {},
           quickLinks: footerInfo.quickLinks || footerInfo.quick_links || [],
           // Schema has 'copyrightText', component expects 'copyright'
-          copyright: footerInfo.copyrightText || footerInfo.copyright || footerInfo.copyright_text
+          copyright:
+            footerInfo.copyrightText ||
+            footerInfo.copyright ||
+            footerInfo.copyright_text,
         };
       } catch (error) {
-        console.error('Error fetching footer settings:', error);
+        console.error("Error fetching footer settings:", error);
         return {} as FooterSettings;
       }
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
-
-
 
   // If we're still loading, show a placeholder
   if (isLoading) {
@@ -78,14 +79,14 @@ export function Footer() {
 
   // Set default values if data hasn't loaded yet
   const {
-    companyName = "Ивээл махны дэлгүүр",
+    companyName = "Арвижих махны дэлгүүр",
     description = "Чанартай махны бүтээгдэхүүн",
-    address = "대전광역시 동구 계족로 489번길 상가동 112호 용전동 한숲아파트",
-    phone = "010 5940 0081",
+    address = "청주시 흥덕구 봉명동 1091",
+    phone = "010-6884-9193",
     email = "",
     copyright = t.copyright,
     socialLinks = {},
-    quickLinks = []
+    quickLinks = [],
   } = footerData || {};
 
   // Render social media icons based on available links
@@ -94,37 +95,57 @@ export function Footer() {
 
     if (socialLinks.facebook) {
       icons.push(
-        <a key="facebook" href={socialLinks.facebook} target="_blank" rel="noopener noreferrer"
-          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center">
+        <a
+          key="facebook"
+          href={socialLinks.facebook}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center"
+        >
           <FaFacebook className="text-xl" />
-        </a>
+        </a>,
       );
     }
 
     if (socialLinks.twitter) {
       icons.push(
-        <a key="twitter" href={socialLinks.twitter} target="_blank" rel="noopener noreferrer"
-          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center">
+        <a
+          key="twitter"
+          href={socialLinks.twitter}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center"
+        >
           <FaTwitter className="text-xl" />
-        </a>
+        </a>,
       );
     }
 
     if (socialLinks.instagram) {
       icons.push(
-        <a key="instagram" href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
-          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center">
+        <a
+          key="instagram"
+          href={socialLinks.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center"
+        >
           <FaInstagram className="text-xl" />
-        </a>
+        </a>,
       );
     }
 
     if (socialLinks.youtube) {
       icons.push(
-        <a key="youtube" href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
-          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center">
+        <a
+          key="youtube"
+          href={socialLinks.youtube}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors duration-300 flex items-center justify-center"
+        >
           <FaYoutube className="text-xl" />
-        </a>
+        </a>,
       );
     }
 
@@ -160,7 +181,7 @@ export function Footer() {
             <div className="flex items-center space-x-2">
               <FaFacebook className="text-gray-600 text-sm" />
               <a
-                href="https://www.facebook.com/groups/533004020966357/?ref=share&mibextid=NSMWBT"
+                href="https://www.facebook.com/otgonbyambahoy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 text-sm hover:text-blue-600 transition-colors duration-200"
@@ -170,15 +191,21 @@ export function Footer() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <span className="material-icons text-gray-600 text-sm">phone</span>
+              <span className="material-icons text-gray-600 text-sm">
+                phone
+              </span>
               <p className="text-gray-600 text-sm">{phone}</p>
             </div>
           </div>
 
           {/* Address on separate line */}
           <div className="flex items-start justify-center space-x-2">
-            <span className="material-icons text-gray-600 text-sm mt-0.5 flex-shrink-0">location_on</span>
-            <p className="text-gray-600 text-sm text-left break-keep leading-relaxed">{address}</p>
+            <span className="material-icons text-gray-600 text-sm mt-0.5 flex-shrink-0">
+              location_on
+            </span>
+            <p className="text-gray-600 text-sm text-left break-keep leading-relaxed">
+              {address}
+            </p>
           </div>
         </div>
 
@@ -199,14 +226,14 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="text-center">
-          <p className="text-gray-500 text-xs mb-3">
-            {t.copyright}
-          </p>
+          <p className="text-gray-500 text-xs mb-3">{t.copyright}</p>
 
           {/* Admin login */}
           <Link href="/admin/login">
             <div className="inline-flex items-center text-gray-500 hover:text-gray-700 text-xs transition-colors duration-200">
-              <span className="material-icons text-xs mr-1">admin_panel_settings</span>
+              <span className="material-icons text-xs mr-1">
+                admin_panel_settings
+              </span>
               <span>{t.adminLogin}</span>
             </div>
           </Link>

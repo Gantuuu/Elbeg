@@ -6,7 +6,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -31,7 +38,11 @@ interface BankAccountFormProps {
   onCancel: () => void;
 }
 
-export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccountFormProps) {
+export function BankAccountForm({
+  bankAccount,
+  onSuccess,
+  onCancel,
+}: BankAccountFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,18 +62,22 @@ export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccoun
     setIsSubmitting(true);
     try {
       console.log("Submitting bank account data:", data);
-      
+
       // Process null or empty string
       const processedData = {
         ...data,
-        description: data.description === '' ? null : data.description
+        description: data.description === "" ? null : data.description,
       };
-      
+
       console.log("Processed data for submission:", processedData);
-      
+
       if (bankAccount) {
         // Update existing bank account
-        const response = await apiRequest("PUT", `/api/bank-accounts/${bankAccount.id}`, processedData);
+        const response = await apiRequest(
+          "PUT",
+          `/api/bank-accounts/${bankAccount.id}`,
+          processedData,
+        );
         console.log("Update bank account response:", response);
         toast({
           title: "Банкны данс шинэчлэгдлээ",
@@ -70,7 +85,11 @@ export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccoun
         });
       } else {
         // Create new bank account
-        const response = await apiRequest("POST", "/api/bank-accounts", processedData);
+        const response = await apiRequest(
+          "POST",
+          "/api/bank-accounts",
+          processedData,
+        );
         console.log("Create bank account response:", response);
         toast({
           title: "Банкны данс үүсгэгдлээ",
@@ -80,20 +99,28 @@ export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccoun
       onSuccess();
     } catch (error) {
       console.error("Error saving bank account:", error);
-      let errorMessage = "Банкны данс хадгалахад алдаа гарлаа. Дахин оролдоно уу.";
-      
+      let errorMessage =
+        "Банкны данс хадгалахад алдаа гарлаа. Дахин оролдоно уу.";
+
       if (error instanceof Error) {
         console.error("Error details:", error.message);
         // Extract more specific error message if possible
-        if (error.message.includes("400") || error.message.includes("Invalid")) {
-          errorMessage = "Формын талбаруудыг бөглөх үед алдаа гарлаа. Мэдээллийг дахин шалгана уу.";
-        } else if (error.message.includes("401") || error.message.includes("unauthorized")) {
+        if (
+          error.message.includes("400") ||
+          error.message.includes("Invalid")
+        ) {
+          errorMessage =
+            "Формын талбаруудыг бөглөх үед алдаа гарлаа. Мэдээллийг дахин шалгана уу.";
+        } else if (
+          error.message.includes("401") ||
+          error.message.includes("unauthorized")
+        ) {
           errorMessage = "Таны эрх хүрэхгүй байна. Дахин нэвтэрнэ үү.";
         } else if (error.message.includes("500")) {
           errorMessage = "Серверийн алдаа гарлаа. Дахин оролдоно уу.";
         }
       }
-      
+
       toast({
         title: "Алдаа гарлаа",
         description: errorMessage,
@@ -163,9 +190,9 @@ export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccoun
                 <FormItem>
                   <FormLabel>Тайлбар</FormLabel>
                   <FormControl>
-                    <Textarea 
+                    <Textarea
                       placeholder="Шилжүүлэг хийх заавар эсвэл нэмэлт мэдээлэл"
-                      value={field.value || ''}
+                      value={field.value || ""}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       name={field.name}
@@ -199,18 +226,15 @@ export function BankAccountForm({ bankAccount, onSuccess, onCancel }: BankAccoun
             />
 
             <div className="flex justify-end gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
                 Цуцлах
               </Button>
-              <Button 
-                type="submit"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Хадгалж байна..." : "Хадгалах"}
               </Button>
             </div>

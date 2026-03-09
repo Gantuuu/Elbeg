@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { Upload, X, Check, Image } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Upload, X, Check, Image } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Button,
   Card,
@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
   Progress,
-} from '@/components/ui';
+} from "@/components/ui";
 
 interface MediaUploadProps {
   onSuccess?: () => void;
@@ -29,7 +29,7 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
       setFile(selectedFile);
 
       // Create preview for images
-      if (selectedFile.type.startsWith('image/')) {
+      if (selectedFile.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (event) => {
           setPreview(event.target?.result as string);
@@ -61,48 +61,51 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
 
       // Create form data
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       // Add metadata if needed
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         const img = new window.Image();
         img.src = URL.createObjectURL(file);
         await new Promise<void>((resolve) => {
           img.onload = () => {
-            formData.append('dimensions', JSON.stringify({
-              width: img.width,
-              height: img.height
-            }));
+            formData.append(
+              "dimensions",
+              JSON.stringify({
+                width: img.width,
+                height: img.height,
+              }),
+            );
             resolve();
           };
         });
       }
 
       // Send to API
-      const response = await fetch('/api/media', {
-        method: 'POST',
+      const response = await fetch("/api/media", {
+        method: "POST",
         body: formData,
         headers: {
           // Don't set Content-Type with FormData, browser will set it with boundary
         },
-        credentials: 'include'
+        credentials: "include",
       });
 
       clearInterval(progressInterval);
       setProgress(100);
 
       if (!response.ok) {
-        throw new Error('Файл байршуулах үед алдаа гарлаа');
+        throw new Error("Файл байршуулах үед алдаа гарлаа");
       }
 
       // Clear form and show success message
       toast({
-        title: 'Амжилттай байршуулагдлаа',
-        description: 'Файл амжилттай байршуулагдлаа.',
+        title: "Амжилттай байршуулагдлаа",
+        description: "Файл амжилттай байршуулагдлаа.",
       });
 
       // Invalidate media queries to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
 
       // Call success callback if provided
       if (onSuccess) {
@@ -117,11 +120,11 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
         setProgress(0);
       }, 1000);
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Файл байршуулах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Файл байршуулах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
       setUploading(false);
       setProgress(0);
@@ -142,13 +145,17 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
         {!file ? (
           <div
             className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-            onClick={() => document.getElementById('file-upload')?.click()}
+            onClick={() => document.getElementById("file-upload")?.click()}
           >
             <div className="flex flex-col items-center">
               <Upload className="h-12 w-12 text-gray-400 mb-4" />
               <p className="text-lg font-medium mb-1">Файл сонгох</p>
-              <p className="text-sm text-gray-500 mb-4">эсвэл энд чирч оруулна уу</p>
-              <p className="text-xs text-gray-400">PNG, JPG, GIF, SVG, PDF, зэрэг файлууд зөвшөөрөгдөнө</p>
+              <p className="text-sm text-gray-500 mb-4">
+                эсвэл энд чирч оруулна уу
+              </p>
+              <p className="text-xs text-gray-400">
+                PNG, JPG, GIF, SVG, PDF, зэрэг файлууд зөвшөөрөгдөнө
+              </p>
             </div>
             <input
               id="file-upload"
@@ -163,7 +170,9 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
             <div className="flex items-center mb-4">
               <div className="flex-1">
                 <p className="font-medium truncate">{file.name}</p>
-                <p className="text-sm text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                <p className="text-sm text-gray-500">
+                  {(file.size / 1024).toFixed(2)} KB
+                </p>
               </div>
               {!uploading && (
                 <Button
@@ -202,10 +211,7 @@ export function MediaUpload({ onSuccess }: MediaUploadProps) {
                 </p>
               </div>
             ) : (
-              <Button
-                onClick={handleUpload}
-                className="w-full"
-              >
+              <Button onClick={handleUpload} className="w-full">
                 <Upload className="h-4 w-4 mr-2" />
                 Байршуулах
               </Button>

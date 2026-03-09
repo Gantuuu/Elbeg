@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
-import { AdminHeader } from '@/components/admin/header';
-import { AdminLayout } from '@/components/admin/layout';
-import { ContentForm } from '@/components/admin/content-form';
-import { HelpTooltip } from '@/components/admin/help-tooltip';
-import { helpIllustrations } from '@/assets/help';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { AdminHeader } from "@/components/admin/header";
+import { AdminLayout } from "@/components/admin/layout";
+import { ContentForm } from "@/components/admin/content-form";
+import { HelpTooltip } from "@/components/admin/help-tooltip";
+import { helpIllustrations } from "@/assets/help";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Button,
   Card,
@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui';
+} from "@/components/ui";
 
 interface SiteContent {
   id: number;
@@ -33,18 +33,22 @@ interface SiteContent {
 
 export default function AdminContent() {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<SiteContent | null>(null);
-  const [contentToDelete, setContentToDelete] = useState<SiteContent | null>(null);
+  const [selectedContent, setSelectedContent] = useState<SiteContent | null>(
+    null,
+  );
+  const [contentToDelete, setContentToDelete] = useState<SiteContent | null>(
+    null,
+  );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: contents = [], isLoading } = useQuery({
-    queryKey: ['/api/site-content'],
+    queryKey: ["/api/site-content"],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/site-content');
+      const data = await apiRequest("GET", "/api/site-content");
       return data as SiteContent[];
-    }
+    },
   });
 
   const handleEdit = (content: SiteContent) => {
@@ -54,25 +58,25 @@ export default function AdminContent() {
 
   const handleDelete = async () => {
     if (!contentToDelete) return;
-    
+
     try {
-      await apiRequest('DELETE', `/api/site-content/${contentToDelete.id}`);
-      
+      await apiRequest("DELETE", `/api/site-content/${contentToDelete.id}`);
+
       toast({
-        title: 'Контент устгагдлаа',
-        description: 'Контент амжилттай устгагдлаа.',
+        title: "Контент устгагдлаа",
+        description: "Контент амжилттай устгагдлаа.",
       });
-      
+
       // Refresh content list
-      queryClient.invalidateQueries({ queryKey: ['/api/site-content'] });
-      
+      queryClient.invalidateQueries({ queryKey: ["/api/site-content"] });
+
       setIsDeleteDialogOpen(false);
       setContentToDelete(null);
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Контент устгах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Контент устгах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -80,9 +84,9 @@ export default function AdminContent() {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedContent(null);
-    
+
     // Refresh content list
-    queryClient.invalidateQueries({ queryKey: ['/api/site-content'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/site-content"] });
   };
 
   return (
@@ -92,15 +96,23 @@ export default function AdminContent() {
           <div className="flex items-center">
             <AdminHeader title="Контент удирдлага" />
             <div className="ml-2">
-              <HelpTooltip 
+              <HelpTooltip
                 content={
                   <div>
                     <p className="font-medium mb-1">Контент удирдлага:</p>
-                    <p className="mb-2">Энд та вебсайтын бүх текст контентыг засах, нэмэх боломжтой.</p>
+                    <p className="mb-2">
+                      Энд та вебсайтын бүх текст контентыг засах, нэмэх
+                      боломжтой.
+                    </p>
                     <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>Шинэ контент нэмэхийн тулд "Шинэ контент" товчийг дарна</li>
+                      <li>
+                        Шинэ контент нэмэхийн тулд "Шинэ контент" товчийг дарна
+                      </li>
                       <li>Контентыг засахын тулд "Засах" товчийг дарна</li>
-                      <li>WYSIWYG редактор ашиглан текст, зураг, линк оруулах боломжтой</li>
+                      <li>
+                        WYSIWYG редактор ашиглан текст, зураг, линк оруулах
+                        боломжтой
+                      </li>
                     </ul>
                   </div>
                 }
@@ -166,7 +178,7 @@ export default function AdminContent() {
                           {content.title}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(content.updatedAt).toLocaleString('mn-MN')}
+                          {new Date(content.updatedAt).toLocaleString("mn-MN")}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <Button
@@ -207,14 +219,17 @@ export default function AdminContent() {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">
-                {selectedContent ? 'Контент засах' : 'Шинэ контент нэмэх'}
+                {selectedContent ? "Контент засах" : "Шинэ контент нэмэх"}
               </h2>
               <div className="ml-2">
-                <HelpTooltip 
+                <HelpTooltip
                   content={
                     <div>
                       <p className="font-medium mb-1">Контент редактор:</p>
-                      <p className="mb-2">WYSIWYG редактор ашиглан текст форматлах, зураг, линк оруулах боломжтой.</p>
+                      <p className="mb-2">
+                        WYSIWYG редактор ашиглан текст форматлах, зураг, линк
+                        оруулах боломжтой.
+                      </p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
                         <li>Bold, Italic, Underline - текстийг тодруулах</li>
                         <li>Heading - гарчиг оруулах (H1-H6)</li>
@@ -243,17 +258,24 @@ export default function AdminContent() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Устгахдаа итгэлтэй байна уу?</AlertDialogTitle>
             <AlertDialogDescription>
-              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{contentToDelete?.title}" контентыг бүр мөсөн устгах болно.
+              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{contentToDelete?.title}"
+              контентыг бүр мөсөн устгах болно.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Цуцлах</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Устгах
             </AlertDialogAction>
           </AlertDialogFooter>

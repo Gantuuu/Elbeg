@@ -10,7 +10,6 @@ import { UserIcon, ShoppingCartIcon, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
-
 // Site name interface
 interface SiteNameSettings {
   value: string;
@@ -26,30 +25,30 @@ export function Navbar() {
 
   // Fetch navigation items from API
   const { data: navigationItems = [] } = useQuery({
-    queryKey: ['navigation'],
+    queryKey: ["navigation"],
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/navigation");
         return res;
       } catch (error) {
-        console.error('Error fetching navigation:', error);
+        console.error("Error fetching navigation:", error);
         return [];
       }
-    }
+    },
   });
 
   // Fetch site name settings
   const { data: siteSettings } = useQuery<SiteNameSettings>({
-    queryKey: ['site-settings', 'site-name'],
+    queryKey: ["site-settings", "site-name"],
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/settings/site-name");
         return res;
       } catch (error) {
-        console.error('Error fetching site name settings:', error);
-        return { value: "Ивээл махны дэлгүүр" }; // Default site name
+        console.error("Error fetching site name settings:", error);
+        return { value: "Арвижих махны дэлгүүр" }; // Default site name
       }
-    }
+    },
   });
 
   const toggleMenu = () => {
@@ -69,27 +68,32 @@ export function Navbar() {
   ];
 
   // Use navigation items from API if available, otherwise use default links
-  const navLinks = navigationItems.length > 0
-    ? navigationItems.map((item: any) => ({
-      href: item.url || `/#${item.title.toLowerCase()}`, // Use title as fallback if URL is empty
-      label: item.title,
-      id: item.id, // Add ID to ensure unique keys
-    }))
-    : defaultNavLinks;
+  const navLinks =
+    navigationItems.length > 0
+      ? navigationItems.map((item: any) => ({
+        href: item.url || `/#${item.title.toLowerCase()}`, // Use title as fallback if URL is empty
+        label: item.title,
+        id: item.id, // Add ID to ensure unique keys
+      }))
+      : defaultNavLinks;
 
   return (
-    <header className="shadow-sm relative z-10 bg-[#0d5c03]">
+    <header className="shadow-sm relative z-10 bg-[#3c8fb8]">
       {/* Top bar */}
       <div className="h-1 bg-[#107004]"></div>
 
-      <div className="bg-[#0d5c03]">
+      <div className="bg-[#3c8fb8]">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             {/* Site Logo */}
             <div className="flex items-center space-x-4">
               <Link href="/">
                 <div className="flex-shrink-0 flex items-center cursor-pointer">
-                  <img src="/logo-new.png" alt={t.siteTitle} className="h-14 md:h-16 w-auto object-contain" />
+                  <img
+                    src="/logo-new.png"
+                    alt={t.siteTitle}
+                    className="h-16 md:h-20 w-auto object-contain"
+                  />
                 </div>
               </Link>
 
@@ -103,16 +107,21 @@ export function Navbar() {
                   <div
                     className={cn(
                       "px-3 py-2 font-medium cursor-pointer transition-all duration-200 relative group",
-                      (location === link.href || (link.href === "/" && location === "/"))
+                      location === link.href ||
+                        (link.href === "/" && location === "/")
                         ? "text-white font-bold"
-                        : "text-gray-300 hover:text-white"
+                        : "text-gray-300 hover:text-white",
                     )}
                   >
                     {link.label}
-                    <span className={cn(
-                      "absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-200 group-hover:w-full",
-                      (location === link.href || (link.href === "/" && location === "/")) && "w-full"
-                    )}></span>
+                    <span
+                      className={cn(
+                        "absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-200 group-hover:w-full",
+                        (location === link.href ||
+                          (link.href === "/" && location === "/")) &&
+                        "w-full",
+                      )}
+                    ></span>
                   </div>
                 </Link>
               ))}
@@ -121,12 +130,17 @@ export function Navbar() {
             {/* Desktop: Cart, User Buttons | Mobile: Language Switcher + Menu Button */}
             <div className="flex items-center space-x-1">
               {/* User Button - Desktop only */}
-              <Link href={user ? "/my-page" : "/auth"} className="hidden md:block">
+              <Link
+                href={user ? "/my-page" : "/auth"}
+                className="hidden md:block"
+              >
                 <div className="p-2 rounded-full hover:bg-white/10 relative mr-1 transition-all duration-200">
-                  <UserIcon className={cn(
-                    "h-5 w-5 transition-all duration-200",
-                    user ? "text-white" : "text-gray-300 hover:text-white"
-                  )} />
+                  <UserIcon
+                    className={cn(
+                      "h-5 w-5 transition-all duration-200",
+                      user ? "text-white" : "text-gray-300 hover:text-white",
+                    )}
+                  />
                 </div>
               </Link>
 
@@ -139,7 +153,7 @@ export function Navbar() {
                   >
                     <ShoppingCartIcon className="h-5 w-5 text-white transition-all duration-200" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-white text-[#0d5c03] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 bg-white text-[#3c8fb8] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                         {cartItemCount}
                       </span>
                     )}
@@ -169,10 +183,12 @@ export function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className={cn(
-        "md:hidden bg-white border-t border-gray-100 shadow-sm transition-all duration-200 overflow-y-auto",
-        isMenuOpen ? "max-h-[70vh]" : "max-h-0"
-      )}>
+      <div
+        className={cn(
+          "md:hidden bg-white border-t border-gray-100 shadow-sm transition-all duration-200 overflow-y-auto",
+          isMenuOpen ? "max-h-[70vh]" : "max-h-0",
+        )}
+      >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           {navLinks.map((link: any) => (
             <Link
@@ -180,9 +196,10 @@ export function Navbar() {
               href={link.href}
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 hover:bg-gray-50 border-l-2",
-                (location === link.href || (link.href === "/" && location === "/"))
-                  ? "text-[#0d5c03] border-[#0d5c03]"
-                  : "text-gray-700 hover:text-[#0d5c03] border-transparent hover:border-[#0d5c03]/50"
+                location === link.href ||
+                  (link.href === "/" && location === "/")
+                  ? "text-[#3c8fb8] border-[#3c8fb8]"
+                  : "text-gray-700 hover:text-[#3c8fb8] border-transparent hover:border-[#3c8fb8]/50",
               )}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -193,43 +210,34 @@ export function Navbar() {
           {/* Cart nav link for mobile */}
           <Link href="/cart">
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0d5c03] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0d5c03]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#3c8fb8] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#3c8fb8]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <ShoppingCartIcon className="h-5 w-5 mr-2" />
               {t.cart}
               {cartItemCount > 0 && (
-                <span className="ml-2 bg-[#0d5c03] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
+                <span className="ml-2 bg-[#3c8fb8] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                   {cartItemCount}
                 </span>
               )}
             </div>
           </Link>
 
-
-
-
-
           {/* User nav link for mobile */}
           <Link href={user ? "/my-page" : "/auth"}>
             <div
-              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#0d5c03] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#0d5c03]/50"
+              className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#3c8fb8] hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-2 border-transparent hover:border-[#3c8fb8]/50"
               onClick={() => setIsMenuOpen(false)}
             >
               <UserIcon className="h-5 w-5 mr-2" />
               {user ? t.profile : t.login}
             </div>
           </Link>
-
-
         </div>
       </div>
 
       {/* Shopping Cart Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-      />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 }

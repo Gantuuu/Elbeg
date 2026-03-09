@@ -39,8 +39,12 @@ export default function BankAccounts() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(null);
-  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<BankAccount | null>(
+    null,
+  );
+  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(
+    null,
+  );
 
   // Fetch bank accounts
   const { data: bankAccounts = [], isLoading } = useQuery<BankAccount[]>({
@@ -63,7 +67,8 @@ export default function BankAccounts() {
       console.error("Error setting default account:", error);
       toast({
         title: "Алдаа гарлаа",
-        description: "Үндсэн данс тохируулахад алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          "Үндсэн данс тохируулахад алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
     },
@@ -177,7 +182,9 @@ export default function BankAccounts() {
                 <TableBody>
                   {bankAccounts.map((account: BankAccount) => (
                     <TableRow key={account.id}>
-                      <TableCell className="font-medium">{account.bankName}</TableCell>
+                      <TableCell className="font-medium">
+                        {account.bankName}
+                      </TableCell>
                       <TableCell>{account.accountNumber}</TableCell>
                       <TableCell>{account.accountHolder}</TableCell>
                       <TableCell>
@@ -185,7 +192,9 @@ export default function BankAccounts() {
                           <Switch
                             checked={account.isDefault}
                             onCheckedChange={() => handleSetDefault(account)}
-                            disabled={account.isDefault || setDefaultMutation.isPending}
+                            disabled={
+                              account.isDefault || setDefaultMutation.isPending
+                            }
                           />
                           {account.isDefault && (
                             <CheckCircle className="ml-2 h-4 w-4 text-green-500" />
@@ -201,14 +210,20 @@ export default function BankAccounts() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(account)}>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(account)}
+                            >
                               <Pencil className="mr-2 h-4 w-4" />
                               Засах
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteClick(account)}
                               disabled={account.isDefault}
-                              className={account.isDefault ? "text-muted-foreground" : "text-destructive"}
+                              className={
+                                account.isDefault
+                                  ? "text-muted-foreground"
+                                  : "text-destructive"
+                              }
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Устгах
@@ -226,18 +241,23 @@ export default function BankAccounts() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!accountToDelete} onOpenChange={(open) => !open && setAccountToDelete(null)}>
+      <AlertDialog
+        open={!!accountToDelete}
+        onOpenChange={(open) => !open && setAccountToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Та итгэлтэй байна уу?</AlertDialogTitle>
             <AlertDialogDescription>
-              Энэ үйлдлийг буцаах боломжгүй. Энэ нь {accountToDelete?.bankName} банкны {accountToDelete?.accountNumber} дугаартай дансыг систэмээс бүр мөсөн устгах болно.
+              Энэ үйлдлийг буцаах боломжгүй. Энэ нь {accountToDelete?.bankName}{" "}
+              банкны {accountToDelete?.accountNumber} дугаартай дансыг систэмээс
+              бүр мөсөн устгах болно.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Болих</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete} 
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground"
             >
               Устгах

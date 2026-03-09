@@ -18,14 +18,14 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Popover,
@@ -36,12 +36,16 @@ import { Calendar } from "@/components/ui/calendar";
 
 // SMS message templates based on order status
 const SMS_TEMPLATES: Record<string, (amount: string) => string> = {
-  pending: (amount) => `[Ивээл махны дэлгүүр] Таны ${amount} төлбөр төлөгдөөгүй байна. Төлбөрөө баталгаажуулна уу.`,
-  payment_confirmed: (amount) => `[Ивээл махны дэлгүүр] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
-  processing: (amount) => `[Ивээл махны дэлгүүр] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
-  shipped: () => `[Ивээл махны дэлгүүр] Таны захиалга хүргэлтэд гарлаа.`,
-  delivered: () => `[Ивээл махны дэлгүүр] Таны захиалга амжилттай хүргэгдлээ. Баярлалаа.`,
-  cancelled: () => `[Ивээл махны дэлгүүр] Таны захиалга цуцлагдсан байна.`,
+  pending: (amount) =>
+    `[Арвижих махны дэлгүүр] Таны ${amount} төлбөр төлөгдөөгүй байна. Төлбөрөө баталгаажуулна уу.`,
+  payment_confirmed: (amount) =>
+    `[Арвижих махны дэлгүүр] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
+  processing: (amount) =>
+    `[Арвижих махны дэлгүүр] Таны ${amount} төлбөр төлөгдлөө. Захиалга бэлтгэгдэж байна.`,
+  shipped: () => `[Арвижих махны дэлгүүр] Таны захиалга хүргэлтэд гарлаа.`,
+  delivered: () =>
+    `[Арвижих махны дэлгүүр] Таны захиалга амжилттай хүргэгдлээ. Баярлалаа.`,
+  cancelled: () => `[Арвижих махны дэлгүүр] Таны захиалга цуцлагдсан байна.`,
 };
 
 export default function AdminOrders() {
@@ -50,7 +54,7 @@ export default function AdminOrders() {
 
   // Parse URL parameters to see if we need to open a specific order
   const urlParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : ""
+    typeof window !== "undefined" ? window.location.search : "",
   );
   const orderIdParam = urlParams.get("id");
 
@@ -60,7 +64,7 @@ export default function AdminOrders() {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(
-    orderIdParam ? parseInt(orderIdParam) : null
+    orderIdParam ? parseInt(orderIdParam) : null,
   );
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(!!orderIdParam);
 
@@ -70,7 +74,7 @@ export default function AdminOrders() {
 
   // Format dates for API queries
   const formatDateForQuery = (date?: Date) => {
-    return date ? format(date, 'yyyy-MM-dd') : undefined;
+    return date ? format(date, "yyyy-MM-dd") : undefined;
   };
 
   // Define types for orders and items
@@ -107,24 +111,24 @@ export default function AdminOrders() {
   // Fetch orders with date filters and improved refresh settings
   const { data: orders = [], isLoading } = useQuery<Order[]>({
     queryKey: [
-      '/api/orders',
+      "/api/orders",
       formatDateForQuery(startDate),
-      formatDateForQuery(endDate)
+      formatDateForQuery(endDate),
     ],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (startDate) params.append('startDate', startDate.toISOString());
+      if (startDate) params.append("startDate", startDate.toISOString());
       if (endDate) {
         // Add one day to end date to include the whole day
         const nextDay = new Date(endDate);
         nextDay.setDate(nextDay.getDate() + 1);
-        params.append('endDate', nextDay.toISOString());
+        params.append("endDate", nextDay.toISOString());
       }
 
       const queryString = params.toString();
-      const url = `/api/orders${queryString ? `?${queryString}` : ''}`;
+      const url = `/api/orders${queryString ? `?${queryString}` : ""}`;
 
-      return await apiRequest('GET', url);
+      return await apiRequest("GET", url);
     },
     refetchInterval: 15000, // Refresh every 15 seconds for orders page
     refetchOnWindowFocus: true, // Refetch when window gains focus
@@ -133,10 +137,10 @@ export default function AdminOrders() {
   });
 
   // Selected order for detailed view
-  const selectedOrder = orders.find(order => order.id === selectedOrderId);
+  const selectedOrder = orders.find((order) => order.id === selectedOrderId);
 
   // Filtered orders based on search and status
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = orders.filter((order) => {
     // Apply status filter
     if (statusFilter !== "all" && order.status !== statusFilter) {
       return false;
@@ -181,7 +185,10 @@ export default function AdminOrders() {
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Захиалгын удирдлага" />
 
-        <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
+        <div
+          className="p-6 overflow-auto"
+          style={{ height: "calc(100vh - 70px)" }}
+        >
           <Card>
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h2 className="font-bold text-lg">Захиалгын жагсаалт</h2>
@@ -211,8 +218,12 @@ export default function AdminOrders() {
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                       >
-                        <span className="material-icons mr-2 text-gray-400">event</span>
-                        {startDate ? format(startDate, 'yyyy-MM-dd') : "Эхлэх огноо"}
+                        <span className="material-icons mr-2 text-gray-400">
+                          event
+                        </span>
+                        {startDate
+                          ? format(startDate, "yyyy-MM-dd")
+                          : "Эхлэх огноо"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -252,8 +263,12 @@ export default function AdminOrders() {
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                       >
-                        <span className="material-icons mr-2 text-gray-400">event</span>
-                        {endDate ? format(endDate, 'yyyy-MM-dd') : "Дуусах огноо"}
+                        <span className="material-icons mr-2 text-gray-400">
+                          event
+                        </span>
+                        {endDate
+                          ? format(endDate, "yyyy-MM-dd")
+                          : "Дуусах огноо"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -284,18 +299,17 @@ export default function AdminOrders() {
 
                 {/* Status Filter */}
                 <div>
-                  <Select
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
-                  >
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Төлөв сонгох" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Бүгд</SelectItem>
-                      {ORDER_STATUSES.map(status => (
+                      {ORDER_STATUSES.map((status) => (
                         <SelectItem key={status.value} value={status.value}>
-                          {t.orderStatus[status.value as keyof typeof t.orderStatus] || status.label}
+                          {t.orderStatus[
+                            status.value as keyof typeof t.orderStatus
+                          ] || status.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -307,27 +321,46 @@ export default function AdminOrders() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Захиалгын ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Харилцагч</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Утас</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дүн</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Төлөв</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Огноо</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үйлдэл</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Захиалгын ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Харилцагч
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Утас
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Дүн
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Төлөв
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Огноо
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Үйлдэл
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {isLoading ? (
-                      Array(5).fill(0).map((_, i) => (
-                        <tr key={i}>
-                          <td colSpan={7} className="px-6 py-4">
-                            <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                        </tr>
-                      ))
+                      Array(5)
+                        .fill(0)
+                        .map((_, i) => (
+                          <tr key={i}>
+                            <td colSpan={7} className="px-6 py-4">
+                              <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
+                            </td>
+                          </tr>
+                        ))
                     ) : filteredOrders.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                        <td
+                          colSpan={7}
+                          className="px-6 py-4 text-center text-gray-500"
+                        >
                           {searchQuery || statusFilter !== "all"
                             ? "Хайлтад тохирох захиалга олдсонгүй"
                             : "Захиалга байхгүй байна"}
@@ -367,7 +400,9 @@ export default function AdminOrders() {
                                 title="SMS илгээх"
                                 data-testid={`button-sms-${order.id}`}
                               >
-                                <span className="material-icons text-lg">sms</span>
+                                <span className="material-icons text-lg">
+                                  sms
+                                </span>
                               </Button>
                             </div>
                           </td>
@@ -416,32 +451,48 @@ export default function AdminOrders() {
                       <div className="bg-gray-50 p-4 rounded-md">
                         <div className="grid grid-cols-2 gap-2">
                           <p className="text-sm text-gray-500">Захиалгын ID:</p>
-                          <p className="text-sm font-medium">{formatOrderId(selectedOrder.id)}</p>
+                          <p className="text-sm font-medium">
+                            {formatOrderId(selectedOrder.id)}
+                          </p>
 
                           <p className="text-sm text-gray-500">Огноо:</p>
-                          <p className="text-sm font-medium">{formatDate(selectedOrder.createdAt)}</p>
+                          <p className="text-sm font-medium">
+                            {formatDate(selectedOrder.createdAt)}
+                          </p>
 
-                          <p className="text-sm text-gray-500">Захиалсан цаг:</p>
+                          <p className="text-sm text-gray-500">
+                            Захиалсан цаг:
+                          </p>
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-bold">
-                              {selectedOrder.createdAt ? format(new Date(selectedOrder.createdAt), 'HH:mm') : '-'}
+                              {selectedOrder.createdAt
+                                ? format(
+                                    new Date(selectedOrder.createdAt),
+                                    "HH:mm",
+                                  )
+                                : "-"}
                             </p>
-                            {selectedOrder.createdAt && (() => {
-                              const orderDate = new Date(selectedOrder.createdAt);
-                              const orderHour = orderDate.getHours();
-                              const orderMinute = orderDate.getMinutes();
-                              const isBeforeCutoff = orderHour < 18 || (orderHour === 18 && orderMinute <= 30);
+                            {selectedOrder.createdAt &&
+                              (() => {
+                                const orderDate = new Date(
+                                  selectedOrder.createdAt,
+                                );
+                                const orderHour = orderDate.getHours();
+                                const orderMinute = orderDate.getMinutes();
+                                const isBeforeCutoff =
+                                  orderHour < 18 ||
+                                  (orderHour === 18 && orderMinute <= 30);
 
-                              return isBeforeCutoff ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  18:30 өмнө → Маргааш хүргэнэ
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                  18:30 дараа → Нөгөөдөр хүргэнэ
-                                </span>
-                              );
-                            })()}
+                                return isBeforeCutoff ? (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    18:30 өмнө → Маргааш хүргэнэ
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    18:30 дараа → Нөгөөдөр хүргэнэ
+                                  </span>
+                                );
+                              })()}
                           </div>
 
                           <p className="text-sm text-gray-500">Төлөв:</p>
@@ -455,26 +506,38 @@ export default function AdminOrders() {
                           </div>
 
                           <p className="text-sm text-gray-500">Нийт дүн:</p>
-                          <p className="text-sm font-medium">{formatPrice(selectedOrder.totalAmount)}</p>
+                          <p className="text-sm font-medium">
+                            {formatPrice(selectedOrder.totalAmount)}
+                          </p>
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="font-medium mb-2">Харилцагчийн мэдээлэл</h3>
+                      <h3 className="font-medium mb-2">
+                        Харилцагчийн мэдээлэл
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md">
                         <div className="grid grid-cols-2 gap-2">
                           <p className="text-sm text-gray-500">Нэр:</p>
-                          <p className="text-sm font-medium">{selectedOrder.customerName}</p>
+                          <p className="text-sm font-medium">
+                            {selectedOrder.customerName}
+                          </p>
 
                           <p className="text-sm text-gray-500">И-мэйл:</p>
-                          <p className="text-sm font-medium">{selectedOrder.customerEmail}</p>
+                          <p className="text-sm font-medium">
+                            {selectedOrder.customerEmail}
+                          </p>
 
                           <p className="text-sm text-gray-500">Утас:</p>
-                          <p className="text-sm font-medium">{selectedOrder.customerPhone}</p>
+                          <p className="text-sm font-medium">
+                            {selectedOrder.customerPhone}
+                          </p>
 
                           <p className="text-sm text-gray-500">Хаяг:</p>
-                          <p className="text-sm font-medium">{selectedOrder.customerAddress}</p>
+                          <p className="text-sm font-medium">
+                            {selectedOrder.customerAddress}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -486,10 +549,18 @@ export default function AdminOrders() {
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                           <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Бүтээгдэхүүн</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үнэ</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тоо хэмжээ</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Нийт</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Бүтээгдэхүүн
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Үнэ
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Тоо хэмжээ
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Нийт
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -503,8 +574,12 @@ export default function AdminOrders() {
                                     className="w-10 h-10 rounded object-cover mr-3"
                                   />
                                   <div>
-                                    <p className="text-sm font-medium">{item.product.name}</p>
-                                    <p className="text-xs text-gray-500">{item.product.category}</p>
+                                    <p className="text-sm font-medium">
+                                      {item.product.name}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {item.product.category}
+                                    </p>
                                   </div>
                                 </div>
                               </td>
@@ -515,14 +590,20 @@ export default function AdminOrders() {
                                 {item.quantity} кг
                               </td>
                               <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                                {formatPrice(parseFloat(item.price.toString()) * item.quantity)}
+                                {formatPrice(
+                                  parseFloat(item.price.toString()) *
+                                    item.quantity,
+                                )}
                               </td>
                             </tr>
                           ))}
                         </tbody>
                         <tfoot className="bg-gray-50">
                           <tr>
-                            <td colSpan={3} className="px-4 py-3 text-right font-medium">
+                            <td
+                              colSpan={3}
+                              className="px-4 py-3 text-right font-medium"
+                            >
                               Нийт дүн:
                             </td>
                             <td className="px-4 py-3 font-bold text-primary">
@@ -535,9 +616,7 @@ export default function AdminOrders() {
                   </div>
 
                   <div className="flex justify-end space-x-2">
-                    <Button onClick={handleCloseDetails}>
-                      Хаах
-                    </Button>
+                    <Button onClick={handleCloseDetails}>Хаах</Button>
                   </div>
                 </div>
               ) : (
@@ -566,11 +645,17 @@ export default function AdminOrders() {
                   {/* Customer Info */}
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="material-icons text-gray-500 text-sm">person</span>
-                      <span className="font-medium">{smsOrder.customerName}</span>
+                      <span className="material-icons text-gray-500 text-sm">
+                        person
+                      </span>
+                      <span className="font-medium">
+                        {smsOrder.customerName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="material-icons text-gray-500 text-sm">phone</span>
+                      <span className="material-icons text-gray-500 text-sm">
+                        phone
+                      </span>
                       <a
                         href={`tel:${smsOrder.customerPhone}`}
                         className="text-blue-600 hover:underline font-medium"
@@ -583,62 +668,78 @@ export default function AdminOrders() {
                   {/* Order Info */}
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Захиалга: {formatOrderId(smsOrder.id)}</span>
-                    <span className="font-bold text-primary">{formatPrice(smsOrder.totalAmount)}</span>
+                    <span className="font-bold text-primary">
+                      {formatPrice(smsOrder.totalAmount)}
+                    </span>
                   </div>
 
                   {/* SMS Message Selection */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Мессеж сонгох:</label>
-                    {Object.entries(SMS_TEMPLATES).map(([status, getMessage]) => {
-                      const message = getMessage(formatPrice(smsOrder.totalAmount));
-                      const statusLabels: Record<string, string> = {
-                        pending: "Төлбөр хүлээгдэж байна",
-                        payment_confirmed: "Төлбөр төлөгдсөн",
-                        processing: "Бэлтгэгдэж байна",
-                        shipped: "Хүргэлтэд гарсан",
-                        delivered: "Хүргэгдсэн",
-                        cancelled: "Цуцлагдсан",
-                      };
+                    <label className="text-sm font-medium text-gray-700">
+                      Мессеж сонгох:
+                    </label>
+                    {Object.entries(SMS_TEMPLATES).map(
+                      ([status, getMessage]) => {
+                        const message = getMessage(
+                          formatPrice(smsOrder.totalAmount),
+                        );
+                        const statusLabels: Record<string, string> = {
+                          pending: "Төлбөр хүлээгдэж байна",
+                          payment_confirmed: "Төлбөр төлөгдсөн",
+                          processing: "Бэлтгэгдэж байна",
+                          shipped: "Хүргэлтэд гарсан",
+                          delivered: "Хүргэгдсэн",
+                          cancelled: "Цуцлагдсан",
+                        };
 
-                      return (
-                        <div
-                          key={status}
-                          className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${smsOrder.status === status ? 'border-green-500 bg-green-50' : 'border-gray-200'
+                        return (
+                          <div
+                            key={status}
+                            className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${
+                              smsOrder.status === status
+                                ? "border-green-500 bg-green-50"
+                                : "border-gray-200"
                             }`}
-                          onClick={() => {
-                            const encodedMessage = encodeURIComponent(message);
-                            // Use different format for iOS vs Android
-                            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                            const smsUrl = isIOS
-                              ? `sms:${smsOrder.customerPhone}&body=${encodedMessage}`
-                              : `sms:${smsOrder.customerPhone}?body=${encodedMessage}`;
-                            window.location.href = smsUrl;
-                          }}
-                          data-testid={`sms-template-${status}`}
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium text-gray-500">
-                              {statusLabels[status]}
-                            </span>
-                            {smsOrder.status === status && (
-                              <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded">
-                                Одоогийн төлөв
+                            onClick={() => {
+                              const encodedMessage =
+                                encodeURIComponent(message);
+                              // Use different format for iOS vs Android
+                              const isIOS = /iPad|iPhone|iPod/.test(
+                                navigator.userAgent,
+                              );
+                              const smsUrl = isIOS
+                                ? `sms:${smsOrder.customerPhone}&body=${encodedMessage}`
+                                : `sms:${smsOrder.customerPhone}?body=${encodedMessage}`;
+                              window.location.href = smsUrl;
+                            }}
+                            data-testid={`sms-template-${status}`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-500">
+                                {statusLabels[status]}
                               </span>
-                            )}
+                              {smsOrder.status === status && (
+                                <span className="text-xs bg-green-500 text-white px-2 py-0.5 rounded">
+                                  Одоогийн төлөв
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-800">{message}</p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-blue-600 font-medium">
+                                📱 {smsOrder.customerPhone}
+                              </span>
+                              <span className="flex items-center gap-1 text-xs text-green-600">
+                                <span className="material-icons text-sm">
+                                  send
+                                </span>
+                                Дарж илгээх
+                              </span>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-800">{message}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-blue-600 font-medium">
-                              📱 {smsOrder.customerPhone}
-                            </span>
-                            <span className="flex items-center gap-1 text-xs text-green-600">
-                              <span className="material-icons text-sm">send</span>
-                              Дарж илгээх
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      },
+                    )}
                   </div>
 
                   {/* Direct SMS Link (for mobile) */}

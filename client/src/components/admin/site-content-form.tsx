@@ -1,11 +1,11 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { insertSiteContentSchema } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { WysiwygEditor } from './wysiwyg-editor';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { insertSiteContentSchema } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { WysiwygEditor } from "./wysiwyg-editor";
 import {
   Form,
   FormControl,
@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
   Switch,
-} from '@/components/ui';
+} from "@/components/ui";
 
 // Extend the schema for form validation
 const siteContentFormSchema = insertSiteContentSchema.extend({
@@ -35,17 +35,21 @@ interface SiteContentFormProps {
   onCancel: () => void;
 }
 
-export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFormProps) {
+export function SiteContentForm({
+  content,
+  onSuccess,
+  onCancel,
+}: SiteContentFormProps) {
   const { toast } = useToast();
   const isEditing = !!content;
 
   const form = useForm<SiteContentFormValues>({
     resolver: zodResolver(siteContentFormSchema),
     defaultValues: {
-      key: content?.key || '',
-      title: content?.title || '',
-      content: content?.content || '<p>Энд агуулгыг оруулна уу.</p>',
-      imageUrl: content?.imageUrl || '',
+      key: content?.key || "",
+      title: content?.title || "",
+      content: content?.content || "<p>Энд агуулгыг оруулна уу.</p>",
+      imageUrl: content?.imageUrl || "",
       active: content?.active ?? true,
     },
   });
@@ -53,24 +57,24 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
   const onSubmit = async (data: SiteContentFormValues) => {
     try {
       if (isEditing && content.id) {
-        await apiRequest('PUT', `/api/site-content/${content.id}`, data);
+        await apiRequest("PUT", `/api/site-content/${content.id}`, data);
         toast({
-          title: 'Агуулга шинэчлэгдлээ',
-          description: 'Сайтын агуулга амжилттай шинэчлэгдлээ.',
+          title: "Агуулга шинэчлэгдлээ",
+          description: "Сайтын агуулга амжилттай шинэчлэгдлээ.",
         });
       } else {
-        await apiRequest('POST', '/api/site-content', data);
+        await apiRequest("POST", "/api/site-content", data);
         toast({
-          title: 'Агуулга үүсгэгдлээ',
-          description: 'Шинэ сайтын агуулга амжилттай нэмэгдлээ.',
+          title: "Агуулга үүсгэгдлээ",
+          description: "Шинэ сайтын агуулга амжилттай нэмэгдлээ.",
         });
       }
       onSuccess();
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Агуулга хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Агуулга хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -79,7 +83,7 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
     <Card>
       <CardHeader>
         <CardTitle>
-          {isEditing ? 'Агуулга засах' : 'Шинэ агуулга нэмэх'}
+          {isEditing ? "Агуулга засах" : "Шинэ агуулга нэмэх"}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -126,7 +130,11 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
                 <FormItem>
                   <FormLabel>Зурган хаяг (URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} value={field.value || ''} />
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -176,7 +184,7 @@ export function SiteContentForm({ content, onSuccess, onCancel }: SiteContentFor
                 Цуцлах
               </Button>
               <Button type="submit" variant="default">
-                {isEditing ? 'Хадгалах' : 'Үүсгэх'}
+                {isEditing ? "Хадгалах" : "Үүсгэх"}
               </Button>
             </div>
           </form>

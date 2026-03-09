@@ -7,12 +7,32 @@ import { useLocation } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { insertStoreSchema, ServiceCategory } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -23,8 +43,16 @@ const storeFormSchema = insertStoreSchema.extend({
   categoryId: z.coerce.number().min(1, {
     message: "Үйлчилгээний ангилал сонгоно уу",
   }),
-  logoUrl: z.string().optional().nullable().transform(val => val || ''),
-  coverImageUrl: z.string().optional().nullable().transform(val => val || ''),
+  logoUrl: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || ""),
+  coverImageUrl: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => val || ""),
 });
 
 type StoreFormValues = z.infer<typeof storeFormSchema>;
@@ -39,7 +67,8 @@ export default function StoreRegisterPage() {
     if (!user) {
       toast({
         title: "Нэвтрэх шаардлагатай",
-        description: "Дэлгүүр бүртгүүлэхийн тулд та эхлээд системд нэвтрэх шаардлагатай.",
+        description:
+          "Дэлгүүр бүртгүүлэхийн тулд та эхлээд системд нэвтрэх шаардлагатай.",
         variant: "destructive",
       });
       setLocation("/auth");
@@ -47,8 +76,10 @@ export default function StoreRegisterPage() {
   }, [user, setLocation, toast]);
 
   // Fetch service categories for dropdown
-  const { data: serviceCategories, isLoading: categoriesLoading } = useQuery<ServiceCategory[]>({
-    queryKey: ['/api/service-categories'],
+  const { data: serviceCategories, isLoading: categoriesLoading } = useQuery<
+    ServiceCategory[]
+  >({
+    queryKey: ["/api/service-categories"],
   });
 
   // Form definition
@@ -79,7 +110,7 @@ export default function StoreRegisterPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json() as { message: string };
+        const errorData = (await response.json()) as { message: string };
         throw new Error(errorData.message || "Дэлгүүр үүсгэх үед алдаа гарлаа");
       }
 
@@ -91,7 +122,7 @@ export default function StoreRegisterPage() {
         description: "Таны дэлгүүр амжилттай бүртгэгдлээ.",
       });
 
-      queryClient.invalidateQueries({ queryKey: ['/api/stores'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stores"] });
       setLocation(`/store/dashboard`);
     },
     onError: (error: Error) => {
@@ -121,14 +152,20 @@ export default function StoreRegisterPage() {
           <div className="max-w-3xl mx-auto">
             <Card>
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold">Дэлгүүр бүртгүүлэх</CardTitle>
+                <CardTitle className="text-2xl font-bold">
+                  Дэлгүүр бүртгүүлэх
+                </CardTitle>
                 <CardDescription>
-                  Та өөрийн дэлгүүрийн мэдээллийг бөглөнө үү. Таны дэлгүүр баталгаажсны дараа бүтээгдэхүүн нэмэх боломжтой болно.
+                  Та өөрийн дэлгүүрийн мэдээллийг бөглөнө үү. Таны дэлгүүр
+                  баталгаажсны дараа бүтээгдэхүүн нэмэх боломжтой болно.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
                     <FormField
                       control={form.control}
                       name="categoryId"
@@ -147,7 +184,10 @@ export default function StoreRegisterPage() {
                             </FormControl>
                             <SelectContent>
                               {serviceCategories?.map((category) => (
-                                <SelectItem key={category.id} value={category.id.toString()}>
+                                <SelectItem
+                                  key={category.id}
+                                  value={category.id.toString()}
+                                >
                                   {category.name}
                                 </SelectItem>
                               ))}
@@ -189,7 +229,8 @@ export default function StoreRegisterPage() {
                             />
                           </FormControl>
                           <FormDescription>
-                            Дэлгүүрийн үйл ажиллагаа, бүтээгдэхүүн, үйлчилгээний талаар дэлгэрэнгүй бичнэ үү.
+                            Дэлгүүрийн үйл ажиллагаа, бүтээгдэхүүн, үйлчилгээний
+                            талаар дэлгэрэнгүй бичнэ үү.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -218,7 +259,10 @@ export default function StoreRegisterPage() {
                           <FormItem>
                             <FormLabel>И-мэйл хаяг</FormLabel>
                             <FormControl>
-                              <Input placeholder="info@yourstore.com" {...field} />
+                              <Input
+                                placeholder="info@yourstore.com"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -254,7 +298,7 @@ export default function StoreRegisterPage() {
                             <FormControl>
                               <Input
                                 placeholder="https://example.com/logo.jpg"
-                                value={field.value || ''}
+                                value={field.value || ""}
                                 onChange={field.onChange}
                                 onBlur={field.onBlur}
                                 ref={field.ref}
@@ -278,7 +322,7 @@ export default function StoreRegisterPage() {
                             <FormControl>
                               <Input
                                 placeholder="https://example.com/cover.jpg"
-                                value={field.value || ''}
+                                value={field.value || ""}
                                 onChange={field.onChange}
                                 onBlur={field.onBlur}
                                 ref={field.ref}
@@ -304,10 +348,12 @@ export default function StoreRegisterPage() {
                       </Button>
                       <Button
                         type="submit"
-                        className="bg-[#0d5c03] text-white"
+                        className="bg-[#3c8fb8] text-white"
                         disabled={createStoreMutation.isPending}
                       >
-                        {createStoreMutation.isPending ? "Бүртгэж байна..." : "Дэлгүүр бүртгүүлэх"}
+                        {createStoreMutation.isPending
+                          ? "Бүртгэж байна..."
+                          : "Дэлгүүр бүртгүүлэх"}
                       </Button>
                     </div>
                   </form>

@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, ShoppingCart, X } from "lucide-react";
 import { Product } from "@shared/schema";
@@ -13,7 +19,11 @@ interface QuantityModalProps {
   product: Product | null;
 }
 
-const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps) => {
+const QuantityModalComponent = ({
+  isOpen,
+  onClose,
+  product,
+}: QuantityModalProps) => {
   const [quantity, setQuantity] = useState(1);
   const { addItem, items } = useCart();
   const { toast } = useToast();
@@ -22,20 +32,22 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
   // Reset quantity when product changes - set to minimum order quantity
   useEffect(() => {
     if (product) {
-      const minOrderQty = product.minOrderQuantity ? parseFloat(product.minOrderQuantity.toString()) : 1;
+      const minOrderQty = product.minOrderQuantity
+        ? parseFloat(product.minOrderQuantity.toString())
+        : 1;
       setQuantity(minOrderQty);
     }
   }, [product]);
 
   // Memoize expensive calculations
-  const cartTotal = useMemo(() =>
-    items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-    [items]
+  const cartTotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [items],
   );
 
-  const productPrice = useMemo(() =>
-    product ? parseFloat(product.price.toString()) : 0,
-    [product?.price]
+  const productPrice = useMemo(
+    () => (product ? parseFloat(product.price.toString()) : 0),
+    [product?.price],
   );
 
   // Calculate price based on product type
@@ -52,15 +64,18 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
     }
   }, [product, productPrice, quantity]);
 
-  const totalWithCurrentProduct = useMemo(() =>
-    cartTotal + calculatedPrice,
-    [cartTotal, calculatedPrice]
+  const totalWithCurrentProduct = useMemo(
+    () => cartTotal + calculatedPrice,
+    [cartTotal, calculatedPrice],
   );
 
   // Get minimum order quantity for current product
-  const minOrderQuantity = useMemo(() =>
-    product?.minOrderQuantity ? parseFloat(product.minOrderQuantity.toString()) : 1,
-    [product?.minOrderQuantity]
+  const minOrderQuantity = useMemo(
+    () =>
+      product?.minOrderQuantity
+        ? parseFloat(product.minOrderQuantity.toString())
+        : 1,
+    [product?.minOrderQuantity],
   );
 
   // Determine quantity step (4kg for special products, 1kg for others)
@@ -69,13 +84,18 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
   }, [product?.name]);
 
   // Memoize event handlers
-  const handleQuantityChange = useCallback((change: number) => {
-    setQuantity(prev => {
-      const step = change > 0 ? quantityStep : -quantityStep;
-      const newQuantity = prev + step;
-      return newQuantity >= minOrderQuantity && newQuantity <= 99 ? newQuantity : prev;
-    });
-  }, [minOrderQuantity, quantityStep]);
+  const handleQuantityChange = useCallback(
+    (change: number) => {
+      setQuantity((prev) => {
+        const step = change > 0 ? quantityStep : -quantityStep;
+        const newQuantity = prev + step;
+        return newQuantity >= minOrderQuantity && newQuantity <= 99
+          ? newQuantity
+          : prev;
+      });
+    },
+    [minOrderQuantity, quantityStep],
+  );
 
   const handleAddToCart = useCallback(() => {
     if (!product) return;
@@ -114,12 +134,15 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
     `)}`;
   }, []);
 
-  const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    if (!target.src.includes('data:image/svg')) {
-      target.src = fallbackImage;
-    }
-  }, [fallbackImage]);
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const target = e.target as HTMLImageElement;
+      if (!target.src.includes("data:image/svg")) {
+        target.src = fallbackImage;
+      }
+    },
+    [fallbackImage],
+  );
 
   if (!product) return null;
 
@@ -133,7 +156,6 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
           <DialogDescription className="sr-only">
             {t.quantityModalDesc}
           </DialogDescription>
-
         </DialogHeader>
 
         <div className="space-y-5">
@@ -148,8 +170,10 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-base truncate">{product.name}</h3>
-              <p className="text-sm text-gray-600 truncate">{product.description}</p>
-              <p className="font-bold text-lg text-[#0d5c03]">
+              <p className="text-sm text-gray-600 truncate">
+                {product.description}
+              </p>
+              <p className="font-bold text-lg text-[#3c8fb8]">
                 {productPrice.toLocaleString()}₩
               </p>
             </div>
@@ -165,10 +189,15 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
                 <span className="text-xs text-orange-600 font-medium">
                   {t.packageUnit}
                 </span>
-              ) : minOrderQuantity > 1 && (
-                <span className="text-xs text-orange-600 font-medium">
-                  {t.minOrderQuantity.replace('{min}', minOrderQuantity.toString())}
-                </span>
+              ) : (
+                minOrderQuantity > 1 && (
+                  <span className="text-xs text-orange-600 font-medium">
+                    {t.minOrderQuantity.replace(
+                      "{min}",
+                      minOrderQuantity.toString(),
+                    )}
+                  </span>
+                )
               )}
             </div>
             <div className="flex items-center justify-center space-x-3">
@@ -204,11 +233,11 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border">
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                {t.currentOrderTotal.split('{total}')[0]}
-                <span className="font-bold text-lg text-[#0d5c03]">
+                {t.currentOrderTotal.split("{total}")[0]}
+                <span className="font-bold text-lg text-[#3c8fb8]">
                   {totalWithCurrentProduct.toLocaleString()}
                 </span>
-                {t.currentOrderTotal.split('{total}')[1]}
+                {t.currentOrderTotal.split("{total}")[1]}
               </p>
             </div>
           </div>
@@ -216,10 +245,11 @@ const QuantityModalComponent = ({ isOpen, onClose, product }: QuantityModalProps
           {/* Add to Cart Button */}
           <Button
             onClick={handleAddToCart}
-            className="w-full bg-[#0d5c03] hover:brightness-105 text-white py-2.5 text-base font-bold"
+            className="w-full bg-[#3c8fb8] hover:brightness-105 text-white py-2.5 text-base font-bold"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            {t.addToCart} ({quantity}{t.pieces})
+            {t.addToCart} ({quantity}
+            {t.pieces})
           </Button>
         </div>
       </DialogContent>

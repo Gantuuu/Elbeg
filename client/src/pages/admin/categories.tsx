@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
-import { AdminHeader } from '@/components/admin/header';
-import { AdminLayout } from '@/components/admin/layout';
-import { CategoryForm } from '@/components/admin/category-form';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { AdminHeader } from "@/components/admin/header";
+import { AdminLayout } from "@/components/admin/layout";
+import { CategoryForm } from "@/components/admin/category-form";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Button,
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui';
+} from "@/components/ui";
 
 interface Category {
   id: number;
@@ -34,18 +34,22 @@ interface Category {
 
 export default function AdminCategories() {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: categories = [], isLoading } = useQuery<Category[]>({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     queryFn: async () => {
       const res = await apiRequest("GET", "/api/categories");
       return Array.isArray(res) ? res : [];
-    }
+    },
   });
 
   const handleEdit = (category: Category) => {
@@ -60,21 +64,21 @@ export default function AdminCategories() {
       await apiRequest("DELETE", `/api/categories/${categoryToDelete.id}`);
 
       toast({
-        title: 'Ангилал устгагдлаа',
-        description: 'Ангилал амжилттай устгагдлаа.',
+        title: "Ангилал устгагдлаа",
+        description: "Ангилал амжилттай устгагдлаа.",
       });
 
       // Refresh categories list
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
 
       setIsDeleteDialogOpen(false);
       setCategoryToDelete(null);
     } catch (error) {
       console.error(error);
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Ангилал устгах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Ангилал устгах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -84,7 +88,7 @@ export default function AdminCategories() {
     setSelectedCategory(null);
 
     // Refresh categories list
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
+    queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
 
   return (
@@ -227,17 +231,24 @@ export default function AdminCategories() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Устгахдаа итгэлтэй байна уу?</AlertDialogTitle>
             <AlertDialogDescription>
-              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{categoryToDelete?.name}" ангилалыг бүр мөсөн устгах болно.
+              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{categoryToDelete?.name}"
+              ангилалыг бүр мөсөн устгах болно.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Цуцлах</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Устгах
             </AlertDialogAction>
           </AlertDialogFooter>

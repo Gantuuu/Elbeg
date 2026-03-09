@@ -7,7 +7,13 @@ import { Footer } from "@/components/footer";
 import { ProductCard } from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@shared/schema";
@@ -29,7 +35,7 @@ export default function ProductsPage() {
   // Get unique categories from products
   const categories = useMemo(() => {
     const categoryMap: { [key: string]: boolean } = {};
-    products.forEach(product => {
+    products.forEach((product) => {
       categoryMap[product.category] = true;
     });
     return Object.keys(categoryMap).sort();
@@ -37,9 +43,11 @@ export default function ProductsPage() {
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
-      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    let filtered = products.filter((product) => {
+      const matchesCategory =
+        selectedCategory === "all" || product.category === selectedCategory;
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
@@ -66,13 +74,16 @@ export default function ProductsPage() {
       return { [selectedCategory]: filteredProducts };
     }
 
-    return filteredProducts.reduce((acc, product) => {
-      if (!acc[product.category]) {
-        acc[product.category] = [];
-      }
-      acc[product.category].push(product);
-      return acc;
-    }, {} as Record<string, Product[]>);
+    return filteredProducts.reduce(
+      (acc, product) => {
+        if (!acc[product.category]) {
+          acc[product.category] = [];
+        }
+        acc[product.category].push(product);
+        return acc;
+      },
+      {} as Record<string, Product[]>,
+    );
   }, [filteredProducts, selectedCategory]);
 
   return (
@@ -81,7 +92,7 @@ export default function ProductsPage() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <div className="bg-[#0d5c03] text-white py-16">
+        <div className="bg-[#3c8fb8] text-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Бүтээгдэхүүн
@@ -111,13 +122,16 @@ export default function ProductsPage() {
                 {/* Category Filter */}
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-gray-500" />
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={setSelectedCategory}
+                  >
                     <SelectTrigger className="w-48">
                       <SelectValue placeholder="Ангилал сонгох" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Бүх ангилал</SelectItem>
-                      {categories.map(category => (
+                      {categories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
@@ -149,23 +163,25 @@ export default function ProductsPage() {
                 className={cn(
                   "transition-all duration-200",
                   selectedCategory === "all"
-                    ? "bg-[#0d5c03] text-white"
-                    : "hover:bg-gray-100"
+                    ? "bg-[#3c8fb8] text-white"
+                    : "hover:bg-gray-100",
                 )}
               >
                 Бүгд
               </Button>
-              {categories.map(category => (
+              {categories.map((category) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
                   className={cn(
                     "transition-all duration-200",
                     selectedCategory === category
-                      ? "bg-[#0d5c03] text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-[#3c8fb8] text-white"
+                      : "hover:bg-gray-100",
                   )}
                 >
                   {category}
@@ -177,7 +193,7 @@ export default function ProductsPage() {
           {/* Products Display */}
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0d5c03] border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#3c8fb8] border-t-transparent"></div>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-20">
@@ -192,25 +208,27 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="space-y-12">
-              {Object.entries(productsByCategory).map(([category, categoryProducts]) => (
-                <div key={category} className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
-                      {category}
-                    </h2>
-                    <div className="flex-1 h-px bg-[#0d5c03]"></div>
-                    <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border">
-                      {categoryProducts.length} бүтээгдэхүүн
-                    </span>
-                  </div>
+              {Object.entries(productsByCategory).map(
+                ([category, categoryProducts]) => (
+                  <div key={category} className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+                        {category}
+                      </h2>
+                      <div className="flex-1 h-px bg-[#3c8fb8]"></div>
+                      <span className="text-sm text-gray-500 bg-white px-3 py-1 rounded-full border">
+                        {categoryProducts.length} бүтээгдэхүүн
+                      </span>
+                    </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {categoryProducts.map(product => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {categoryProducts.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           )}
 
@@ -220,7 +238,7 @@ export default function ProductsPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 hover:text-[#0d5c03] transition-all duration-200"
+                className="bg-white hover:bg-gray-50 border-2 border-gray-200 text-gray-700 hover:text-[#3c8fb8] transition-all duration-200"
               >
                 Нүүр хуудас руу буцах
               </Button>

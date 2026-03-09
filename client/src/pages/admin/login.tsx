@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-
 // Login form schema
 const loginFormSchema = z.object({
   email: z.string().min(1, {
@@ -51,8 +50,12 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     // CHECK FOR LOCAL ADMIN BYPASS (DEV ONLY)
-    if (import.meta.env.DEV && data.email === 'admin' && data.password === 'admin123') {
-      localStorage.setItem('mock_admin_session', 'true');
+    if (
+      import.meta.env.DEV &&
+      data.email === "admin" &&
+      data.password === "admin123"
+    ) {
+      localStorage.setItem("mock_admin_session", "true");
 
       // Initializing query data for immediate feedback if queryClient is used elsewhere
       // (Though admin panel likely refetches /api/user or checks auth)
@@ -83,7 +86,10 @@ export default function AdminLogin() {
       });
 
       // Debug cookies on mobile after login
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        );
       if (isMobile) {
         console.log("=== POST-LOGIN MOBILE COOKIE DEBUG ===");
         logMobileCookieDebug();
@@ -93,7 +99,6 @@ export default function AdminLogin() {
       setTimeout(() => {
         setLocation("/admin");
       }, 500);
-
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -111,8 +116,12 @@ export default function AdminLogin() {
         <Card>
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center mb-2">
-              <span className="material-icons text-3xl mr-2 text-[#0d5c03]">admin_panel_settings</span>
-              <CardTitle className="text-2xl font-bold text-[#0d5c03]">Админ нэвтрэх</CardTitle>
+              <span className="material-icons text-3xl mr-2 text-[#3c8fb8]">
+                admin_panel_settings
+              </span>
+              <CardTitle className="text-2xl font-bold text-[#3c8fb8]">
+                Админ нэвтрэх
+              </CardTitle>
             </div>
             {isRedirected && (
               <div className="bg-yellow-100 text-yellow-800 p-3 rounded text-sm">
@@ -122,7 +131,10 @@ export default function AdminLogin() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="email"
@@ -144,7 +156,11 @@ export default function AdminLogin() {
                     <FormItem>
                       <FormLabel>Нууц үг</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -153,7 +169,7 @@ export default function AdminLogin() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#0d5c03] hover:brightness-105 text-white"
+                  className="w-full bg-[#3c8fb8] hover:brightness-105 text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -170,7 +186,7 @@ export default function AdminLogin() {
                   <Button
                     variant="link"
                     onClick={() => setLocation("/")}
-                    className="text-[#0d5c03] font-medium"
+                    className="text-[#3c8fb8] font-medium"
                   >
                     Нүүр хуудас руу буцах
                   </Button>

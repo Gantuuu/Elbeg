@@ -29,30 +29,31 @@ export default function ProductDetails() {
   } = useQuery<Product>({
     queryKey: [`products`, numericId],
     queryFn: async () => {
-      return await apiRequest('GET', `/api/products/${numericId}`);
+      return await apiRequest("GET", `/api/products/${numericId}`);
     },
     enabled: !isNaN(numericId),
   });
 
   // 모든 제품 데이터를 가져옵니다
-  const {
-    data: allProducts = [],
-    isLoading: isAllProductsLoading,
-  } = useQuery<Product[]>({
-    queryKey: ['products'],
+  const { data: allProducts = [], isLoading: isAllProductsLoading } = useQuery<
+    Product[]
+  >({
+    queryKey: ["products"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/products');
+      return await apiRequest("GET", "/api/products");
     },
     enabled: !!product,
   });
 
   // 선택된 카테고리 또는 현재 제품의 카테고리에 따라 제품을 필터링합니다
-  const filteredProducts = allProducts.filter(p => {
-    if (selectedCategory) {
-      return p.category === selectedCategory && p.id !== numericId;
-    }
-    return p.category === product?.category && p.id !== numericId;
-  }).slice(0, 4);
+  const filteredProducts = allProducts
+    .filter((p) => {
+      if (selectedCategory) {
+        return p.category === selectedCategory && p.id !== numericId;
+      }
+      return p.category === product?.category && p.id !== numericId;
+    })
+    .slice(0, 4);
 
   // 제품이 로드되면 기본적으로 해당 제품의 카테고리를 선택합니다
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function ProductDetails() {
   // 사용 가능한 모든 카테고리를 가져옵니다
   // 중복 제거를 위해 객체를 사용합니다
   const categoryMap: Record<string, boolean> = {};
-  allProducts.forEach(p => {
+  allProducts.forEach((p) => {
     if (p.category) {
       categoryMap[p.category] = true;
     }
@@ -97,7 +98,7 @@ export default function ProductDetails() {
         title: "🛒 Сагсанд нэмлээ",
         description: `${quantity}× ${product.name}`,
         variant: "default",
-        className: "animate-bounceInUp" // 애니메이션 추가
+        className: "animate-bounceInUp", // 애니메이션 추가
       });
     } catch (error) {
       toast({
@@ -126,8 +127,12 @@ export default function ProductDetails() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center py-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Бүтээгдэхүүн олдсонгүй</h2>
-            <p className="text-gray-500 mb-6">Энэхүү бүтээгдэхүүн байхгүй байна эсвэл устгагдсан байна.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Бүтээгдэхүүн олдсонгүй
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Энэхүү бүтээгдэхүүн байхгүй байна эсвэл устгагдсан байна.
+            </p>
             <Button
               onClick={() => setLocation("/")}
               className="bg-primary hover:bg-primary-dark text-white"
@@ -163,19 +168,26 @@ export default function ProductDetails() {
             {/* Product Info - Compact */}
             <div className="p-4">
               <div className="flex justify-between items-start mb-1">
-                <h1 className="text-xl font-bold text-gray-900">{product.name}</h1>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {product.name}
+                </h1>
                 <div>
-                  <p className="text-lg font-bold text-[#0d5c03]">
-                    {formatPrice(parseFloat(product.price.toString()) * quantity)}
+                  <p className="text-lg font-bold text-[#3c8fb8]">
+                    {formatPrice(
+                      parseFloat(product.price.toString()) * quantity,
+                    )}
                   </p>
                   <p className="text-[10px] text-gray-500 text-right">
-                    {quantity} × {formatPrice(parseFloat(product.price.toString()))}
+                    {quantity} ×{" "}
+                    {formatPrice(parseFloat(product.price.toString()))}
                   </p>
                 </div>
               </div>
 
               <div className="py-3 mb-3 text-sm text-gray-600">
-                <p className="text-gray-700 text-sm whitespace-pre-line">{product.description}</p>
+                <p className="text-gray-700 text-sm whitespace-pre-line">
+                  {product.description}
+                </p>
               </div>
 
               {/* Quantity Selector - Smaller */}
@@ -192,7 +204,7 @@ export default function ProductDetails() {
                   <span className="px-3 text-sm font-medium">{quantity}</span>
                   <button
                     onClick={() => handleQuantityChange(quantity + 1)}
-                    className="w-7 h-7 flex items-center justify-center bg-[#0d5c03] rounded-full"
+                    className="w-7 h-7 flex items-center justify-center bg-[#3c8fb8] rounded-full"
                   >
                     <span className="text-white text-sm">+</span>
                   </button>
@@ -201,10 +213,12 @@ export default function ProductDetails() {
 
               {/* Add to Cart Button - Trendy Style */}
               <Button
-                className="w-full bg-[#0d5c03] text-white py-2.5 px-4 rounded-full flex items-center justify-center transition-all hover:shadow-md text-sm"
+                className="w-full bg-[#3c8fb8] text-white py-2.5 px-4 rounded-full flex items-center justify-center transition-all hover:shadow-md text-sm"
                 onClick={handleAddToCart}
               >
-                <span className="material-icons text-sm mr-1.5">shopping_cart</span>
+                <span className="material-icons text-sm mr-1.5">
+                  shopping_cart
+                </span>
                 Сагсанд нэмэх
               </Button>
             </div>
@@ -215,7 +229,9 @@ export default function ProductDetails() {
       {/* Categories Section - Mobile Optimized */}
       <section className="py-6 bg-neutral">
         <div className="max-w-md mx-auto px-4">
-          <h2 className="text-lg font-bold mb-4 text-[#0d5c03]">Ангилал бүтээгдэхүүн</h2>
+          <h2 className="text-lg font-bold mb-4 text-[#3c8fb8]">
+            Ангилал бүтээгдэхүүн
+          </h2>
 
           {/* Category Pills - Smaller */}
           <div className="mb-4">
@@ -223,10 +239,11 @@ export default function ProductDetails() {
               {categories.map((category) => (
                 <button
                   key={category}
-                  className={`min-w-[80px] px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${selectedCategory === category
-                    ? "bg-[#0d5c03] text-white"
-                    : "bg-gray-100/80 text-gray-700"
-                    }`}
+                  className={`min-w-[80px] px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    selectedCategory === category
+                      ? "bg-[#3c8fb8] text-white"
+                      : "bg-gray-100/80 text-gray-700"
+                  }`}
                   onClick={() => setSelectedCategory(category)}
                 >
                   <span className="font-bold">{category}</span>
@@ -241,7 +258,9 @@ export default function ProductDetails() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <p className="text-center text-gray-500 py-4 text-sm">Энэ ангилалд бүтээгдэхүүн олдсонгүй</p>
+            <p className="text-center text-gray-500 py-4 text-sm">
+              Энэ ангилалд бүтээгдэхүүн олдсонгүй
+            </p>
           ) : (
             <div className="overflow-x-auto pb-2">
               <motion.div
@@ -255,7 +274,9 @@ export default function ProductDetails() {
                   <div
                     key={filteredProduct.id}
                     className="flex-shrink-0 w-[120px]"
-                    onClick={() => setLocation(`/products/${filteredProduct.id}`)}
+                    onClick={() =>
+                      setLocation(`/products/${filteredProduct.id}`)
+                    }
                   >
                     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                       <div className="h-24 overflow-hidden relative">
@@ -266,12 +287,17 @@ export default function ProductDetails() {
                         />
                       </div>
                       <div className="p-2">
-                        <h3 className="font-bold text-xs truncate">{filteredProduct.name}</h3>
+                        <h3 className="font-bold text-xs truncate">
+                          {filteredProduct.name}
+                        </h3>
                         <div className="flex justify-between items-center mt-1">
-                          <span className="font-bold text-[10px] text-[#0d5c03]">
-                            {parseFloat(filteredProduct.price.toString()).toLocaleString()}₩
+                          <span className="font-bold text-[10px] text-[#3c8fb8]">
+                            {parseFloat(
+                              filteredProduct.price.toString(),
+                            ).toLocaleString()}
+                            ₩
                           </span>
-                          <button className="bg-[#0d5c03] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
+                          <button className="bg-[#3c8fb8] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                             +
                           </button>
                         </div>
@@ -282,8 +308,6 @@ export default function ProductDetails() {
               </motion.div>
             </div>
           )}
-
-
         </div>
       </section>
 

@@ -17,7 +17,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   // Close drawer when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+      if (
+        drawerRef.current &&
+        !drawerRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
@@ -43,7 +46,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         style={{ maxWidth: "85vw" }}
       >
         {/* Basic header bar */}
-        <div className="bg-[#0d5c03] p-4 flex justify-between items-center text-white">
+        <div className="bg-[#3c8fb8] p-4 flex justify-between items-center text-white">
           <h2 className="text-xl font-bold flex items-center">
             <span className="material-icons mr-2">shopping_cart</span>
             Таны сагс
@@ -61,14 +64,16 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <div className="w-20 h-20 rounded-full gradient-card flex items-center justify-center mb-6 shadow-md">
-                <span className="material-icons text-5xl text-[#0d5c03]">shopping_cart</span>
+                <span className="material-icons text-5xl text-[#3c8fb8]">
+                  shopping_cart
+                </span>
               </div>
               <p className="text-lg font-medium">Таны сагс хоосон байна</p>
               <p className="mt-2 text-sm text-center">
                 Бүтээгдэхүүн сонгоод "Сагсанд нэмэх" товчийг дарна уу.
               </p>
               <Button
-                className="mt-6 bg-[#0d5c03] hover:bg-[#0d5c03]/90 text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                className="mt-6 bg-[#3c8fb8] hover:bg-[#3c8fb8]/90 text-white transition-all duration-300 shadow-md hover:shadow-lg"
                 onClick={onClose}
               >
                 Бүтээгдэхүүн харах
@@ -86,16 +91,16 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         <div className="p-5 border-t">
           <div className="flex justify-between mb-4">
             <span className="text-lg">Нийт дүн:</span>
-            <span className="font-bold text-lg text-[#0d5c03]">{formatPrice(totalPrice)}</span>
+            <span className="font-bold text-lg text-[#3c8fb8]">
+              {formatPrice(totalPrice)}
+            </span>
           </div>
           <Button
-            className="w-full bg-[#0d5c03] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-md hover:shadow-lg"
+            className="w-full bg-[#3c8fb8] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-md hover:shadow-lg"
             disabled={isEmpty}
             asChild
           >
-            <Link href="/checkout">
-              Захиалга хийх
-            </Link>
+            <Link href="/checkout">Захиалга хийх</Link>
           </Button>
         </div>
       </div>

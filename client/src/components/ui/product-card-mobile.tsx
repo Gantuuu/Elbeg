@@ -27,7 +27,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
 
   useEffect(() => {
     if (isPressed) {
-      controls.start({ color: "#0d5c03" });
+      controls.start({ color: "#3c8fb8" });
     } else {
       controls.start({ color: "#333333" });
     }
@@ -66,7 +66,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
         title: t.toast.cartAdded,
         description: `${name}`,
         variant: "default",
-        className: "animate-bounceInUp"
+        className: "animate-bounceInUp",
       });
     } catch (error) {
       toast({
@@ -114,7 +114,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
 
           <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-300 flex items-end justify-end">
             <button
-              className="m-2 bg-[#0d5c03] text-white text-xs py-1.5 px-3 rounded-md flex items-center justify-center shadow-md font-bold"
+              className="m-2 bg-[#3c8fb8] text-white text-xs py-1.5 px-3 rounded-md flex items-center justify-center shadow-md font-bold"
               onClick={handleAddToCart}
               disabled={isLoading}
             >
@@ -131,7 +131,7 @@ export function ProductCardMobile({ product }: ProductCardMobileProps) {
             {name}
           </h3>
           <div className="flex justify-end items-center mt-1">
-            <p className="font-bold text-sm text-[#0d5c03]">
+            <p className="font-bold text-sm text-[#3c8fb8]">
               {formatPrice(price)}
             </p>
           </div>

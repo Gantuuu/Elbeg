@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { insertNavigationItemSchema } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { insertNavigationItemSchema } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
@@ -24,7 +24,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui';
+} from "@/components/ui";
 
 // Extend the schema for form validation
 const navigationFormSchema = insertNavigationItemSchema.extend({
@@ -39,7 +39,11 @@ interface NavigationFormProps {
   onCancel: () => void;
 }
 
-export function NavigationForm({ navigationItem, onSuccess, onCancel }: NavigationFormProps) {
+export function NavigationForm({
+  navigationItem,
+  onSuccess,
+  onCancel,
+}: NavigationFormProps) {
   const { toast } = useToast();
   const isEditing = !!navigationItem;
   const [navigationItems, setNavigationItems] = useState<any[]>([]);
@@ -47,14 +51,14 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
   useEffect(() => {
     const fetchNavigationItems = async () => {
       try {
-        const items = await apiRequest('GET', '/api/navigation');
+        const items = await apiRequest("GET", "/api/navigation");
         // Filter out current item from parent options to prevent circular references
         const filteredItems = isEditing
           ? items.filter((item: any) => item.id !== navigationItem.id)
           : items;
         setNavigationItems(filteredItems);
       } catch (error) {
-        console.error('Error fetching navigation items:', error);
+        console.error("Error fetching navigation items:", error);
       }
     };
 
@@ -64,8 +68,8 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
   const form = useForm<NavigationFormValues>({
     resolver: zodResolver(navigationFormSchema),
     defaultValues: {
-      title: navigationItem?.title || '',
-      url: navigationItem?.url || '',
+      title: navigationItem?.title || "",
+      url: navigationItem?.url || "",
       order: navigationItem?.order || 0,
       parentId: navigationItem?.parentId || null,
       isActive: navigationItem?.isActive ?? true,
@@ -75,24 +79,24 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
   const onSubmit = async (data: NavigationFormValues) => {
     try {
       if (isEditing && navigationItem.id) {
-        await apiRequest('PUT', `/api/navigation/${navigationItem.id}`, data);
+        await apiRequest("PUT", `/api/navigation/${navigationItem.id}`, data);
         toast({
-          title: 'Цэс шинэчлэгдлээ',
-          description: 'Цэсний бүтэц амжилттай шинэчлэгдлээ.',
+          title: "Цэс шинэчлэгдлээ",
+          description: "Цэсний бүтэц амжилттай шинэчлэгдлээ.",
         });
       } else {
-        await apiRequest('POST', '/api/navigation', data);
+        await apiRequest("POST", "/api/navigation", data);
         toast({
-          title: 'Цэс үүсгэгдлээ',
-          description: 'Шинэ цэсний бүтэц амжилттай нэмэгдлээ.',
+          title: "Цэс үүсгэгдлээ",
+          description: "Шинэ цэсний бүтэц амжилттай нэмэгдлээ.",
         });
       }
       onSuccess();
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Цэс хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Цэс хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -100,9 +104,7 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {isEditing ? 'Цэс засах' : 'Шинэ цэс нэмэх'}
-        </CardTitle>
+        <CardTitle>{isEditing ? "Цэс засах" : "Шинэ цэс нэмэх"}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -145,10 +147,12 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
                   <FormItem>
                     <FormLabel>Эрэмбэ</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -163,7 +167,9 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
                   <FormItem>
                     <FormLabel>Эцэг цэс</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(value === "0" ? null : Number(value))}
+                      onValueChange={(value) =>
+                        field.onChange(value === "0" ? null : Number(value))
+                      }
                       defaultValue={field.value?.toString() || "0"}
                     >
                       <FormControl>
@@ -212,7 +218,7 @@ export function NavigationForm({ navigationItem, onSuccess, onCancel }: Navigati
                 Цуцлах
               </Button>
               <Button type="submit" variant="default">
-                {isEditing ? 'Хадгалах' : 'Үүсгэх'}
+                {isEditing ? "Хадгалах" : "Үүсгэх"}
               </Button>
             </div>
           </form>

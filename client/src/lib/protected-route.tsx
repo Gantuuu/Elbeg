@@ -7,7 +7,10 @@ interface ProtectedRouteProps {
   component: React.ComponentType<any>;
 }
 
-export function ProtectedRoute({ path, component: Component }: ProtectedRouteProps) {
+export function ProtectedRoute({
+  path,
+  component: Component,
+}: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -23,16 +26,8 @@ export function ProtectedRoute({ path, component: Component }: ProtectedRoutePro
   }
 
   if (!user) {
-    return (
-      <Route path={path}>
-        {() => <Redirect to="/auth" />}
-      </Route>
-    );
+    return <Route path={path}>{() => <Redirect to="/auth" />}</Route>;
   }
 
-  return (
-    <Route path={path}>
-      {(params) => <Component {...params} />}
-    </Route>
-  );
+  return <Route path={path}>{(params) => <Component {...params} />}</Route>;
 }

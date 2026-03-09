@@ -41,11 +41,11 @@ const checkoutFormSchema = z.object({
   customerName: z.string().min(2, {
     message: "Нэр хамгийн багадаа 2 тэмдэгт байх ёстой",
   }),
-  customerPhone: z.string()
-    .regex(
-      /^010-\d{4}-\d{4}$/,
-      { message: "Утасны дугаар 010-0000-0000 хэлбэртэй байх ёстой" }
-    ),
+  customerPhone: z
+    .string()
+    .regex(/^010-\d{4}-\d{4}$/, {
+      message: "Утасны дугаар 010-0000-0000 хэлбэртэй байх ёстой",
+    }),
   customerEmail: z.string().email({
     message: "Имэйл хаягаа зөв оруулна уу",
   }),
@@ -80,7 +80,8 @@ export default function Checkout() {
     if (!isAuthLoading && !user) {
       toast({
         title: "Нэвтрэх шаардлагатай",
-        description: "Захиалга хийхийн тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
+        description:
+          "Захиалга хийхийн тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
         variant: "default",
       });
       setLocation("/auth?tab=signup");
@@ -91,26 +92,34 @@ export default function Checkout() {
   const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0);
 
   // Fetch shipping rules from server
-  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery({
-    queryKey: ['shipping-fee'],
-    queryFn: async () => {
-      try {
-        const data = await apiRequest('GET', '/api/settings/shipping-fee');
-        if (data && data.value) {
-          return JSON.parse(data.value) as { min: number, max: number, fee: number }[];
+  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery(
+    {
+      queryKey: ["shipping-fee"],
+      queryFn: async () => {
+        try {
+          const data = await apiRequest("GET", "/api/settings/shipping-fee");
+          if (data && data.value) {
+            return JSON.parse(data.value) as {
+              min: number;
+              max: number;
+              fee: number;
+            }[];
+          }
+        } catch (error) {
+          console.error("Error fetching shipping fee:", error);
         }
-      } catch (error) {
-        console.error('Error fetching shipping fee:', error);
-      }
-      return []; // Default
-    }
-  });
+        return []; // Default
+      },
+    },
+  );
 
   // Update shipping fee when data or weight changes
   useEffect(() => {
     let fee = 0;
     if (shippingRulesData && shippingRulesData.length > 0) {
-      const applicableRule = shippingRulesData.find(rule => totalWeight >= rule.min && totalWeight <= rule.max);
+      const applicableRule = shippingRulesData.find(
+        (rule) => totalWeight >= rule.min && totalWeight <= rule.max,
+      );
       if (applicableRule) {
         fee = applicableRule.fee;
       } else {
@@ -125,32 +134,34 @@ export default function Checkout() {
   }, [shippingRulesData, totalWeight, isLoadingShippingFee]);
 
   // Fetch all bank accounts
-  const { data: bankAccounts = [], isLoading: isBankAccountsLoading } = useQuery<BankAccount[]>({
-    queryKey: ['bank-accounts'],
-    queryFn: async () => {
-      return await apiRequest('GET', '/api/bank-accounts');
-    }
-  });
+  const { data: bankAccounts = [], isLoading: isBankAccountsLoading } =
+    useQuery<BankAccount[]>({
+      queryKey: ["bank-accounts"],
+      queryFn: async () => {
+        return await apiRequest("GET", "/api/bank-accounts");
+      },
+    });
 
   // Fetch default bank account
-  const { data: defaultBankAccount, isLoading: isBankAccountLoading } = useQuery<BankAccount>({
-    queryKey: ['bank-account-default'],
-    queryFn: async () => {
-      try {
-        return await apiRequest('GET', '/api/bank-accounts/default');
-      } catch (e) {
-        return null; // No default account might return 404
-      }
-    }
-  });
+  const { data: defaultBankAccount, isLoading: isBankAccountLoading } =
+    useQuery<BankAccount>({
+      queryKey: ["bank-account-default"],
+      queryFn: async () => {
+        try {
+          return await apiRequest("GET", "/api/bank-accounts/default");
+        } catch (e) {
+          return null; // No default account might return 404
+        }
+      },
+    });
 
   // Log bank account data when it changes
   useEffect(() => {
     if (defaultBankAccount) {
-      console.log('Bank account data loaded successfully:', defaultBankAccount);
+      console.log("Bank account data loaded successfully:", defaultBankAccount);
     }
     if (bankAccounts.length > 0) {
-      console.log('All bank accounts loaded:', bankAccounts);
+      console.log("All bank accounts loaded:", bankAccounts);
     }
   }, [defaultBankAccount, bankAccounts]);
 
@@ -192,7 +203,8 @@ export default function Checkout() {
 
     toast({
       title: "Захиалга амжилттай",
-      description: "Таны захиалгыг хүлээн авлаа. Захиалгын түүх руу чиглүүлж байна.",
+      description:
+        "Таны захиалгыг хүлээн авлаа. Захиалгын түүх руу чиглүүлж байна.",
     });
 
     // Redirect to My Page where user can view all their orders
@@ -201,15 +213,15 @@ export default function Checkout() {
 
   // Enhanced form submission handler with better debugging
   const onSubmit = async (data: CheckoutFormValues) => {
-    logger.custom('⏳', '주문 생성 시작...');
+    logger.custom("⏳", "주문 생성 시작...");
 
     // Log order data
-    logger.custom('🛒', '주문 데이터:', {
+    logger.custom("🛒", "주문 데이터:", {
       customerName: data.customerName,
       totalAmount: totalPrice + shippingFee,
       itemsCount: items.length,
       paymentMethod: data.paymentMethod,
-      deliveryAddress: data.customerAddress
+      deliveryAddress: data.customerAddress,
     });
 
     // Check for form validation errors (logging already added by logger above implicitly via custom if needed, but keeping existing logic)
@@ -245,36 +257,38 @@ export default function Checkout() {
         customerAddress: data.customerAddress,
         paymentMethod: data.paymentMethod,
         totalAmount: orderTotalWithShipping,
-        status: 'pending'
+        status: "pending",
       };
 
-      const cartItemsForApi = items.map(item => ({
+      const cartItemsForApi = items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
       }));
 
-      const order = await apiRequest('POST', '/api/orders', {
+      const order = await apiRequest("POST", "/api/orders", {
         orderData,
-        cartItems: cartItemsForApi
+        cartItems: cartItemsForApi,
       });
 
-      logger.success('Master Order болон Items амжилттай үүслээ:', {
+      logger.success("Master Order болон Items амжилттай үүслээ:", {
         orderId: order.id,
-        totalAmount: order.totalAmount
+        totalAmount: order.totalAmount,
       });
 
       handleCheckoutSuccess(order.id);
     } catch (error: any) {
-      logger.error('주문 생성 실패:', {
+      logger.error("주문 생성 실패:", {
         formData: data,
         error: error.message,
-        details: error
+        details: error,
       });
 
       toast({
         title: "Алдаа гарлаа",
-        description: error.message || "Захиалга боловсруулах үед алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          error.message ||
+          "Захиалга боловсруулах үед алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
     } finally {
@@ -296,7 +310,7 @@ export default function Checkout() {
           </div>
         </div>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#0d5c03] rounded-full"></div>
+          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#3c8fb8] rounded-full"></div>
         </div>
         <Footer />
       </div>
@@ -310,12 +324,18 @@ export default function Checkout() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center py-10 bg-white rounded-xl shadow-sm">
-            <span className="material-icons text-5xl text-[#0d5c03] mb-4">shopping_cart</span>
-            <h2 className="text-2xl font-bold text-foreground mb-4">Сагс хоосон байна</h2>
-            <p className="text-muted-foreground mb-6">Захиалга хийхийн тулд сагсандаа бүтээгдэхүүн нэмнэ үү.</p>
+            <span className="material-icons text-5xl text-[#3c8fb8] mb-4">
+              shopping_cart
+            </span>
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              Сагс хоосон байна
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Захиалга хийхийн тулд сагсандаа бүтээгдэхүүн нэмнэ үү.
+            </p>
             <Button
               onClick={() => setLocation("/")}
-              className="bg-[#0d5c03] hover:brightness-105 text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+              className="bg-[#3c8fb8] hover:brightness-105 text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
             >
               Бүтээгдэхүүн харах
               <span className="material-icons ml-2">arrow_forward</span>
@@ -333,17 +353,24 @@ export default function Checkout() {
 
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#0d5c03] inline-block mb-3">{t.checkout}</h1>
-          <div className="w-20 h-1 bg-[#0d5c03] mx-auto rounded-full"></div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#3c8fb8] inline-block mb-3">
+            {t.checkout}
+          </h1>
+          <div className="w-20 h-1 bg-[#3c8fb8] mx-auto rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Form */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <h2 className="text-xl font-bold mb-6 text-foreground">{t.orderInfo}</h2>
+            <h2 className="text-xl font-bold mb-6 text-foreground">
+              {t.orderInfo}
+            </h2>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="customerName"
@@ -351,7 +378,11 @@ export default function Checkout() {
                     <FormItem>
                       <FormLabel>{t.name}</FormLabel>
                       <FormControl>
-                        <Input placeholder={t.name} className="placeholder:text-gray-400" {...field} />
+                        <Input
+                          placeholder={t.name}
+                          className="placeholder:text-gray-400"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -366,7 +397,11 @@ export default function Checkout() {
                       <FormItem>
                         <FormLabel>{t.email}</FormLabel>
                         <FormControl>
-                          <Input placeholder="example@mail.com" className="placeholder:text-gray-400" {...field} />
+                          <Input
+                            placeholder="example@mail.com"
+                            className="placeholder:text-gray-400"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -379,7 +414,7 @@ export default function Checkout() {
                     render={({ field }) => {
                       const formatPhoneNumber = (value: string) => {
                         // Remove all non-digit characters
-                        const digits = value.replace(/\D/g, '');
+                        const digits = value.replace(/\D/g, "");
 
                         // Apply Korean phone number format (010-0000-0000)
                         if (digits.length <= 3) {
@@ -401,7 +436,9 @@ export default function Checkout() {
                               {...field}
                               value={field.value}
                               onChange={(e) => {
-                                const formatted = formatPhoneNumber(e.target.value);
+                                const formatted = formatPhoneNumber(
+                                  e.target.value,
+                                );
                                 field.onChange(formatted);
                               }}
                             />
@@ -435,9 +472,13 @@ export default function Checkout() {
                 />
 
                 <div className="space-y-4 rounded-lg p-5 border-2 border-blue-400/70 bg-white shadow-md">
-                  <div className="flex items-center bg-[#0d5c03] px-4 py-2 rounded-md -mt-2 -mx-1 shadow-sm">
-                    <span className="material-icons mr-2 text-xl text-white">account_balance</span>
-                    <h3 className="font-bold text-md text-white">{t.paymentInfo}</h3>
+                  <div className="flex items-center bg-[#3c8fb8] px-4 py-2 rounded-md -mt-2 -mx-1 shadow-sm">
+                    <span className="material-icons mr-2 text-xl text-white">
+                      account_balance
+                    </span>
+                    <h3 className="font-bold text-md text-white">
+                      {t.paymentInfo}
+                    </h3>
                   </div>
 
                   <FormField
@@ -446,7 +487,11 @@ export default function Checkout() {
                     render={({ field }) => (
                       <FormItem className="hidden">
                         <FormControl>
-                          <Input type="hidden" {...field} value="bank_transfer" />
+                          <Input
+                            type="hidden"
+                            {...field}
+                            value="bank_transfer"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -454,8 +499,12 @@ export default function Checkout() {
                   />
 
                   <div className="mb-6">
-                    <h3 className="text-lg font-bold text-[#0d5c03] inline-block mb-3">{t.bankTransfer}</h3>
-                    <p className="text-sm text-gray-600 mb-4">{t.bankTransferDesc}</p>
+                    <h3 className="text-lg font-bold text-[#3c8fb8] inline-block mb-3">
+                      {t.bankTransfer}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {t.bankTransferDesc}
+                    </p>
 
                     <FormField
                       control={form.control}
@@ -464,7 +513,9 @@ export default function Checkout() {
                         <FormItem className="mb-4">
                           <div className="flex items-center justify-between mb-2">
                             <FormLabel className="text-gray-800 font-medium flex items-center">
-                              <span className="material-icons text-[#0d5c03] mr-1 text-lg">account_balance</span>
+                              <span className="material-icons text-[#3c8fb8] mr-1 text-lg">
+                                account_balance
+                              </span>
                               {t.bank}
                             </FormLabel>
                             <span className="text-xs text-gray-500">
@@ -477,36 +528,49 @@ export default function Checkout() {
                             value={field.value}
                           >
                             <FormControl>
-                              <SelectTrigger className="bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0d5c03]/20 focus:border-[#0d5c03]">
+                              <SelectTrigger className="bg-white border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#3c8fb8]/20 focus:border-[#3c8fb8]">
                                 <SelectValue placeholder={t.selectBank} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl border-2 border-gray-200 shadow-lg bg-white">
                               {isBankAccountsLoading ? (
                                 <div className="p-4 text-center">
-                                  <div className="h-4 w-24 bg-[#0d5c03]/10 animate-pulse rounded-full mx-auto mb-2"></div>
-                                  <div className="h-4 w-36 bg-[#0d5c03]/10 animate-pulse rounded-full mx-auto"></div>
+                                  <div className="h-4 w-24 bg-[#3c8fb8]/10 animate-pulse rounded-full mx-auto mb-2"></div>
+                                  <div className="h-4 w-36 bg-[#3c8fb8]/10 animate-pulse rounded-full mx-auto"></div>
                                 </div>
                               ) : bankAccounts.length > 0 ? (
-                                bankAccounts.filter(account => account && account.id).map((account) => (
-                                  <SelectItem
-                                    key={account.id}
-                                    value={String(account.id || '')}
-                                    className="border-none focus:bg-violet-600 data-[state=checked]:bg-violet-600 data-[state=checked]:text-white text-gray-900 my-1 rounded-lg py-3"
-                                  >
-                                    <div className="flex items-center w-full">
-                                      <div className="w-8 h-8 rounded-full bg-violet-100 data-[state=checked]:bg-white/30 flex items-center justify-center mr-3">
-                                        <span className="material-icons text-base text-violet-600 data-[state=checked]:text-white">account_balance</span>
+                                bankAccounts
+                                  .filter((account) => account && account.id)
+                                  .map((account) => (
+                                    <SelectItem
+                                      key={account.id}
+                                      value={String(account.id || "")}
+                                      className="border-none focus:bg-violet-600 data-[state=checked]:bg-violet-600 data-[state=checked]:text-white text-gray-900 my-1 rounded-lg py-3"
+                                    >
+                                      <div className="flex items-center w-full">
+                                        <div className="w-8 h-8 rounded-full bg-violet-100 data-[state=checked]:bg-white/30 flex items-center justify-center mr-3">
+                                          <span className="material-icons text-base text-violet-600 data-[state=checked]:text-white">
+                                            account_balance
+                                          </span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                          <span className="font-bold data-[state=checked]:text-white">
+                                            {account.bankName}
+                                          </span>
+                                          <span className="text-xs text-gray-600 data-[state=checked]:text-white/80">
+                                            {account.description}
+                                          </span>
+                                        </div>
                                       </div>
-                                      <div className="flex flex-col">
-                                        <span className="font-bold data-[state=checked]:text-white">{account.bankName}</span>
-                                        <span className="text-xs text-gray-600 data-[state=checked]:text-white/80">{account.description}</span>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                ))
+                                    </SelectItem>
+                                  ))
                               ) : (
-                                <SelectItem value="default" className="py-3 font-medium">{t.defaultAccount}</SelectItem>
+                                <SelectItem
+                                  value="default"
+                                  className="py-3 font-medium"
+                                >
+                                  {t.defaultAccount}
+                                </SelectItem>
                               )}
                             </SelectContent>
                           </Select>
@@ -520,21 +584,29 @@ export default function Checkout() {
                       <div className="rounded-xl overflow-hidden shadow-md bg-white border border-gray-100">
                         {(() => {
                           // Find selected bank account
-                          const selectedAccountId = form.watch("selectedBankAccount");
+                          const selectedAccountId = form.watch(
+                            "selectedBankAccount",
+                          );
                           const selectedAccount = bankAccounts.find(
-                            account => account?.id?.toString() === selectedAccountId
+                            (account) =>
+                              account?.id?.toString() === selectedAccountId,
                           );
 
-                          const accountData = selectedAccount || defaultBankAccount;
+                          const accountData =
+                            selectedAccount || defaultBankAccount;
 
                           if (accountData) {
                             return (
                               <>
-                                <div className="bg-[#0d5c03] p-3 text-white">
+                                <div className="bg-[#3c8fb8] p-3 text-white">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                      <span className="material-icons mr-2">account_balance</span>
-                                      <h4 className="font-bold">{accountData.bankName}</h4>
+                                      <span className="material-icons mr-2">
+                                        account_balance
+                                      </span>
+                                      <h4 className="font-bold">
+                                        {accountData.bankName}
+                                      </h4>
                                     </div>
                                     {accountData.isDefault && (
                                       <span className="bg-white/20 text-white text-xs px-2 py-1 rounded-full">
@@ -546,19 +618,33 @@ export default function Checkout() {
                                 <div className="p-4">
                                   <div className="flex flex-col space-y-4">
                                     <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-3">
-                                      <span className="text-gray-600 text-sm">{t.accountNumber}</span>
-                                      <span className="font-mono font-bold text-lg tracking-wider">{accountData.accountNumber}</span>
+                                      <span className="text-gray-600 text-sm">
+                                        {t.accountNumber}
+                                      </span>
+                                      <span className="font-mono font-bold text-lg tracking-wider">
+                                        {accountData.accountNumber}
+                                      </span>
                                     </div>
                                     <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-3">
-                                      <span className="text-gray-600 text-sm">{t.accountHolder}</span>
-                                      <span className="font-bold">{accountData.accountHolder}</span>
+                                      <span className="text-gray-600 text-sm">
+                                        {t.accountHolder}
+                                      </span>
+                                      <span className="font-bold">
+                                        {accountData.accountHolder}
+                                      </span>
                                     </div>
                                     <button
                                       type="button"
-                                      onClick={() => navigator.clipboard.writeText(accountData.accountNumber)}
-                                      className="flex items-center justify-center py-2 px-4 rounded-lg bg-[#0d5c03] text-white hover:brightness-110 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md mt-2"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          accountData.accountNumber,
+                                        )
+                                      }
+                                      className="flex items-center justify-center py-2 px-4 rounded-lg bg-[#3c8fb8] text-white hover:brightness-110 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md mt-2"
                                     >
-                                      <span className="material-icons text-sm mr-1">content_copy</span>
+                                      <span className="material-icons text-sm mr-1">
+                                        content_copy
+                                      </span>
                                       {t.copyAccountNumber}
                                     </button>
                                   </div>
@@ -568,8 +654,12 @@ export default function Checkout() {
                           } else {
                             return (
                               <div className="p-6 text-center">
-                                <span className="material-icons text-amber-500 text-4xl mb-2">warning</span>
-                                <p className="text-amber-600 font-medium">{t.bankInfoNotFound}</p>
+                                <span className="material-icons text-amber-500 text-4xl mb-2">
+                                  warning
+                                </span>
+                                <p className="text-amber-600 font-medium">
+                                  {t.bankInfoNotFound}
+                                </p>
                               </div>
                             );
                           }
@@ -583,9 +673,15 @@ export default function Checkout() {
                     name="transferAccountHolder"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-800 font-medium">{t.transferSenderName}</FormLabel>
+                        <FormLabel className="text-gray-800 font-medium">
+                          {t.transferSenderName}
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t.transferSenderNamePlaceholder} {...field} className="border-2 border-gray-200 placeholder:text-gray-400" />
+                          <Input
+                            placeholder={t.transferSenderNamePlaceholder}
+                            {...field}
+                            className="border-2 border-gray-200 placeholder:text-gray-400"
+                          />
                         </FormControl>
                         <FormMessage />
                         <p className="text-xs text-gray-600 mt-1 font-medium">
@@ -598,7 +694,7 @@ export default function Checkout() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-[#0d5c03] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="w-full bg-[#3c8fb8] hover:brightness-105 text-white font-medium py-6 transition-all duration-300 shadow-sm hover:shadow-md"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -620,7 +716,9 @@ export default function Checkout() {
           {/* Order Summary */}
           <div>
             <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
-              <h2 className="text-xl font-bold mb-6 text-foreground">{t.orderInfo}</h2>
+              <h2 className="text-xl font-bold mb-6 text-foreground">
+                {t.orderInfo}
+              </h2>
 
               <div className="space-y-4 mb-6">
                 {items.map((item) => (
@@ -630,11 +728,15 @@ export default function Checkout() {
 
               <div className="border-t border-gray-100 pt-4">
                 <div className="flex justify-between mb-2">
-                  <span className="font-medium text-foreground">{t.products}:</span>
+                  <span className="font-medium text-foreground">
+                    {t.products}:
+                  </span>
                   <span className="font-bold">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between mb-2">
-                  <span className="font-medium text-foreground">{t.shippingFee}:</span>
+                  <span className="font-medium text-foreground">
+                    {t.shippingFee}:
+                  </span>
                   <span className="font-bold">
                     {isLoadingShippingFee ? (
                       <span className="h-4 w-16 bg-gray-200 animate-pulse rounded inline-block"></span>
@@ -645,12 +747,12 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-gray-100">
                   <span className="text-foreground">{t.totalAmount}:</span>
-                  <span className="text-[#0d5c03] font-bold">{formatPrice(totalPrice + shippingFee)}</span>
+                  <span className="text-[#3c8fb8] font-bold">
+                    {formatPrice(totalPrice + shippingFee)}
+                  </span>
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
       </section>

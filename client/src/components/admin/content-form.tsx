@@ -1,12 +1,12 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { WysiwygEditor } from './wysiwyg-editor';
-import { HelpTooltip } from './help-tooltip';
-import { helpIllustrations } from '@/assets/help';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { WysiwygEditor } from "./wysiwyg-editor";
+import { HelpTooltip } from "./help-tooltip";
+import { helpIllustrations } from "@/assets/help";
 import {
   Form,
   FormControl,
@@ -16,13 +16,13 @@ import {
   FormMessage,
   Input,
   Button,
-} from '@/components/ui';
+} from "@/components/ui";
 
 // Define the form schema
 const contentFormSchema = z.object({
-  key: z.string().min(1, { message: 'Түлхүүр оруулна уу' }),
-  title: z.string().min(1, { message: 'Гарчиг оруулна уу' }),
-  content: z.string().min(1, { message: 'Контент оруулна уу' }),
+  key: z.string().min(1, { message: "Түлхүүр оруулна уу" }),
+  title: z.string().min(1, { message: "Гарчиг оруулна уу" }),
+  content: z.string().min(1, { message: "Контент оруулна уу" }),
 });
 
 type ContentFormValues = z.infer<typeof contentFormSchema>;
@@ -33,17 +33,21 @@ interface ContentFormProps {
   onCancel: () => void;
 }
 
-export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) {
+export function ContentForm({
+  content,
+  onSuccess,
+  onCancel,
+}: ContentFormProps) {
   const { toast } = useToast();
-  
+
   // Initialize form with default values
   const form = useForm<ContentFormValues>({
     resolver: zodResolver(contentFormSchema),
     defaultValues: {
-      key: content?.key || '',
-      title: content?.title || '',
-      content: content?.content || '',
-    }
+      key: content?.key || "",
+      title: content?.title || "",
+      content: content?.content || "",
+    },
   });
 
   // Form submission handler
@@ -51,26 +55,26 @@ export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) 
     try {
       if (content) {
         // Update existing content
-        await apiRequest('PATCH', `/api/site-content/${content.id}`, data);
+        await apiRequest("PATCH", `/api/site-content/${content.id}`, data);
         toast({
-          title: 'Контент шинэчлэгдлээ',
-          description: 'Контент амжилттай шинэчлэгдлээ.',
+          title: "Контент шинэчлэгдлээ",
+          description: "Контент амжилттай шинэчлэгдлээ.",
         });
       } else {
         // Create new content
-        await apiRequest('POST', '/api/site-content', data);
+        await apiRequest("POST", "/api/site-content", data);
         toast({
-          title: 'Контент үүсгэгдлээ',
-          description: 'Шинэ контент амжилттай үүсгэгдлээ.',
+          title: "Контент үүсгэгдлээ",
+          description: "Шинэ контент амжилттай үүсгэгдлээ.",
         });
       }
-      
+
       onSuccess();
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Контент хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Контент хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -87,12 +91,18 @@ export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) 
                 <div className="flex items-center">
                   <FormLabel>Түлхүүр</FormLabel>
                   <div className="ml-2">
-                    <HelpTooltip 
+                    <HelpTooltip
                       content={
                         <div>
                           <p className="font-medium mb-1">Түлхүүр:</p>
-                          <p>Энэ нь контентыг вебсайт дээр дуудахад ашиглагдах техникийн нэр. Англи үсгээр, доогуур зураас ашиглан бичнэ үү.</p>
-                          <p className="text-xs mt-1">Жишээ: home_banner, about_us, contact_info</p>
+                          <p>
+                            Энэ нь контентыг вебсайт дээр дуудахад ашиглагдах
+                            техникийн нэр. Англи үсгээр, доогуур зураас ашиглан
+                            бичнэ үү.
+                          </p>
+                          <p className="text-xs mt-1">
+                            Жишээ: home_banner, about_us, contact_info
+                          </p>
                         </div>
                       }
                       size="sm"
@@ -101,8 +111,8 @@ export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) 
                 </div>
                 <FormLabel>Түлхүүр</FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
+                  <Input
+                    {...field}
                     placeholder="Жишээ: home_banner"
                     disabled={!!content} // Disable editing key for existing content
                   />
@@ -135,12 +145,18 @@ export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) 
               <div className="flex items-center">
                 <FormLabel>Контент</FormLabel>
                 <div className="ml-2">
-                  <HelpTooltip 
+                  <HelpTooltip
                     content={
                       <div>
                         <p className="font-medium mb-1">WYSIWYG Редактор:</p>
-                        <p className="mb-2">Хүссэн контентоо форматлах боломжтой. Текст, зураг, линк гэх мэт оруулах боломжтой.</p>
-                        <p className="text-xs">Санамж: Зураг оруулахын тулд Media Library-с зураг сонгох боломжтой.</p>
+                        <p className="mb-2">
+                          Хүссэн контентоо форматлах боломжтой. Текст, зураг,
+                          линк гэх мэт оруулах боломжтой.
+                        </p>
+                        <p className="text-xs">
+                          Санамж: Зураг оруулахын тулд Media Library-с зураг
+                          сонгох боломжтой.
+                        </p>
                       </div>
                     }
                     illustration={helpIllustrations.wysiwyg}
@@ -161,26 +177,39 @@ export function ContentForm({ content, onSuccess, onCancel }: ContentFormProps) 
         />
 
         <div className="flex justify-end space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
+          <Button type="button" variant="outline" onClick={onCancel}>
             Цуцлах
           </Button>
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting}
-          >
+          <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Хадгалж байна...
               </span>
-            ) : content ? 'Шинэчлэх' : 'Хадгалах'}
+            ) : content ? (
+              "Шинэчлэх"
+            ) : (
+              "Хадгалах"
+            )}
           </Button>
         </div>
       </form>

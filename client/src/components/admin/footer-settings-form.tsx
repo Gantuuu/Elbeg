@@ -2,7 +2,15 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaYoutube,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -11,8 +19,22 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
@@ -40,7 +62,9 @@ export function FooterSettingsForm() {
   const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-  const [quickLinks, setQuickLinks] = useState<Array<{ title: string; url: string }>>([]);
+  const [quickLinks, setQuickLinks] = useState<
+    Array<{ title: string; url: string }>
+  >([]);
   const [newQuickLinkTitle, setNewQuickLinkTitle] = useState("");
   const [newQuickLinkUrl, setNewQuickLinkUrl] = useState("");
 
@@ -51,7 +75,7 @@ export function FooterSettingsForm() {
       const res = await fetch("/api/settings/footer");
       if (!res.ok) throw new Error("Failed to fetch footer settings");
       return res.json();
-    }
+    },
   });
 
   // Setup form with default values
@@ -68,8 +92,8 @@ export function FooterSettingsForm() {
       facebook: "",
       twitter: "",
       instagram: "",
-      youtube: ""
-    }
+      youtube: "",
+    },
   });
 
   // Update form when data is loaded
@@ -92,7 +116,10 @@ export function FooterSettingsForm() {
       });
 
       // Set quick links
-      if (footerSettings.quickLinks && Array.isArray(footerSettings.quickLinks)) {
+      if (
+        footerSettings.quickLinks &&
+        Array.isArray(footerSettings.quickLinks)
+      ) {
         setQuickLinks(footerSettings.quickLinks);
       }
 
@@ -116,13 +143,16 @@ export function FooterSettingsForm() {
   // Handle adding a new quick link
   const handleAddQuickLink = () => {
     if (newQuickLinkTitle && newQuickLinkUrl) {
-      setQuickLinks([...quickLinks, { title: newQuickLinkTitle, url: newQuickLinkUrl }]);
+      setQuickLinks([
+        ...quickLinks,
+        { title: newQuickLinkTitle, url: newQuickLinkUrl },
+      ]);
       setNewQuickLinkTitle("");
       setNewQuickLinkUrl("");
     } else {
       toast({
         title: "Гарчиг болон URL оруулна уу",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -160,7 +190,7 @@ export function FooterSettingsForm() {
         facebook: data.facebook,
         twitter: data.twitter,
         instagram: data.instagram,
-        youtube: data.youtube
+        youtube: data.youtube,
       };
       formData.append("socialLinks", JSON.stringify(socialLinks));
 
@@ -174,8 +204,10 @@ export function FooterSettingsForm() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json() as { message?: string };
-        throw new Error(errorData.message || "Failed to update footer settings");
+        const errorData = (await response.json()) as { message?: string };
+        throw new Error(
+          errorData.message || "Failed to update footer settings",
+        );
       }
 
       return response.json();
@@ -185,7 +217,7 @@ export function FooterSettingsForm() {
       toast({
         title: "Амжилттай!",
         description: "Хөлны тохиргоо шинэчлэгдлээ",
-        variant: "default"
+        variant: "default",
       });
 
       // Invalidate the footer settings query to refresh the data
@@ -196,9 +228,9 @@ export function FooterSettingsForm() {
       toast({
         title: "Алдаа гарлаа!",
         description: error.message || "Хөлны тохиргоог шинэчлэхэд алдаа гарлаа",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const onSubmit = (data: FooterFormValues) => {
@@ -206,7 +238,11 @@ export function FooterSettingsForm() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">Ачааллаж байна...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        Ачааллаж байна...
+      </div>
+    );
   }
 
   return (
@@ -280,7 +316,9 @@ export function FooterSettingsForm() {
                 />
 
                 <div className="space-y-2">
-                  <FormLabel htmlFor="footerLogo">Хөлний лого (хэрэв шаардлагатай бол)</FormLabel>
+                  <FormLabel htmlFor="footerLogo">
+                    Хөлний лого (хэрэв шаардлагатай бол)
+                  </FormLabel>
                   <div className="flex flex-col space-y-2">
                     {previewUrl && (
                       <div className="relative w-48 h-24 bg-gray-100 rounded-md overflow-hidden">
@@ -426,7 +464,10 @@ export function FooterSettingsForm() {
                         Instagram
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="https://instagram.com/" {...field} />
+                        <Input
+                          placeholder="https://instagram.com/"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -468,10 +509,15 @@ export function FooterSettingsForm() {
                     <h3 className="text-sm font-medium">Одоогийн холбоосууд</h3>
                     <ul className="space-y-2">
                       {quickLinks.map((link, index) => (
-                        <li key={index} className="flex justify-between items-center p-2 rounded bg-secondary/10">
+                        <li
+                          key={index}
+                          className="flex justify-between items-center p-2 rounded bg-secondary/10"
+                        >
                           <div>
                             <p className="font-medium">{link.title}</p>
-                            <p className="text-sm text-muted-foreground">{link.url}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {link.url}
+                            </p>
                           </div>
                           <Button
                             type="button"
@@ -487,7 +533,9 @@ export function FooterSettingsForm() {
                   </div>
                 ) : (
                   <div className="text-center p-4 bg-secondary/10 rounded-md">
-                    <p className="text-muted-foreground">Одоогоор холбоос байхгүй байна</p>
+                    <p className="text-muted-foreground">
+                      Одоогоор холбоос байхгүй байна
+                    </p>
                   </div>
                 )}
 

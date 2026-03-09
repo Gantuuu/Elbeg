@@ -13,11 +13,21 @@ import { motion } from "framer-motion";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { useLanguage, getLocalizedProductName, getLocalizedProductDescription } from "@/contexts/language-context";
+import {
+  useLanguage,
+  getLocalizedProductName,
+  getLocalizedProductDescription,
+} from "@/contexts/language-context";
 import { QuantityModal } from "@/components/quantity-modal";
 import { useImagePreloader } from "@/hooks/use-image-preloader";
 import { logMobileCookieDebug } from "@/utils/cookieUtils";
-import { calculateDeliveryDate, formatDeliveryDate, getDeliveryMessage, DeliverySettings, NonDeliveryDay } from "@/lib/delivery-date";
+import {
+  calculateDeliveryDate,
+  formatDeliveryDate,
+  getDeliveryMessage,
+  DeliverySettings,
+  NonDeliveryDay,
+} from "@/lib/delivery-date";
 import { Truck, Star, MessageSquare } from "lucide-react";
 import { Review } from "@shared/schema";
 import { getFullImageUrl } from "@/lib/image-utils";
@@ -35,9 +45,9 @@ export default function HomePage() {
 
   // Fetch service categories for the homepage
   const { data: serviceCategories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['service-categories'],
+    queryKey: ["service-categories"],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/service-categories');
+      const data = await apiRequest("GET", "/api/service-categories");
       if (!Array.isArray(data)) return [];
       return data.filter((cat: any) => cat.isActive);
     },
@@ -46,45 +56,45 @@ export default function HomePage() {
 
   // Fetch featured products
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ["products"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/products');
+      return await apiRequest("GET", "/api/products");
     },
     staleTime: 2 * 60 * 1000,
   });
 
   // Fetch delivery settings and non-delivery days
   const { data: deliverySettings } = useQuery<DeliverySettings>({
-    queryKey: ['delivery-settings'],
+    queryKey: ["delivery-settings"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/delivery-settings');
+      return await apiRequest("GET", "/api/delivery-settings");
     },
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: nonDeliveryDays = [] } = useQuery<NonDeliveryDay[]>({
-    queryKey: ['non-delivery-days'],
+    queryKey: ["non-delivery-days"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/non-delivery-days');
+      return await apiRequest("GET", "/api/non-delivery-days");
     },
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch approved reviews
   const { data: reviewsData = [] } = useQuery<Review[]>({
-    queryKey: ['reviews'],
+    queryKey: ["reviews"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/reviews');
+      return await apiRequest("GET", "/api/reviews");
     },
     staleTime: 5 * 60 * 1000,
   });
 
   // Fetch product categories from category management
   const { data: productCategories = [] } = useQuery<any[]>({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     queryFn: async () => {
-      const response = await fetch('/api/categories');
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      const response = await fetch("/api/categories");
+      if (!response.ok) throw new Error("Failed to fetch categories");
       return await response.json();
     },
     staleTime: 5 * 60 * 1000,
@@ -113,10 +123,11 @@ export default function HomePage() {
 
   // Preload product images for faster display
   const productImageUrls = useMemo(() => {
-    return displayedProducts.map(product => product.imageUrl);
+    return displayedProducts.map((product) => product.imageUrl);
   }, [displayedProducts]);
 
-  const { loadedImages, isLoading: imagesLoading } = useImagePreloader(productImageUrls);
+  const { loadedImages, isLoading: imagesLoading } =
+    useImagePreloader(productImageUrls);
 
   // Reset displayed count when category changes
   useEffect(() => {
@@ -126,7 +137,10 @@ export default function HomePage() {
   // Mobile cookie debugging - run once on mount
   useEffect(() => {
     // Only run on mobile browsers
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
     if (isMobile) {
       setTimeout(() => {
         logMobileCookieDebug();
@@ -137,16 +151,20 @@ export default function HomePage() {
   // Infinite scroll handler
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 1000) {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 1000
+      ) {
         if (displayedCount < filteredProducts.length) {
-          setDisplayedCount(prev => Math.min(prev + 8, filteredProducts.length));
+          setDisplayedCount((prev) =>
+            Math.min(prev + 8, filteredProducts.length),
+          );
         }
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [displayedCount, filteredProducts.length]);
 
   // Handle category click to navigate to the service category page
@@ -155,30 +173,35 @@ export default function HomePage() {
   };
 
   // Memoize event handlers
-  const handleAddToCartClick = useCallback((product: Product) => {
-    if (!user) {
-      toast({
-        title: t.toast.loginRequired,
-        description: t.toast.loginRequiredDesc,
-        variant: "default",
-      });
-      setLocation("/auth?tab=signup");
-      return;
-    }
+  const handleAddToCartClick = useCallback(
+    (product: Product) => {
+      if (!user) {
+        toast({
+          title: t.toast.loginRequired,
+          description: t.toast.loginRequiredDesc,
+          variant: "default",
+        });
+        setLocation("/auth?tab=signup");
+        return;
+      }
 
-    setSelectedProduct(product);
-    setIsQuantityModalOpen(true);
-  }, [user, toast, setLocation]);
+      setSelectedProduct(product);
+      setIsQuantityModalOpen(true);
+    },
+    [user, toast, setLocation],
+  );
 
   const handleCloseModal = useCallback(() => {
     setIsQuantityModalOpen(false);
     setSelectedProduct(null);
   }, []);
 
-  const handleProductClick = useCallback((productId: number) => {
-    setLocation(`/products/${productId}`);
-  }, [setLocation]);
-
+  const handleProductClick = useCallback(
+    (productId: number) => {
+      setLocation(`/products/${productId}`);
+    },
+    [setLocation],
+  );
 
   // Check for upcoming non-delivery days to show warning banner
   const upcomingNonDeliveryDays = useMemo(() => {
@@ -188,7 +211,7 @@ export default function HomePage() {
     const nextWeek = new Date(today);
     nextWeek.setDate(nextWeek.getDate() + 7);
 
-    return nonDeliveryDays.filter(day => {
+    return nonDeliveryDays.filter((day) => {
       const dayDate = new Date(day.date);
       dayDate.setHours(0, 0, 0, 0);
       return dayDate >= today && dayDate <= nextWeek;
@@ -204,7 +227,9 @@ export default function HomePage() {
         <div className="bg-red-50 border-b-2 border-red-200">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-2">
-              <span className="material-icons text-red-600 flex-shrink-0">warning</span>
+              <span className="material-icons text-red-600 flex-shrink-0">
+                warning
+              </span>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-red-800">
                   ⚠️ Хүргэлтийн тухай:
@@ -213,7 +238,8 @@ export default function HomePage() {
                   {upcomingNonDeliveryDays.map((day, idx) => (
                     <span key={day.id}>
                       {idx > 0 && ", "}
-                      {new Date(day.date).toLocaleDateString('mn-MN')} ({day.reason})
+                      {new Date(day.date).toLocaleDateString("mn-MN")} (
+                      {day.reason})
                     </span>
                   ))}
                 </p>
@@ -231,67 +257,84 @@ export default function HomePage() {
           <section className="py-8 bg-gray-50">
             <div className="container mx-auto px-6">
               <div className="text-center mb-6">
-                <h2 className="text-xl md:text-2xl font-bold mb-2">Хэрэглэгчдийн сэтгэгдэл</h2>
+                <h2 className="text-xl md:text-2xl font-bold mb-2">
+                  Хэрэглэгчдийн сэтгэгдэл
+                </h2>
                 <p className="text-gray-600 text-sm">Чанар баталгааг амлая</p>
               </div>
               {/* Desktop: Grid layout */}
               <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(Array.isArray(reviewsData) ? reviewsData : []).slice(0, 3).map((review) => (
-                  <div
-                    key={review.id}
-                    className="bg-white rounded-lg p-4 shadow-sm"
-                    data-testid={`review-card-${review.id}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#0d5c03] flex items-center justify-center text-white font-bold flex-shrink-0">
-                        {review.customerName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm">{review.customerName}</span>
-                          <div className="flex items-center gap-0.5">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
+                {(Array.isArray(reviewsData) ? reviewsData : [])
+                  .slice(0, 3)
+                  .map((review) => (
+                    <div
+                      key={review.id}
+                      className="bg-white rounded-lg p-4 shadow-sm"
+                      data-testid={`review-card-${review.id}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#3c8fb8] flex items-center justify-center text-white font-bold flex-shrink-0">
+                          {review.customerName.charAt(0).toUpperCase()}
                         </div>
-                        <p className="text-gray-600 text-xs line-clamp-3">{review.content}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-sm">
+                              {review.customerName}
+                            </span>
+                            <div className="flex items-center gap-0.5">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-gray-600 text-xs line-clamp-3">
+                            {review.content}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
               {/* Mobile: Horizontal auto-scrolling carousel */}
               <div className="md:hidden overflow-hidden">
                 <div className="flex gap-4 animate-scroll-x">
                   {(() => {
-                    const safeReviews = Array.isArray(reviewsData) ? reviewsData : [];
-                    return [...safeReviews.slice(0, 3), ...safeReviews.slice(0, 3)].map((review, index) => (
+                    const safeReviews = Array.isArray(reviewsData)
+                      ? reviewsData
+                      : [];
+                    return [
+                      ...safeReviews.slice(0, 3),
+                      ...safeReviews.slice(0, 3),
+                    ].map((review, index) => (
                       <div
                         key={`${review.id}-${index}`}
                         className="bg-white rounded-lg p-4 shadow-sm flex-shrink-0 w-[280px]"
                         data-testid={`review-card-mobile-${review.id}-${index}`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#0d5c03] flex items-center justify-center text-white font-bold flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-[#3c8fb8] flex items-center justify-center text-white font-bold flex-shrink-0">
                             {review.customerName.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="font-semibold text-sm">{review.customerName}</span>
+                              <span className="font-semibold text-sm">
+                                {review.customerName}
+                              </span>
                               <div className="flex items-center gap-0.5">
                                 {Array.from({ length: 5 }).map((_, i) => (
                                   <Star
                                     key={i}
-                                    className={`h-3 w-3 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                                    className={`h-3 w-3 ${i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
                                   />
                                 ))}
                               </div>
                             </div>
-                            <p className="text-gray-600 text-xs line-clamp-3">{review.content}</p>
+                            <p className="text-gray-600 text-xs line-clamp-3">
+                              {review.content}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -312,7 +355,9 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">{t.featuredProducts}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                {t.featuredProducts}
+              </h2>
               <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
                 {t.featuredProductsDesc}
               </p>
@@ -324,30 +369,37 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-2 justify-center pb-2">
                   <button
                     onClick={() => setSelectedCategory("all")}
-                    className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${selectedCategory === "all"
-                      ? "bg-[#0d5c03] text-white"
-                      : "bg-gray-100/80 text-gray-700"
-                      }`}
+                    className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${
+                      selectedCategory === "all"
+                        ? "bg-[#3c8fb8] text-white"
+                        : "bg-gray-100/80 text-gray-700"
+                    }`}
                   >
-                    <span className="font-bold text-center text-xs md:text-sm leading-tight">{t.categories.all}</span>
+                    <span className="font-bold text-center text-xs md:text-sm leading-tight">
+                      {t.categories.all}
+                    </span>
                   </button>
 
                   {/* Dynamic categories from API */}
-                  {Array.isArray(productCategories) && productCategories
-                    .filter((cat: any) => cat.isActive !== false)
-                    .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-                    .map((category: any) => (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.name)}
-                        className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${selectedCategory === category.name
-                          ? "bg-[#0d5c03] text-white"
-                          : "bg-gray-100/80 text-gray-700"
+                  {Array.isArray(productCategories) &&
+                    productCategories
+                      .filter((cat: any) => cat.isActive !== false)
+                      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                      .map((category: any) => (
+                        <button
+                          key={category.id}
+                          onClick={() => setSelectedCategory(category.name)}
+                          className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${
+                            selectedCategory === category.name
+                              ? "bg-[#3c8fb8] text-white"
+                              : "bg-gray-100/80 text-gray-700"
                           }`}
-                      >
-                        <span className="font-bold text-center text-xs md:text-sm leading-tight">{category.name}</span>
-                      </button>
-                    ))}
+                        >
+                          <span className="font-bold text-center text-xs md:text-sm leading-tight">
+                            {category.name}
+                          </span>
+                        </button>
+                      ))}
                 </div>
               </div>
             </div>
@@ -356,19 +408,24 @@ export default function HomePage() {
             <div className="mb-10 max-w-4xl mx-auto">
               {productsLoading ? (
                 <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  {Array(8).fill(0).map((_, i) => (
-                    <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
-                      <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
-                      <div className="p-3 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-200 rounded w-full"></div>
-                        <div className="flex justify-between items-center pt-2">
-                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                          <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  {Array(8)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse"
+                      >
+                        <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
+                        <div className="p-3 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-full"></div>
+                          <div className="flex justify-between items-center pt-2">
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-8 bg-gray-200 rounded w-16"></div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : displayedProducts.length > 0 ? (
                 <>
@@ -383,18 +440,24 @@ export default function HomePage() {
                       >
                         <div className="aspect-square relative overflow-hidden bg-gray-50">
                           <img
-                            src={getFullImageUrl(product.thumbnailUrl || product.imageUrl)}
+                            src={getFullImageUrl(
+                              product.thumbnailUrl || product.imageUrl,
+                            )}
                             alt={getLocalizedProductName(product, language)}
                             className="w-full h-full object-cover transition-opacity duration-300"
                             loading="lazy"
                             decoding="async"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
+                              target.style.display = "none";
                               const parent = target.parentElement;
-                              if (parent && !parent.querySelector('.fallback-bg')) {
-                                const fallback = document.createElement('div');
-                                fallback.className = 'fallback-bg absolute inset-0 bg-[#0d5c03] flex items-center justify-center';
+                              if (
+                                parent &&
+                                !parent.querySelector(".fallback-bg")
+                              ) {
+                                const fallback = document.createElement("div");
+                                fallback.className =
+                                  "fallback-bg absolute inset-0 bg-[#3c8fb8] flex items-center justify-center";
                                 fallback.innerHTML = `<span class="text-white font-bold text-xs text-center px-2">${product.name}</span>`;
                                 parent.appendChild(fallback);
                               }
@@ -406,7 +469,10 @@ export default function HomePage() {
                             <div className="absolute bottom-2 right-2 max-w-[calc(100%-16px)]">
                               <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full text-right ml-auto w-fit">
                                 <span className="block truncate">
-                                  {getLocalizedProductDescription(product, language)}
+                                  {getLocalizedProductDescription(
+                                    product,
+                                    language,
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -414,14 +480,18 @@ export default function HomePage() {
                         </div>
 
                         <div className="p-3 flex-1 flex flex-col">
-                          <h3 className="font-bold text-sm mb-3 line-clamp-1 h-5 text-center">{getLocalizedProductName(product, language)}</h3>
+                          <h3 className="font-bold text-sm mb-3 line-clamp-1 h-5 text-center">
+                            {getLocalizedProductName(product, language)}
+                          </h3>
 
                           <div className="mt-auto space-y-2">
                             {/* Price display - centered */}
                             <div className="text-center">
-                              <span className="font-bold text-sm text-[#0d5c03]">
+                              <span className="font-bold text-sm text-[#3c8fb8]">
                                 {(() => {
-                                  const price = parseFloat(product.price.toString());
+                                  const price = parseFloat(
+                                    product.price.toString(),
+                                  );
 
                                   // Display the price as stored (already calculated for packages)
                                   return `${price.toLocaleString()}₩`;
@@ -432,7 +502,7 @@ export default function HomePage() {
                             {/* Cart button - full width and centered */}
                             <Button
                               size="sm"
-                              className="w-full bg-[#0d5c03] hover:brightness-105 text-white h-8 text-xs font-medium"
+                              className="w-full bg-[#3c8fb8] hover:brightness-105 text-white h-8 text-xs font-medium"
                               onClick={() => handleAddToCartClick(product)}
                             >
                               {t.addToCart}
@@ -440,10 +510,15 @@ export default function HomePage() {
 
                             {/* Delivery date badge - mobile optimized */}
                             {deliveryDate && (
-                              <div className="flex flex-col items-center justify-center bg-[#0d5c03] text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg" data-testid={`delivery-badge-${product.id}`}>
+                              <div
+                                className="flex flex-col items-center justify-center bg-[#3c8fb8] text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg"
+                                data-testid={`delivery-badge-${product.id}`}
+                              >
                                 <div className="flex items-center gap-0.5 sm:gap-1">
                                   <Truck className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                                  <span>{formatDeliveryDate(deliveryDate, language)}</span>
+                                  <span>
+                                    {formatDeliveryDate(deliveryDate, language)}
+                                  </span>
                                 </div>
                                 <span>{getDeliveryMessage(language)}</span>
                               </div>
@@ -458,7 +533,7 @@ export default function HomePage() {
                   {displayedCount < filteredProducts.length && (
                     <div className="text-center mt-8">
                       <div className="inline-flex items-center gap-2 text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#0d5c03] rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#3c8fb8] rounded-full animate-spin"></div>
                         {t.loading}
                       </div>
                     </div>
@@ -467,23 +542,25 @@ export default function HomePage() {
               ) : (
                 <div className="text-center py-12">
                   <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                    <span className="material-icons text-gray-400 text-3xl">inventory_2</span>
+                    <span className="material-icons text-gray-400 text-3xl">
+                      inventory_2
+                    </span>
                   </div>
-                  <h3 className="text-lg font-medium mb-2">Бүтээгдэхүүн олдсонгүй</h3>
+                  <h3 className="text-lg font-medium mb-2">
+                    Бүтээгдэхүүн олдсонгүй
+                  </h3>
                   <p className="text-gray-500 max-w-md mx-auto mb-4">
                     Таны сонгосон ангилалд одоогоор бүтээгдэхүүн байхгүй байна.
                   </p>
                   <Button
                     onClick={() => setSelectedCategory("all")}
-                    className="bg-[#0d5c03] text-white"
+                    className="bg-[#3c8fb8] text-white"
                   >
                     Бүх бүтээгдэхүүн үзэх
                   </Button>
                 </div>
               )}
             </div>
-
-
           </div>
         </section>
       </main>
@@ -494,6 +571,6 @@ export default function HomePage() {
         onClose={handleCloseModal}
         product={selectedProduct}
       />
-    </div >
+    </div>
   );
 }

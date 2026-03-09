@@ -3,7 +3,13 @@ import { AdminLayout } from "@/components/admin/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -20,25 +26,25 @@ export default function SiteSettingsPage() {
 
   // Fetch site name settings
   const { data: siteSettings } = useQuery<SiteNameSettings>({
-    queryKey: ['/api/settings/site-name'],
+    queryKey: ["/api/settings/site-name"],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/settings/site-name', {
-          credentials: 'include',
-          cache: 'no-cache',
-          mode: 'same-origin'
+        const response = await fetch("/api/settings/site-name", {
+          credentials: "include",
+          cache: "no-cache",
+          mode: "same-origin",
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch site name settings');
+          throw new Error("Failed to fetch site name settings");
         }
 
         return await response.json();
       } catch (error) {
-        console.error('Error fetching site name settings:', error);
+        console.error("Error fetching site name settings:", error);
         return { siteName: "Гэрийн Мах" }; // Default site name
       }
-    }
+    },
   });
 
   // Initialize state once data is loaded
@@ -50,7 +56,7 @@ export default function SiteSettingsPage() {
   // Mutation to update site name
   const updateSiteNameMutation = useMutation({
     mutationFn: async (data: { siteName: string }) => {
-      const res = await apiRequest('PUT', '/api/settings/site-name', data);
+      const res = await apiRequest("PUT", "/api/settings/site-name", data);
       return res;
     },
     onSuccess: () => {
@@ -58,8 +64,8 @@ export default function SiteSettingsPage() {
         title: "Амжилттай",
         description: "Сайтын нэр шинэчлэгдлээ",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/settings/site-name'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/site-name"] });
+    },
   });
 
   const handleSubmitSiteName = (e: React.FormEvent) => {
@@ -78,15 +84,15 @@ export default function SiteSettingsPage() {
   return (
     <AdminLayout>
       <div className="container mx-auto py-6">
-        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#0d5c03] to-[#16a34a] inline-block px-4 py-2 rounded-lg shadow-sm">Сайтын тохиргоо</h1>
+        <h1 className="text-2xl font-bold mb-6 text-white bg-gradient-to-r from-[#3c8fb8] to-[#16a34a] inline-block px-4 py-2 rounded-lg shadow-sm">
+          Сайтын тохиргоо
+        </h1>
 
         <div className="grid grid-cols-1 gap-6">
           <Card className="shadow-md max-w-2xl">
             <CardHeader>
-              <CardTitle className="text-[#0d5c03]">Сайтын нэр</CardTitle>
-              <CardDescription>
-                Сайтын дээд хэсэгт харагдах нэр
-              </CardDescription>
+              <CardTitle className="text-[#3c8fb8]">Сайтын нэр</CardTitle>
+              <CardDescription>Сайтын дээд хэсэгт харагдах нэр</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmitSiteName} className="space-y-4">
@@ -102,10 +108,12 @@ export default function SiteSettingsPage() {
                 <div className="flex items-center gap-2 pt-2">
                   <Button
                     type="submit"
-                    className="bg-[#0d5c03] hover:bg-[#084130]"
+                    className="bg-[#3c8fb8] hover:bg-[#084130]"
                     disabled={updateSiteNameMutation.isPending}
                   >
-                    {updateSiteNameMutation.isPending ? "Хадгалж байна..." : "Хадгалах"}
+                    {updateSiteNameMutation.isPending
+                      ? "Хадгалж байна..."
+                      : "Хадгалах"}
                   </Button>
 
                   {updateSiteNameMutation.isSuccess && (

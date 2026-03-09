@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { CartItem } from "@shared/schema";
 import { getFullImageUrl } from "@/lib/image-utils";
 
-
 interface MiniCartProps {
   isVisible: boolean;
 }
@@ -22,7 +21,7 @@ export function MiniCart({ isVisible }: MiniCartProps) {
 
   const total = items.reduce(
     (sum, item) => sum + Number(item.price) * item.quantity,
-    0
+    0,
   );
 
   // Show max 3 items and indicate if there are more
@@ -62,7 +61,9 @@ export function MiniCart({ isVisible }: MiniCartProps) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{item.name}</p>
+              <p className="text-sm font-medium text-white truncate">
+                {item.name}
+              </p>
               <div className="flex justify-between items-center mt-1">
                 <span className="text-xs text-gray-300">
                   {item.quantity} × {formatPrice(Number(item.price))}

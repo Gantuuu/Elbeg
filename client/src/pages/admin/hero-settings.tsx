@@ -18,17 +18,26 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Image, Plus, Trash2, Upload } from "lucide-react";
-import { getFullImageUrl, handleImageError, compressImage } from "@/lib/image-utils";
+import {
+  getFullImageUrl,
+  handleImageError,
+  compressImage,
+} from "@/lib/image-utils";
 import { logger } from "@/lib/logger";
 
 // Create form schema
 const slideSchema = z.object({
-  title: z.string().optional().or(z.literal('')),
-  text: z.string().optional().or(z.literal('')),
+  title: z.string().optional().or(z.literal("")),
+  text: z.string().optional().or(z.literal("")),
   imageUrl: z.string().optional(),
 });
 
@@ -50,100 +59,102 @@ export default function HeroSettings() {
   const form = useForm<HeroFormValues>({
     resolver: zodResolver(heroFormSchema),
     defaultValues: {
-      slides: [
-        { title: "", text: "", imageUrl: "" }
-      ]
-    }
+      slides: [{ title: "", text: "", imageUrl: "" }],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "slides"
+    name: "slides",
   });
 
   // Fetch current hero settings
   const { data: heroSettings, isLoading } = useQuery({
-    queryKey: ['/api/settings/hero'],
+    queryKey: ["/api/settings/hero"],
     queryFn: async () => {
       try {
-        const data = await apiRequest('GET', '/api/settings/hero') as any;
+        const data = (await apiRequest("GET", "/api/settings/hero")) as any;
         // Handle migration from legacy object to array
         if (data.slides && Array.isArray(data.slides)) {
           return data;
         } else if (data.title || data.text || data.imageUrl) {
           // Convert legacy single slide to array
           return {
-            slides: [{
-              title: data.title || "",
-              text: data.text || "",
-              imageUrl: data.imageUrl || ""
-            }]
+            slides: [
+              {
+                title: data.title || "",
+                text: data.text || "",
+                imageUrl: data.imageUrl || "",
+              },
+            ],
           };
         }
         return { slides: [{ title: "", text: "", imageUrl: "" }] };
       } catch (error) {
         console.error("Error fetching hero settings:", error);
         return {
-          slides: [{ title: "", text: "", imageUrl: "" }]
+          slides: [{ title: "", text: "", imageUrl: "" }],
         };
       }
-    }
+    },
   });
 
   // Set default form values when data loads
   useEffect(() => {
     if (heroSettings) {
       form.reset({
-        slides: heroSettings.slides
+        slides: heroSettings.slides,
       });
     }
   }, [heroSettings, form]);
 
   // Handle file selection and upload
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploadingIndex(index);
 
     try {
-      logger.custom('🖼️', 'Compressing hero image...');
+      logger.custom("🖼️", "Compressing hero image...");
       // Banner images can be large, compress to 1920px max width WebP
       const compressedFile = await compressImage(file, 1920, 0.82);
 
       const formData = new FormData();
-      formData.append('file', compressedFile);
+      formData.append("file", compressedFile);
 
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
       const response = await fetch(`${apiBaseUrl}/api/media`, {
-        method: 'POST',
+        method: "POST",
         body: formData,
-        credentials: 'include'
+        credentials: "include",
       });
 
-      if (!response.ok) throw new Error('Failed to upload image');
+      if (!response.ok) throw new Error("Failed to upload image");
 
-      const data = await response.json() as { url: string };
+      const data = (await response.json()) as { url: string };
 
       // Update the form field with the new image URL
       form.setValue(`slides.${index}.imageUrl`, data.url);
       toast({
         title: "Зураг амжилттай хуулагдлаа",
-        description: "Image uploaded successfully"
+        description: "Image uploaded successfully",
       });
-
     } catch (error) {
       console.error("Upload error:", error);
       toast({
         title: "Алдаа",
         description: "Зураг хуулахад алдаа гарлаа",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setUploadingIndex(null);
       // Reset file input
       if (fileInputRefs.current[index]) {
-        fileInputRefs.current[index]!.value = '';
+        fileInputRefs.current[index]!.value = "";
       }
     }
   };
@@ -161,13 +172,13 @@ export default function HeroSettings() {
       });
 
       // Invalidate hero settings cache
-      queryClient.invalidateQueries({ queryKey: ['/api/settings/hero'] });
-
+      queryClient.invalidateQueries({ queryKey: ["/api/settings/hero"] });
     } catch (error) {
       console.error("Error updating hero settings:", error);
       toast({
         title: "Алдаа гарлаа",
-        description: "Нүүр хуудасны тохиргоо шинэчлэхэд алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          "Нүүр хуудасны тохиргоо шинэчлэхэд алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
     } finally {
@@ -206,14 +217,24 @@ export default function HeroSettings() {
                 </div>
               ) : (
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    <Accordion
+                      type="single"
+                      collapsible
+                      defaultValue="item-0"
+                      className="w-full"
+                    >
                       {fields.map((field, index) => (
                         <AccordionItem key={field.id} value={`item-${index}`}>
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex justify-between items-center w-full pr-4">
                               <span className="font-medium">
-                                Слайд {index + 1}: {form.watch(`slides.${index}.title`) || "(Гарчиггүй)"}
+                                Слайд {index + 1}:{" "}
+                                {form.watch(`slides.${index}.title`) ||
+                                  "(Гарчиггүй)"}
                               </span>
                             </div>
                           </AccordionTrigger>
@@ -227,7 +248,10 @@ export default function HeroSettings() {
                                     <FormItem>
                                       <FormLabel>Гарчиг</FormLabel>
                                       <FormControl>
-                                        <Input placeholder="Шинэ, Шинэхэн, Чанартай Мах" {...field} />
+                                        <Input
+                                          placeholder="Шинэ, Шинэхэн, Чанартай Мах"
+                                          {...field}
+                                        />
                                       </FormControl>
                                       <FormMessage />
                                     </FormItem>
@@ -260,10 +284,16 @@ export default function HeroSettings() {
                                       <FormLabel>Зурагны URL</FormLabel>
                                       <FormControl>
                                         <div className="flex gap-2">
-                                          <Input {...field} placeholder="https://example.com/image.jpg" />
+                                          <Input
+                                            {...field}
+                                            placeholder="https://example.com/image.jpg"
+                                          />
                                         </div>
                                       </FormControl>
-                                      <FormDescription>URL шууд оруулах эсвэл доорх товчийг ашиглан хуулна уу</FormDescription>
+                                      <FormDescription>
+                                        URL шууд оруулах эсвэл доорх товчийг
+                                        ашиглан хуулна уу
+                                      </FormDescription>
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -274,7 +304,9 @@ export default function HeroSettings() {
                                     type="file"
                                     accept="image/*"
                                     className="hidden"
-                                    ref={(el) => (fileInputRefs.current[index] = el)}
+                                    ref={(el) =>
+                                      (fileInputRefs.current[index] = el)
+                                    }
                                     onChange={(e) => handleFileChange(e, index)}
                                   />
                                   <Button
@@ -282,7 +314,9 @@ export default function HeroSettings() {
                                     variant="secondary"
                                     className="w-full"
                                     disabled={uploadingIndex === index}
-                                    onClick={() => fileInputRefs.current[index]?.click()}
+                                    onClick={() =>
+                                      fileInputRefs.current[index]?.click()
+                                    }
                                   >
                                     {uploadingIndex === index ? (
                                       <span className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
@@ -307,25 +341,46 @@ export default function HeroSettings() {
                               </div>
 
                               <div className="space-y-4">
-                                <div className="text-sm font-medium">Урьдчилсан харагдац</div>
+                                <div className="text-sm font-medium">
+                                  Урьдчилсан харагдац
+                                </div>
                                 {form.watch(`slides.${index}.imageUrl`) ? (
                                   <div className="relative aspect-video rounded-md overflow-hidden border">
                                     <img
-                                      src={getFullImageUrl(form.watch(`slides.${index}.imageUrl`) || "")}
+                                      src={getFullImageUrl(
+                                        form.watch(
+                                          `slides.${index}.imageUrl`,
+                                        ) || "",
+                                      )}
                                       alt="Slide preview"
                                       className="w-full h-full object-cover"
-                                      onError={(e) => handleImageError(e, form.watch(`slides.${index}.imageUrl`))}
+                                      onError={(e) =>
+                                        handleImageError(
+                                          e,
+                                          form.watch(
+                                            `slides.${index}.imageUrl`,
+                                          ),
+                                        )
+                                      }
                                     />
                                   </div>
                                 ) : (
                                   <div className="aspect-video rounded-md border border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
-                                    <span className="text-gray-400">Зураг байхгүй байна</span>
+                                    <span className="text-gray-400">
+                                      Зураг байхгүй байна
+                                    </span>
                                   </div>
                                 )}
 
                                 <div className="p-4 bg-gray-900 text-white rounded-md mt-4">
-                                  <h3 className="font-bold text-lg mb-2">{form.watch(`slides.${index}.title`) || "Гарчиг"}</h3>
-                                  <p className="text-sm opacity-80">{form.watch(`slides.${index}.text`) || "Тайлбар текст..."}</p>
+                                  <h3 className="font-bold text-lg mb-2">
+                                    {form.watch(`slides.${index}.title`) ||
+                                      "Гарчиг"}
+                                  </h3>
+                                  <p className="text-sm opacity-80">
+                                    {form.watch(`slides.${index}.text`) ||
+                                      "Тайлбар текст..."}
+                                  </p>
                                 </div>
                               </div>
                             </div>

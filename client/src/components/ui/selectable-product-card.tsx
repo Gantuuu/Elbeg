@@ -5,7 +5,6 @@ import { Product } from "@shared/schema";
 import { CheckCircle } from "lucide-react";
 import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
 
-
 interface SelectableProductCardProps {
   product: Product;
   isSelected: boolean;
@@ -21,7 +20,7 @@ export function SelectableProductCard({
   onSelect,
   onDeselect,
   quantity,
-  onQuantityChange
+  onQuantityChange,
 }: SelectableProductCardProps) {
   const { id, name, category, price, imageUrl, description } = product;
   const [isHovered, setIsHovered] = useState(false);
@@ -43,33 +42,35 @@ export function SelectableProductCard({
 
   return (
     <motion.div
-      className={`bg-white rounded-lg overflow-hidden transition-all duration-300 border-2 ${isSelected
-        ? "border-primary shadow-lg shadow-primary/20"
-        : "border-transparent shadow-md hover:shadow-xl hover:border-primary/10"
-        }`}
+      className={`bg-white rounded-lg overflow-hidden transition-all duration-300 border-2 ${
+        isSelected
+          ? "border-primary shadow-lg shadow-primary/20"
+          : "border-transparent shadow-md hover:shadow-xl hover:border-primary/10"
+      }`}
       initial={{ scale: 1 }}
       whileHover={{
         scale: 1.02,
-        transition: { duration: 0.3, type: "spring", stiffness: 300 }
+        transition: { duration: 0.3, type: "spring", stiffness: 300 },
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <div
-        className="relative cursor-pointer"
-        onClick={handleClick}
-      >
+      <div className="relative cursor-pointer" onClick={handleClick}>
         <div className="relative overflow-hidden group">
           <motion.img
             src={getFullImageUrl(imageUrl)}
             alt={name}
             className="w-full h-48 object-cover"
-            animate={isHovered ? { scale: 1.1, filter: "brightness(1.1)" } : { scale: 1, filter: "brightness(1)" }}
+            animate={
+              isHovered
+                ? { scale: 1.1, filter: "brightness(1.1)" }
+                : { scale: 1, filter: "brightness(1)" }
+            }
             transition={{ duration: 0.5 }}
             onError={(e) => handleImageError(e, imageUrl || undefined)}
           />
           <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-[#0d5c03]/70 via-transparent to-[#0d5c03]/30"
+            className="absolute inset-0 bg-gradient-to-t from-[#3c8fb8]/70 via-transparent to-[#3c8fb8]/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: isHovered || isSelected ? 1 : 0 }}
             transition={{ duration: 0.4 }}
@@ -91,31 +92,37 @@ export function SelectableProductCard({
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-bold text-lg mb-1">{name}</h3>
-              <motion.span
-                className="inline-block bg-[#0d5c03]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#0d5c03]/20 text-[#0d5c03]"
-              >
+              <motion.span className="inline-block bg-[#3c8fb8]/10 text-xs px-2 py-1 rounded-full mb-2 border border-[#3c8fb8]/20 text-[#3c8fb8]">
                 {category}
               </motion.span>
             </div>
             <motion.span
-              className="font-bold text-lg text-[#0d5c03]"
-              animate={isHovered ? {
-                scale: 1.1
-              } : {
-                scale: 1
-              }}
+              className="font-bold text-lg text-[#3c8fb8]"
+              animate={
+                isHovered
+                  ? {
+                      scale: 1.1,
+                    }
+                  : {
+                      scale: 1,
+                    }
+              }
             >
               {formatPrice(price)}
             </motion.span>
           </div>
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{description}</p>
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+            {description}
+          </p>
         </div>
       </div>
 
       {isSelected && (
         <div className="p-4 pt-0">
           <div className="flex items-center">
-            <label className="text-sm mr-2 text-[#0d5c03] font-medium">Хэмжээ:</label>
+            <label className="text-sm mr-2 text-[#3c8fb8] font-medium">
+              Хэмжээ:
+            </label>
             <input
               type="number"
               min="1"

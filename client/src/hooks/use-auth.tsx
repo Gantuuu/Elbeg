@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        const error = await res.json() as { message?: string };
+        const error = (await res.json()) as { message?: string };
         throw new Error(error.message || "Login failed");
       }
 
@@ -95,11 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        const error = await res.json() as { message?: string };
+        const error = (await res.json()) as { message?: string };
         throw new Error(error.message || "Registration failed");
       }
 
-      const result = await res.json() as { user: User; message?: string };
+      const result = (await res.json()) as { user: User; message?: string };
       return result.user; // API returns { success: true, user: ..., message: ... }
     },
     onSuccess: (user) => {
@@ -147,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast({
       title: "Not Implemented",
       description: "Google Login is currently disabled in this version.",
-      variant: "default"
+      variant: "default",
     });
   };
 

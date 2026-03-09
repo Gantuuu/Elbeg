@@ -11,7 +11,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import { ProductForm } from "@/components/admin/product-form";
 import { formatPrice } from "@/lib/utils";
@@ -37,12 +37,14 @@ export default function AdminProducts() {
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : ""
+    typeof window !== "undefined" ? window.location.search : "",
   );
 
   // State for product management
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [isAddingProduct, setIsAddingProduct] = useState(urlParams.get("new") === "true");
+  const [isAddingProduct, setIsAddingProduct] = useState(
+    urlParams.get("new") === "true",
+  );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
@@ -52,21 +54,24 @@ export default function AdminProducts() {
 
   // Fetch products
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ["products"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/products');
+      return await apiRequest("GET", "/api/products");
     },
   });
 
   // Filtered products based on search and category
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     // Apply category filter
     if (categoryFilter !== "all" && product.category !== categoryFilter) {
       return false;
     }
 
     // Apply search filter
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (
+      searchQuery &&
+      !product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) {
       return false;
     }
 
@@ -86,7 +91,10 @@ export default function AdminProducts() {
   const handleEditProduct = async (product: Product) => {
     try {
       // Fetch the latest product data to ensure we have the most up-to-date information
-      const updatedProduct = await apiRequest('GET', `/api/products/${product.id}`);
+      const updatedProduct = await apiRequest(
+        "GET",
+        `/api/products/${product.id}`,
+      );
 
       // Set the product for editing with the fresh data
       setEditingProduct(updatedProduct);
@@ -94,7 +102,8 @@ export default function AdminProducts() {
     } catch (error) {
       toast({
         title: "Алдаа гарлаа",
-        description: "Бүтээгдэхүүн мэдээлэл авах үед алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          "Бүтээгдэхүүн мэдээлэл авах үед алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
       console.error("Error fetching product details:", error);
@@ -133,10 +142,10 @@ export default function AdminProducts() {
     if (!productToDelete) return;
 
     try {
-      await apiRequest('DELETE', `/api/products/${productToDelete.id}`);
+      await apiRequest("DELETE", `/api/products/${productToDelete.id}`);
 
       // Invalidate queries to reload product list
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
 
       toast({
         title: "Бүтээгдэхүүн устгагдлаа",
@@ -160,13 +169,18 @@ export default function AdminProducts() {
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Бүтээгдэхүүний удирдлага" />
 
-        <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
+        <div
+          className="p-6 overflow-auto"
+          style={{ height: "calc(100vh - 70px)" }}
+        >
           {/* Product Form (Add/Edit) */}
           {isAddingProduct && (
             <Card className="mb-6">
               <div className="p-6">
                 <h2 className="text-xl font-bold mb-6">
-                  {editingProduct ? "Бүтээгдэхүүн засах" : "Шинэ бүтээгдэхүүн нэмэх"}
+                  {editingProduct
+                    ? "Бүтээгдэхүүн засах"
+                    : "Шинэ бүтээгдэхүүн нэмэх"}
                 </h2>
                 <ProductForm
                   product={editingProduct || undefined}
@@ -216,7 +230,7 @@ export default function AdminProducts() {
                       <SelectValue placeholder="Ангилал сонгох" />
                     </SelectTrigger>
                     <SelectContent>
-                      {MEAT_CATEGORIES.map(category => (
+                      {MEAT_CATEGORIES.map((category) => (
                         <SelectItem key={category.value} value={category.value}>
                           {category.label}
                         </SelectItem>
@@ -231,25 +245,40 @@ export default function AdminProducts() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Зураг</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Нэр</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ангилал</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үнэ</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үйлдэл</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Зураг
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Нэр
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ангилал
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Үнэ
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Үйлдэл
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {isLoading ? (
-                      Array(5).fill(0).map((_, i) => (
-                        <tr key={i}>
-                          <td colSpan={5} className="px-6 py-4">
-                            <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
-                          </td>
-                        </tr>
-                      ))
+                      Array(5)
+                        .fill(0)
+                        .map((_, i) => (
+                          <tr key={i}>
+                            <td colSpan={5} className="px-6 py-4">
+                              <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
+                            </td>
+                          </tr>
+                        ))
                     ) : filteredProducts.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                        <td
+                          colSpan={5}
+                          className="px-6 py-4 text-center text-gray-500"
+                        >
                           {searchQuery || categoryFilter !== "all"
                             ? "Хайлтад тохирох бүтээгдэхүүн олдсонгүй"
                             : "Бүтээгдэхүүн байхгүй байна"}
@@ -263,7 +292,9 @@ export default function AdminProducts() {
                               src={getFullImageUrl(product.imageUrl)}
                               alt={product.name}
                               className="w-12 h-12 rounded object-cover"
-                              onError={(e) => handleImageError(e, product.imageUrl)}
+                              onError={(e) =>
+                                handleImageError(e, product.imageUrl)
+                              }
                             />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -301,13 +332,18 @@ export default function AdminProducts() {
               {/* Mobile View: Cards */}
               <div className="md:hidden space-y-4">
                 {isLoading ? (
-                  Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
-                      <div className="h-20 bg-gray-200 rounded mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  ))
+                  Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white p-4 rounded-lg shadow animate-pulse"
+                      >
+                        <div className="h-20 bg-gray-200 rounded mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      </div>
+                    ))
                 ) : filteredProducts.length === 0 ? (
                   <div className="text-center p-8 bg-gray-50 rounded-lg text-gray-500">
                     {searchQuery || categoryFilter !== "all"
@@ -316,14 +352,19 @@ export default function AdminProducts() {
                   </div>
                 ) : (
                   filteredProducts.map((product) => (
-                    <div key={product.id} className="bg-white border rounded-lg shadow-sm overflow-hidden">
+                    <div
+                      key={product.id}
+                      className="bg-white border rounded-lg shadow-sm overflow-hidden"
+                    >
                       <div className="flex p-4 gap-4">
                         <div className="flex-shrink-0">
                           <img
                             src={getFullImageUrl(product.imageUrl)}
                             alt={product.name}
                             className="w-20 h-20 rounded-md object-cover"
-                            onError={(e) => handleImageError(e, product.imageUrl)}
+                            onError={(e) =>
+                              handleImageError(e, product.imageUrl)
+                            }
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -335,7 +376,7 @@ export default function AdminProducts() {
                               {product.category}
                             </span>
                           </div>
-                          <p className="mt-1 text-sm font-semibold text-[#0d5c03]">
+                          <p className="mt-1 text-sm font-semibold text-[#3c8fb8]">
                             {formatPrice(product.price)}
                           </p>
                           <p className="mt-1 text-xs text-gray-500 line-clamp-2">
@@ -350,7 +391,9 @@ export default function AdminProducts() {
                           className="text-primary hover:text-primary-dark hover:bg-primary/10 border-primary/20"
                           onClick={() => handleEditProduct(product)}
                         >
-                          <span className="material-icons text-sm mr-1">edit</span>
+                          <span className="material-icons text-sm mr-1">
+                            edit
+                          </span>
                           Засах
                         </Button>
                         <Button
@@ -359,7 +402,9 @@ export default function AdminProducts() {
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
                           onClick={() => openDeleteConfirm(product)}
                         >
-                          <span className="material-icons text-sm mr-1">delete</span>
+                          <span className="material-icons text-sm mr-1">
+                            delete
+                          </span>
                           Устгах
                         </Button>
                       </div>
@@ -385,18 +430,15 @@ export default function AdminProducts() {
               <DialogHeader>
                 <DialogTitle>Бүтээгдэхүүн устгах</DialogTitle>
                 <DialogDescription>
-                  Та "{productToDelete?.name}" бүтээгдэхүүнийг устгахдаа итгэлтэй байна уу?
-                  Энэ үйлдлийг буцаах боломжгүй.
+                  Та "{productToDelete?.name}" бүтээгдэхүүнийг устгахдаа
+                  итгэлтэй байна уу? Энэ үйлдлийг буцаах боломжгүй.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="outline" onClick={closeDeleteConfirm}>
                   Цуцлах
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={deleteProduct}
-                >
+                <Button variant="destructive" onClick={deleteProduct}>
                   Устгах
                 </Button>
               </DialogFooter>

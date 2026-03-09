@@ -15,7 +15,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { id, name, category, price, description, imageUrl, minOrderQuantity } = product;
+  const { id, name, category, price, description, imageUrl, minOrderQuantity } =
+    product;
   const { addItem } = useCart();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -57,14 +58,14 @@ export function ProductCard({ product }: ProductCardProps) {
         title: t.toast.cartAdded,
         description: `${name}`,
         variant: "default",
-        className: "animate-bounceInUp"
+        className: "animate-bounceInUp",
       });
     } catch (error) {
       toast({
         title: t.toast.addToCartError,
         description: t.toast.addToCartErrorDesc,
         variant: "destructive",
-        className: "animate-bounceInUp"
+        className: "animate-bounceInUp",
       });
     } finally {
       setIsLoading(false);
@@ -77,7 +78,7 @@ export function ProductCard({ product }: ProductCardProps) {
       initial={{ scale: 1 }}
       whileHover={{
         scale: 1.02,
-        transition: { duration: 0.2, type: "spring", stiffness: 300 }
+        transition: { duration: 0.2, type: "spring", stiffness: 300 },
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -89,9 +90,15 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={name}
             className="w-full h-48 object-cover cursor-pointer transition-all duration-300"
             loading="lazy"
-            animate={isHovered ? { scale: 1.05, filter: "brightness(1.05)" } : { scale: 1, filter: "brightness(1)" }}
+            animate={
+              isHovered
+                ? { scale: 1.05, filter: "brightness(1.05)" }
+                : { scale: 1, filter: "brightness(1)" }
+            }
             transition={{ duration: 0.3 }}
-            onError={(e) => handleImageError(e, (product.thumbnailUrl || imageUrl) || undefined)}
+            onError={(e) =>
+              handleImageError(e, product.thumbnailUrl || imageUrl || undefined)
+            }
           />
           {/* Discount badge removed */}
         </div>
@@ -104,9 +111,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 <h3 className="font-bold text-lg mb-3 text-gray-800">{name}</h3>
               </div>
             </Link>
-
           </div>
-          <span className="font-bold text-lg text-[#0d5c03]">
+          <span className="font-bold text-lg text-[#3c8fb8]">
             {formatPrice(price)}
           </span>
         </div>
@@ -117,15 +123,18 @@ export function ProductCard({ product }: ProductCardProps) {
               4кг багц - ₩50,000
             </span>
           </div>
-        ) : minOrderQuantity && parseFloat(minOrderQuantity.toString()) > 1 && (
-          <div className="mb-3">
-            <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded-full">
-              Хамгийн багадаа {parseFloat(minOrderQuantity.toString())}кг
-            </span>
-          </div>
+        ) : (
+          minOrderQuantity &&
+          parseFloat(minOrderQuantity.toString()) > 1 && (
+            <div className="mb-3">
+              <span className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded-full">
+                Хамгийн багадаа {parseFloat(minOrderQuantity.toString())}кг
+              </span>
+            </div>
+          )
         )}
         <button
-          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#0d5c03] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
+          className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#3c8fb8] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
           onClick={handleAddToCart}
           disabled={isLoading}
         >

@@ -26,7 +26,8 @@ export default function CartPage() {
     if (!isLoadingAuth && !user) {
       toast({
         title: "Нэвтрэх шаардлагатай",
-        description: "Сагс руу орохын тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
+        description:
+          "Сагс руу орохын тулд нэвтрэх эсвэл бүртгүүлэх шаардлагатай.",
         variant: "default",
       });
       setLocation("/auth?tab=signup");
@@ -34,16 +35,18 @@ export default function CartPage() {
   }, [user, isLoadingAuth, setLocation, toast]);
 
   // Fetch shipping fee rules from the server
-  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery<{ min: number, max: number, fee: number }[]>({
+  const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery<
+    { min: number; max: number; fee: number }[]
+  >({
     queryKey: ["shipping-fee"],
     queryFn: async () => {
       try {
-        const res = await apiRequest('GET', '/api/settings/shipping-fee');
+        const res = await apiRequest("GET", "/api/settings/shipping-fee");
         if (res && res.value) {
           return JSON.parse(res.value);
         }
       } catch (error) {
-        console.error('Error fetching shipping rules:', error);
+        console.error("Error fetching shipping rules:", error);
       }
       return [];
     },
@@ -56,7 +59,9 @@ export default function CartPage() {
   // Calculate dynamic shipping fee
   let shippingFee = 0;
   if (shippingRulesData && shippingRulesData.length > 0) {
-    const applicableRule = shippingRulesData.find(rule => totalWeight >= rule.min && totalWeight <= rule.max);
+    const applicableRule = shippingRulesData.find(
+      (rule) => totalWeight >= rule.min && totalWeight <= rule.max,
+    );
     if (applicableRule) {
       shippingFee = applicableRule.fee;
     } else {
@@ -89,7 +94,7 @@ export default function CartPage() {
           </div>
         </div>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#0d5c03] rounded-full"></div>
+          <div className="animate-spin h-12 w-12 border-4 border-t-transparent border-[#3c8fb8] rounded-full"></div>
         </div>
         <Footer />
       </div>
@@ -110,16 +115,17 @@ export default function CartPage() {
       </div>
 
       <section className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto -mt-4">
-
         {isEmpty ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center max-w-2xl mx-auto">
             <div className="w-20 h-20 rounded-full gradient-nav flex items-center justify-center mx-auto mb-6 shadow-md">
-              <span className="material-icons text-5xl text-white">shopping_cart</span>
+              <span className="material-icons text-5xl text-white">
+                shopping_cart
+              </span>
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-4">{t.cartEmpty}</h2>
-            <p className="text-muted-foreground mb-8">
-              {t.cartEmptyDesc}
-            </p>
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              {t.cartEmpty}
+            </h2>
+            <p className="text-muted-foreground mb-8">{t.cartEmptyDesc}</p>
             <Button
               className="gradient-nav text-white font-medium px-8 py-6 transition-all duration-300 shadow-md hover:shadow-lg"
               onClick={() => setLocation("/")}
@@ -137,25 +143,33 @@ export default function CartPage() {
 
               <div className="space-y-6">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex flex-col rounded-lg overflow-hidden">
+                  <div
+                    key={item.productId}
+                    className="flex flex-col rounded-lg overflow-hidden"
+                  >
                     <CartItemComponent key={item.productId} item={item} />
-
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6 h-fit border border-gray-100">
-              <h2 className="text-xl font-bold mb-6 text-foreground">{t.orderInfo}</h2>
+              <h2 className="text-xl font-bold mb-6 text-foreground">
+                {t.orderInfo}
+              </h2>
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t.products}:</span>
-                  <span className="font-medium">{items.length} {t.productTypes}</span>
+                  <span className="font-medium">
+                    {items.length} {t.productTypes}
+                  </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Нийт жин / тоо хэмжээ:</span>
+                  <span className="text-muted-foreground">
+                    Нийт жин / тоо хэмжээ:
+                  </span>
                   <span className="font-medium">{totalWeight} кг / ширхэг</span>
                 </div>
               </div>
@@ -179,7 +193,9 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-lg font-bold mt-4 pt-4 border-t border-gray-100">
                   <span className="text-foreground">{t.totalAmount}:</span>
-                  <span className="text-[#0d5c03] font-bold">{formatPrice(finalTotalPrice)}</span>
+                  <span className="text-[#3c8fb8] font-bold">
+                    {formatPrice(finalTotalPrice)}
+                  </span>
                 </div>
               </div>
 
@@ -197,7 +213,9 @@ export default function CartPage() {
                   onClick={() => setLocation("/")}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <span className="material-icons mr-1 text-sm">keyboard_backspace</span>
+                  <span className="material-icons mr-1 text-sm">
+                    keyboard_backspace
+                  </span>
                   {t.continueShopping}
                 </Button>
               </div>

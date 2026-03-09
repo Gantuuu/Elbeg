@@ -4,12 +4,28 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 import { NonDeliveryDay, DeliverySetting } from "@shared/schema";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths } from "date-fns";
+import {
+  format,
+  parseISO,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameDay,
+  isSameMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
 import { mn } from "date-fns/locale";
 
 import { AdminHeader } from "@/components/admin/header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,7 +55,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar, Clock, Truck } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Calendar,
+  Clock,
+  Truck,
+} from "lucide-react";
 
 export default function DeliverySettings() {
   const { toast } = useToast();
@@ -55,28 +79,31 @@ export default function DeliverySettings() {
   const [cutoffMinute, setCutoffMinute] = useState(30);
   const [processingDays, setProcessingDays] = useState(1);
 
-  const { data: nonDeliveryDays = [], isLoading: isLoadingDays } = useQuery<NonDeliveryDay[]>({
+  const { data: nonDeliveryDays = [], isLoading: isLoadingDays } = useQuery<
+    NonDeliveryDay[]
+  >({
     queryKey: ["non-delivery-days"],
     queryFn: async () => {
       const days = await apiRequest("GET", "/api/non-delivery-days");
       return days.map((day: any) => ({
         ...day,
         date: new Date(day.date),
-        createdAt: day.createdAt ? new Date(day.createdAt) : null
+        createdAt: day.createdAt ? new Date(day.createdAt) : null,
       }));
-    }
+    },
   });
 
-  const { data: deliverySettings, isLoading: isLoadingSettings } = useQuery<DeliverySetting>({
-    queryKey: ["delivery-settings"],
-    queryFn: async () => {
-      const settings = await apiRequest("GET", "/api/delivery-settings");
-      return {
-        ...settings,
-        updatedAt: settings.updatedAt ? new Date(settings.updatedAt) : null
-      };
-    }
-  });
+  const { data: deliverySettings, isLoading: isLoadingSettings } =
+    useQuery<DeliverySetting>({
+      queryKey: ["delivery-settings"],
+      queryFn: async () => {
+        const settings = await apiRequest("GET", "/api/delivery-settings");
+        return {
+          ...settings,
+          updatedAt: settings.updatedAt ? new Date(settings.updatedAt) : null,
+        };
+      },
+    });
 
   useEffect(() => {
     if (deliverySettings) {
@@ -87,7 +114,11 @@ export default function DeliverySettings() {
   }, [deliverySettings]);
 
   const createNonDeliveryDayMutation = useMutation({
-    mutationFn: async (data: { date: string; reason: string; isRecurringYearly: boolean }) => {
+    mutationFn: async (data: {
+      date: string;
+      reason: string;
+      isRecurringYearly: boolean;
+    }) => {
       await apiRequest("POST", "/api/non-delivery-days", data);
     },
     onSuccess: () => {
@@ -132,7 +163,11 @@ export default function DeliverySettings() {
   });
 
   const updateSettingsMutation = useMutation({
-    mutationFn: async (data: { cutoffHour: number; cutoffMinute: number; processingDays: number }) => {
+    mutationFn: async (data: {
+      cutoffHour: number;
+      cutoffMinute: number;
+      processingDays: number;
+    }) => {
       await apiRequest("PUT", "/api/delivery-settings", data);
     },
     onSuccess: () => {
@@ -178,7 +213,10 @@ export default function DeliverySettings() {
     return nonDeliveryDays.some((day) => {
       const dayDate = new Date(day.date);
       if (day.isRecurringYearly) {
-        return dayDate.getMonth() === date.getMonth() && dayDate.getDate() === date.getDate();
+        return (
+          dayDate.getMonth() === date.getMonth() &&
+          dayDate.getDate() === date.getDate()
+        );
       }
       return isSameDay(dayDate, date);
     });
@@ -245,13 +283,17 @@ export default function DeliverySettings() {
                   min="0"
                   max="59"
                   value={cutoffMinute}
-                  onChange={(e) => setCutoffMinute(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setCutoffMinute(parseInt(e.target.value) || 0)
+                  }
                   data-testid="input-cutoff-minute"
                 />
               </div>
             </div>
             <div className="p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-              Одоогийн тохиргоо: {cutoffHour}:{cutoffMinute.toString().padStart(2, '0')} өмнө захиалга → Маргааш хүргэгдэнэ
+              Одоогийн тохиргоо: {cutoffHour}:
+              {cutoffMinute.toString().padStart(2, "0")} өмнө захиалга → Маргааш
+              хүргэгдэнэ
             </div>
           </CardContent>
         </Card>
@@ -275,12 +317,15 @@ export default function DeliverySettings() {
                 min="1"
                 max="7"
                 value={processingDays}
-                onChange={(e) => setProcessingDays(parseInt(e.target.value) || 1)}
+                onChange={(e) =>
+                  setProcessingDays(parseInt(e.target.value) || 1)
+                }
                 data-testid="input-processing-days"
               />
             </div>
             <div className="p-3 bg-green-50 rounded-lg text-sm text-green-700">
-              Одоогийн тохиргоо: Захиалгаас {processingDays} хоногийн дараа хүргэгдэнэ
+              Одоогийн тохиргоо: Захиалгаас {processingDays} хоногийн дараа
+              хүргэгдэнэ
             </div>
             <Button
               onClick={handleSaveSettings}
@@ -301,7 +346,8 @@ export default function DeliverySettings() {
             Хүргэлтгүй өдрийн хуанли
           </CardTitle>
           <CardDescription>
-            Улаан өнгөөр тэмдэглэсэн өдрүүдэд хүргэлт хийгдэхгүй. Өдөр дээр дарж хүргэлтгүй өдөр нэмнэ үү.
+            Улаан өнгөөр тэмдэглэсэн өдрүүдэд хүргэлт хийгдэхгүй. Өдөр дээр дарж
+            хүргэлтгүй өдөр нэмнэ үү.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -349,12 +395,13 @@ export default function DeliverySettings() {
                 <button
                   key={date.toISOString()}
                   onClick={() => handleDateClick(date)}
-                  className={`h-10 rounded-lg text-sm font-medium transition-colors ${isNonDelivery
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : isToday
-                      ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                      : "hover:bg-gray-100"
-                    }`}
+                  className={`h-10 rounded-lg text-sm font-medium transition-colors ${
+                    isNonDelivery
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : isToday
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        : "hover:bg-gray-100"
+                  }`}
                   data-testid={`calendar-day-${format(date, "yyyy-MM-dd")}`}
                 >
                   {format(date, "d")}
@@ -375,7 +422,8 @@ export default function DeliverySettings() {
         <CardContent>
           {nonDeliveryDays.length === 0 ? (
             <div className="text-center p-8 text-gray-500">
-              Хүргэлтгүй өдөр тохируулаагүй байна. Хуанлиас өдөр сонгож нэмнэ үү.
+              Хүргэлтгүй өдөр тохируулаагүй байна. Хуанлиас өдөр сонгож нэмнэ
+              үү.
             </div>
           ) : (
             <Table>
@@ -391,7 +439,9 @@ export default function DeliverySettings() {
                 {nonDeliveryDays.map((day) => (
                   <TableRow key={day.id}>
                     <TableCell>
-                      {format(new Date(day.date), "yyyy оны M сарын d (EEE)", { locale: mn })}
+                      {format(new Date(day.date), "yyyy оны M сарын d (EEE)", {
+                        locale: mn,
+                      })}
                     </TableCell>
                     <TableCell>{day.reason}</TableCell>
                     <TableCell>
@@ -424,7 +474,9 @@ export default function DeliverySettings() {
           <DialogHeader>
             <DialogTitle>Хүргэлтгүй өдөр нэмэх</DialogTitle>
             <DialogDescription>
-              {selectedDate && format(selectedDate, "yyyy оны M сарын d", { locale: mn })}-г хүргэлтгүй өдөр болгон тохируулна
+              {selectedDate &&
+                format(selectedDate, "yyyy оны M сарын d", { locale: mn })}
+              -г хүргэлтгүй өдөр болгон тохируулна
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -442,7 +494,9 @@ export default function DeliverySettings() {
               <Checkbox
                 id="recurring"
                 checked={isRecurringYearly}
-                onCheckedChange={(checked) => setIsRecurringYearly(checked === true)}
+                onCheckedChange={(checked) =>
+                  setIsRecurringYearly(checked === true)
+                }
                 data-testid="checkbox-recurring"
               />
               <Label htmlFor="recurring" className="text-sm">
@@ -456,7 +510,9 @@ export default function DeliverySettings() {
             </Button>
             <Button
               onClick={handleAddNonDeliveryDay}
-              disabled={!reason.trim() || createNonDeliveryDayMutation.isPending}
+              disabled={
+                !reason.trim() || createNonDeliveryDayMutation.isPending
+              }
               data-testid="button-confirm-add"
             >
               Нэмэх
@@ -465,14 +521,20 @@ export default function DeliverySettings() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!dayToDelete} onOpenChange={() => setDayToDelete(null)}>
+      <AlertDialog
+        open={!!dayToDelete}
+        onOpenChange={() => setDayToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Хүргэлтгүй өдөр устгах</AlertDialogTitle>
             <AlertDialogDescription>
               {dayToDelete && (
                 <>
-                  {format(new Date(dayToDelete.date), "yyyy оны M сарын d", { locale: mn })} ({dayToDelete.reason})-г устгах уу?
+                  {format(new Date(dayToDelete.date), "yyyy оны M сарын d", {
+                    locale: mn,
+                  })}{" "}
+                  ({dayToDelete.reason})-г устгах уу?
                 </>
               )}
             </AlertDialogDescription>
@@ -480,7 +542,10 @@ export default function DeliverySettings() {
           <AlertDialogFooter>
             <AlertDialogCancel>Болих</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => dayToDelete && deleteNonDeliveryDayMutation.mutate(dayToDelete.id)}
+              onClick={() =>
+                dayToDelete &&
+                deleteNonDeliveryDayMutation.mutate(dayToDelete.id)
+              }
               className="bg-red-500 hover:bg-red-600"
               data-testid="button-confirm-delete"
             >

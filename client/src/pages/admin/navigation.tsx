@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit, Trash2, MoveVertical, Loader2 } from 'lucide-react';
-import { AdminHeader } from '@/components/admin/header';
-import { AdminLayout } from '@/components/admin/layout';
-import { HelpTooltip } from '@/components/admin/help-tooltip';
-import { helpIllustrations } from '@/assets/help';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { NavigationForm } from '@/components/admin/navigation-form';
-import { NavigationSort } from '@/components/admin/navigation-sort';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus, Edit, Trash2, MoveVertical, Loader2 } from "lucide-react";
+import { AdminHeader } from "@/components/admin/header";
+import { AdminLayout } from "@/components/admin/layout";
+import { HelpTooltip } from "@/components/admin/help-tooltip";
+import { helpIllustrations } from "@/assets/help";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { NavigationForm } from "@/components/admin/navigation-form";
+import { NavigationSort } from "@/components/admin/navigation-sort";
 import {
   Button,
   Card,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui';
+} from "@/components/ui";
 
 interface NavigationItem {
   id: number;
@@ -36,18 +36,22 @@ interface NavigationItem {
 export default function AdminNavigation() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [selectedNavItem, setSelectedNavItem] = useState<NavigationItem | null>(null);
-  const [navItemToDelete, setNavItemToDelete] = useState<NavigationItem | null>(null);
+  const [selectedNavItem, setSelectedNavItem] = useState<NavigationItem | null>(
+    null,
+  );
+  const [navItemToDelete, setNavItemToDelete] = useState<NavigationItem | null>(
+    null,
+  );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: navigationItems = [], isLoading } = useQuery({
-    queryKey: ['/api/navigation'],
+    queryKey: ["/api/navigation"],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/navigation');
+      const data = await apiRequest("GET", "/api/navigation");
       return data as NavigationItem[];
-    }
+    },
   });
 
   const handleEdit = (navItem: NavigationItem) => {
@@ -59,23 +63,23 @@ export default function AdminNavigation() {
     if (!navItemToDelete) return;
 
     try {
-      await apiRequest('DELETE', `/api/navigation/${navItemToDelete.id}`);
+      await apiRequest("DELETE", `/api/navigation/${navItemToDelete.id}`);
 
       toast({
-        title: 'Цэс устгагдлаа',
-        description: 'Цэсний элемент амжилттай устгагдлаа.',
+        title: "Цэс устгагдлаа",
+        description: "Цэсний элемент амжилттай устгагдлаа.",
       });
 
       // Refresh navigation list
-      queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/navigation"] });
 
       setIsDeleteDialogOpen(false);
       setNavItemToDelete(null);
     } catch (error) {
       toast({
-        title: 'Алдаа гарлаа',
-        description: 'Цэс устгах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description: "Цэс устгах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -85,27 +89,27 @@ export default function AdminNavigation() {
     setSelectedNavItem(null);
 
     // Refresh navigation list
-    queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/navigation"] });
   };
 
   const handleSortSuccess = () => {
     setIsSortOpen(false);
 
     // Refresh navigation list
-    queryClient.invalidateQueries({ queryKey: ['/api/navigation'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/navigation"] });
 
     toast({
-      title: 'Цэс шинэчлэгдлээ',
-      description: 'Цэсний дараалал амжилттай шинэчлэгдлээ.',
+      title: "Цэс шинэчлэгдлээ",
+      description: "Цэсний дараалал амжилттай шинэчлэгдлээ.",
     });
   };
 
   // Transform flat list to hierarchical structure for display
   const processNavigationItems = (items: NavigationItem[]) => {
-    const topLevel = items.filter(item => item.parentId === null);
+    const topLevel = items.filter((item) => item.parentId === null);
     const childrenMap = new Map<number, NavigationItem[]>();
 
-    items.forEach(item => {
+    items.forEach((item) => {
       if (item.parentId !== null) {
         if (!childrenMap.has(item.parentId)) {
           childrenMap.set(item.parentId, []);
@@ -114,14 +118,14 @@ export default function AdminNavigation() {
       }
     });
 
-    const result = topLevel.map(item => ({
+    const result = topLevel.map((item) => ({
       ...item,
-      children: childrenMap.get(item.id) || []
+      children: childrenMap.get(item.id) || [],
     }));
 
     // Sort by order
     result.sort((a, b) => a.order - b.order);
-    result.forEach(item => {
+    result.forEach((item) => {
       if (item.children) {
         item.children.sort((a, b) => a.order - b.order);
       }
@@ -143,11 +147,17 @@ export default function AdminNavigation() {
                 content={
                   <div>
                     <p className="font-medium mb-1">Цэс удирдлага:</p>
-                    <p className="mb-2">Энд та вебсайтын үндсэн цэсийг засах, нэмэх, устгах боломжтой.</p>
+                    <p className="mb-2">
+                      Энд та вебсайтын үндсэн цэсийг засах, нэмэх, устгах
+                      боломжтой.
+                    </p>
                     <ul className="list-disc list-inside space-y-1 text-xs">
                       <li>Шинэ цэс нэмэхийн тулд "Шинэ цэс" товчийг дарна</li>
                       <li>Цэсийг засахын тулд "Засах" товчийг дарна</li>
-                      <li>Цэсийн дарааллыг өөрчлөхийн тулд "Дараалал өөрчлөх" товчийг дарна</li>
+                      <li>
+                        Цэсийн дарааллыг өөрчлөхийн тулд "Дараалал өөрчлөх"
+                        товчийг дарна
+                      </li>
                       <li>Цэс устгахын тулд "Устгах" товчийг дарна</li>
                     </ul>
                   </div>
@@ -268,53 +278,57 @@ export default function AdminNavigation() {
                             </Button>
                           </td>
                         </tr>
-                        {navItem.children && navItem.children.map((child) => (
-                          <tr key={child.id} className="hover:bg-gray-50 bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 pl-12">
-                              ↳ {child.title}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {child.url}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {child.order}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {child.isActive ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  Идэвхтэй
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  Идэвхгүй
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(child)}
-                                className="text-blue-600 hover:text-blue-900 mr-2"
-                              >
-                                <Edit className="h-4 w-4 mr-1" />
-                                Засах
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setNavItemToDelete(child);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Устгах
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
+                        {navItem.children &&
+                          navItem.children.map((child) => (
+                            <tr
+                              key={child.id}
+                              className="hover:bg-gray-50 bg-gray-50"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 pl-12">
+                                ↳ {child.title}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {child.url}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {child.order}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {child.isActive ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Идэвхтэй
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Идэвхгүй
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(child)}
+                                  className="text-blue-600 hover:text-blue-900 mr-2"
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Засах
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setNavItemToDelete(child);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Устгах
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
                       </React.Fragment>
                     ))}
                   </tbody>
@@ -331,7 +345,7 @@ export default function AdminNavigation() {
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">
-                {selectedNavItem ? 'Цэс засах' : 'Шинэ цэс нэмэх'}
+                {selectedNavItem ? "Цэс засах" : "Шинэ цэс нэмэх"}
               </h2>
               <div className="ml-2">
                 <HelpTooltip
@@ -340,7 +354,9 @@ export default function AdminNavigation() {
                       <p className="font-medium mb-1">Цэс засах:</p>
                       <p className="mb-2">Цэсний мэдээллийг оруулна уу:</p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
-                        <li>Эх цэс - Эх цэсний доорх дэд цэс болгохын тулд сонгоно</li>
+                        <li>
+                          Эх цэс - Эх цэсний доорх дэд цэс болгохын тулд сонгоно
+                        </li>
                         <li>Нэр - Вебсайт дээр харагдах цэсний нэр</li>
                         <li>URL - Цэс дээр дарахад очих хуудасны хаяг</li>
                         <li>Дараалал - Цэсний дарааллын дугаар</li>
@@ -377,11 +393,15 @@ export default function AdminNavigation() {
                   content={
                     <div>
                       <p className="font-medium mb-1">Дараалал өөрчлөх:</p>
-                      <p className="mb-2">Цэсүүдийг чирч шилжүүлж дарааллыг өөрчлөх боломжтой:</p>
+                      <p className="mb-2">
+                        Цэсүүдийг чирч шилжүүлж дарааллыг өөрчлөх боломжтой:
+                      </p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
                         <li>Цэс дээр хулгана байрлуулж чирч шилжүүлнэ</li>
                         <li>Дэд цэсийг чирч эх цэсрүү шилжүүлж болно</li>
-                        <li>Дараалал өөрчлөхийн тулд "Хадгалах" товчийг дарна</li>
+                        <li>
+                          Дараалал өөрчлөхийн тулд "Хадгалах" товчийг дарна
+                        </li>
                       </ul>
                     </div>
                   }
@@ -397,22 +417,31 @@ export default function AdminNavigation() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Устгахдаа итгэлтэй байна уу?</AlertDialogTitle>
             <AlertDialogDescription>
-              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{navItemToDelete?.title}" цэсийг бүр мөсөн устгах болно.
-              {navItemToDelete?.children && navItemToDelete.children.length > 0 && (
-                <span className="font-medium block mt-2 text-red-600">
-                  Анхааруулга: Энэ цэсийг устгаснаар түүний доорх бүх дэд цэс мөн устгагдана.
-                </span>
-              )}
+              Энэ үйлдлийг буцаах боломжгүй. Энэ нь "{navItemToDelete?.title}"
+              цэсийг бүр мөсөн устгах болно.
+              {navItemToDelete?.children &&
+                navItemToDelete.children.length > 0 && (
+                  <span className="font-medium block mt-2 text-red-600">
+                    Анхааруулга: Энэ цэсийг устгаснаар түүний доорх бүх дэд цэс
+                    мөн устгагдана.
+                  </span>
+                )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Цуцлах</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Устгах
             </AlertDialogAction>
           </AlertDialogFooter>

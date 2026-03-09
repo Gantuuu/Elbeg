@@ -43,7 +43,9 @@ const AdminLogoSettings = lazy(() => import("@/pages/admin/logo-settings"));
 const AdminFooterSettings = lazy(() => import("@/pages/admin/footer-settings"));
 const AdminSiteSettings = lazy(() => import("@/pages/admin/site-settings"));
 const AdminLoginSettings = lazy(() => import("@/pages/admin/login-settings"));
-const AdminDeliverySettings = lazy(() => import("@/pages/admin/delivery-settings"));
+const AdminDeliverySettings = lazy(
+  () => import("@/pages/admin/delivery-settings"),
+);
 const AdminReviews = lazy(() => import("@/pages/admin/reviews"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -102,14 +104,19 @@ function AppContent() {
   return (
     <TooltipProvider>
       <Toaster />
-      <div className="pb-16 md:pb-0"> {/* Add bottom padding for mobile nav */}
+      <div className="pb-16 md:pb-0">
+        {" "}
+        {/* Add bottom padding for mobile nav */}
         <Suspense fallback={<LoadingScreen text="Loading..." />}>
           <Switch>
             {/* Customer-facing routes */}
             <Route path="/" component={Home} />
             <Route path="/products/:id" component={ProductDetails} />
 
-            <Route path="/service-category/:slug" component={ServiceCategoryPage} />
+            <Route
+              path="/service-category/:slug"
+              component={ServiceCategoryPage}
+            />
             <Route path="/cart" component={CartPage} />
             <Route path="/checkout" component={Checkout} />
             <Route path="/order-confirmation" component={OrderConfirmation} />
@@ -121,7 +128,10 @@ function AppContent() {
 
             {/* Store routes */}
             <Route path="/store/register" component={StoreRegister} />
-            <ProtectedRoute path="/store/dashboard" component={StoreDashboard} />
+            <ProtectedRoute
+              path="/store/dashboard"
+              component={StoreDashboard}
+            />
 
             {/* User protected routes */}
             <ProtectedRoute path="/my-page" component={MyPage} />
@@ -184,7 +194,10 @@ function AppContent() {
           </Switch>
         </Suspense>
       </div>
-      <MobileBottomNav cartItemCount={cartItemCount} onMenuToggle={toggleMenu} />
+      <MobileBottomNav
+        cartItemCount={cartItemCount}
+        onMenuToggle={toggleMenu}
+      />
     </TooltipProvider>
   );
 }

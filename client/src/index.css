@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 113.3 93.7% 18.6%;
+    --primary: 199.8 50.8% 47.8%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -83,35 +83,35 @@
 
   /* Overrides for previous gradient classes to use the new brand color */
   .gradient-red-blue {
-    @apply bg-[#0d5c03] !important;
-    background: #0d5c03 !important;
+    @apply bg-[#3c8fb8] !important;
+    background: #3c8fb8 !important;
   }
 
   .gradient-nav {
-    @apply bg-[#0d5c03] !important;
-    background: #0d5c03 !important;
+    @apply bg-[#3c8fb8] !important;
+    background: #3c8fb8 !important;
   }
 
   .text-gradient-red-blue {
-    @apply text-[#0d5c03] !important;
+    @apply text-[#3c8fb8] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .gradient-text {
-    @apply text-[#0d5c03] !important;
+    @apply text-[#3c8fb8] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .text-gradient-text {
-    @apply text-[#0d5c03] !important;
+    @apply text-[#3c8fb8] !important;
     background: none !important;
     -webkit-text-fill-color: initial !important;
   }
 
   .bg-gradient-to-r.from-\[\#FF2D2D\].to-\[\#2D55FF\] {
-    @apply bg-[#0d5c03] !important;
+    @apply bg-[#3c8fb8] !important;
     background-image: none !important;
   }
 }

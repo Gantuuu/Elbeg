@@ -4,7 +4,13 @@ import { useLocation } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -30,7 +36,8 @@ export default function StoreDashboard() {
     if (!user) {
       toast({
         title: "Нэвтрэх шаардлагатай",
-        description: "Дэлгүүрийн удирдлагын самбар руу хандахын тулд та эхлээд системд нэвтрэх шаардлагатай.",
+        description:
+          "Дэлгүүрийн удирдлагын самбар руу хандахын тулд та эхлээд системд нэвтрэх шаардлагатай.",
         variant: "destructive",
       });
       setLocation("/auth");
@@ -39,7 +46,7 @@ export default function StoreDashboard() {
 
   // Fetch user's stores
   const { data: myStores, isLoading: storesLoading } = useQuery<Store[]>({
-    queryKey: ['/api/stores/my-stores'],
+    queryKey: ["/api/stores/my-stores"],
     enabled: !!user,
   });
 
@@ -48,13 +55,13 @@ export default function StoreDashboard() {
 
   // Fetch store products
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
-    queryKey: ['/api/stores', currentStore?.id, 'products'],
+    queryKey: ["/api/stores", currentStore?.id, "products"],
     enabled: !!currentStore,
   });
 
   // Fetch store orders
   const { data: orders, isLoading: ordersLoading } = useQuery<Order[]>({
-    queryKey: ['/api/stores', currentStore?.id, 'orders'],
+    queryKey: ["/api/stores", currentStore?.id, "orders"],
     enabled: !!currentStore,
   });
 
@@ -89,13 +96,14 @@ export default function StoreDashboard() {
             <CardHeader>
               <CardTitle>Бүртгэлтэй дэлгүүр олдсонгүй</CardTitle>
               <CardDescription>
-                Танд одоогоор бүртгэлтэй дэлгүүр байхгүй байна. Та шинэ дэлгүүр үүсгэх боломжтой.
+                Танд одоогоор бүртгэлтэй дэлгүүр байхгүй байна. Та шинэ дэлгүүр
+                үүсгэх боломжтой.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">
               <Button
-                className="bg-[#0d5c03] text-white"
-                onClick={() => setLocation('/store/register')}
+                className="bg-[#3c8fb8] text-white"
+                onClick={() => setLocation("/store/register")}
               >
                 Шинэ дэлгүүр бүртгүүлэх
               </Button>
@@ -125,7 +133,11 @@ export default function StoreDashboard() {
           </Button>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs
+          defaultValue="overview"
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
           <TabsList className="grid w-full max-w-3xl grid-cols-3">
             <TabsTrigger value="overview">Ерөнхий мэдээлэл</TabsTrigger>
             <TabsTrigger value="products">Бүтээгдэхүүнүүд</TabsTrigger>
@@ -137,7 +149,9 @@ export default function StoreDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Нийт бүтээгдэхүүн</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Нийт бүтээгдэхүүн
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
@@ -152,7 +166,9 @@ export default function StoreDashboard() {
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Нийт захиалга</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Нийт захиалга
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
@@ -167,7 +183,9 @@ export default function StoreDashboard() {
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">Дэлгүүрийн төлөв</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      Дэлгүүрийн төлөв
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-md font-medium">
@@ -194,36 +212,52 @@ export default function StoreDashboard() {
                 <CardContent>
                   <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Үйлчилгээний ангилал</dt>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Үйлчилгээний ангилал
+                      </dt>
                       <dd className="mt-1">{currentStore.categoryId}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Утасны дугаар</dt>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Утасны дугаар
+                      </dt>
                       <dd className="mt-1">{currentStore.phone}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">И-мэйл</dt>
+                      <dt className="text-sm font-medium text-gray-500">
+                        И-мэйл
+                      </dt>
                       <dd className="mt-1">{currentStore.email}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Хаяг</dt>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Хаяг
+                      </dt>
                       <dd className="mt-1">{currentStore.address}</dd>
                     </div>
                     <div className="md:col-span-2">
-                      <dt className="text-sm font-medium text-gray-500">Үүсгэсэн огноо</dt>
+                      <dt className="text-sm font-medium text-gray-500">
+                        Үүсгэсэн огноо
+                      </dt>
                       <dd className="mt-1">
-                        {currentStore.createdAt && new Date(currentStore.createdAt).toLocaleDateString('mn-MN', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}
+                        {currentStore.createdAt &&
+                          new Date(currentStore.createdAt).toLocaleDateString(
+                            "mn-MN",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )}
                       </dd>
                     </div>
                   </dl>
 
                   <div className="mt-6">
                     <Button
-                      onClick={() => setLocation(`/store/edit/${currentStore.id}`)}
+                      onClick={() =>
+                        setLocation(`/store/edit/${currentStore.id}`)
+                      }
                       variant="outline"
                       className="mr-2"
                     >
@@ -245,7 +279,7 @@ export default function StoreDashboard() {
                   </div>
                   <Button
                     onClick={() => setLocation(`/store/products/add`)}
-                    className="bg-[#0d5c03] text-white"
+                    className="bg-[#3c8fb8] text-white"
                   >
                     Бүтээгдэхүүн нэмэх
                   </Button>
@@ -287,11 +321,13 @@ export default function StoreDashboard() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {Number(product.price).toLocaleString('mn-MN')}₩
+                              {Number(product.price).toLocaleString("mn-MN")}₩
                             </TableCell>
                             <TableCell>
                               {product.stock > 0 ? (
-                                <span className="text-green-600">{product.stock}</span>
+                                <span className="text-green-600">
+                                  {product.stock}
+                                </span>
                               ) : (
                                 <span className="text-red-600">Дууссан</span>
                               )}
@@ -301,7 +337,9 @@ export default function StoreDashboard() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() =>
-                                  setLocation(`/store/products/edit/${product.id}`)
+                                  setLocation(
+                                    `/store/products/edit/${product.id}`,
+                                  )
                                 }
                               >
                                 Засах
@@ -314,15 +352,20 @@ export default function StoreDashboard() {
                   ) : (
                     <div className="text-center py-12">
                       <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                        <span className="material-icons text-gray-400 text-3xl">inventory_2</span>
+                        <span className="material-icons text-gray-400 text-3xl">
+                          inventory_2
+                        </span>
                       </div>
-                      <h3 className="text-lg font-medium mb-2">Бүтээгдэхүүн байхгүй</h3>
+                      <h3 className="text-lg font-medium mb-2">
+                        Бүтээгдэхүүн байхгүй
+                      </h3>
                       <p className="text-gray-500 max-w-md mx-auto mb-6">
-                        Таны дэлгүүрт одоогоор бүртгэлтэй бүтээгдэхүүн байхгүй байна. Шинэ бүтээгдэхүүн нэмж эхлээрэй.
+                        Таны дэлгүүрт одоогоор бүртгэлтэй бүтээгдэхүүн байхгүй
+                        байна. Шинэ бүтээгдэхүүн нэмж эхлээрэй.
                       </p>
                       <Button
                         onClick={() => setLocation(`/store/products/add`)}
-                        className="bg-[#0d5c03] text-white"
+                        className="bg-[#3c8fb8] text-white"
                       >
                         Бүтээгдэхүүн нэмэх
                       </Button>
@@ -360,30 +403,35 @@ export default function StoreDashboard() {
                       <TableBody>
                         {orders.map((order) => (
                           <TableRow key={order.id}>
-                            <TableCell className="font-medium">#{order.id}</TableCell>
-                            <TableCell>
-                              {Number(order.totalAmount).toLocaleString('mn-MN')}₩
+                            <TableCell className="font-medium">
+                              #{order.id}
                             </TableCell>
                             <TableCell>
-                              {order.status === 'pending' && (
+                              {Number(order.totalAmount).toLocaleString(
+                                "mn-MN",
+                              )}
+                              ₩
+                            </TableCell>
+                            <TableCell>
+                              {order.status === "pending" && (
                                 <span className="text-yellow-600 flex items-center">
                                   <span className="w-2 h-2 bg-yellow-600 rounded-full mr-2"></span>
                                   Хүлээгдэж буй
                                 </span>
                               )}
-                              {order.status === 'processing' && (
+                              {order.status === "processing" && (
                                 <span className="text-blue-600 flex items-center">
                                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                                   Боловсруулж буй
                                 </span>
                               )}
-                              {order.status === 'completed' && (
+                              {order.status === "completed" && (
                                 <span className="text-green-600 flex items-center">
                                   <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
                                   Биелсэн
                                 </span>
                               )}
-                              {order.status === 'cancelled' && (
+                              {order.status === "cancelled" && (
                                 <span className="text-red-600 flex items-center">
                                   <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
                                   Цуцлагдсан
@@ -391,7 +439,10 @@ export default function StoreDashboard() {
                               )}
                             </TableCell>
                             <TableCell>
-                              {order.createdAt && new Date(order.createdAt).toLocaleDateString('mn-MN')}
+                              {order.createdAt &&
+                                new Date(order.createdAt).toLocaleDateString(
+                                  "mn-MN",
+                                )}
                             </TableCell>
                             <TableCell>
                               <Button
@@ -411,9 +462,13 @@ export default function StoreDashboard() {
                   ) : (
                     <div className="text-center py-12">
                       <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                        <span className="material-icons text-gray-400 text-3xl">receipt_long</span>
+                        <span className="material-icons text-gray-400 text-3xl">
+                          receipt_long
+                        </span>
                       </div>
-                      <h3 className="text-lg font-medium mb-2">Захиалга байхгүй</h3>
+                      <h3 className="text-lg font-medium mb-2">
+                        Захиалга байхгүй
+                      </h3>
                       <p className="text-gray-500 max-w-md mx-auto">
                         Таны дэлгүүрт одоогоор захиалга байхгүй байна.
                       </p>

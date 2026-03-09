@@ -10,7 +10,7 @@ export default function Contact() {
       <Navbar />
 
       {/* Back Button */}
-      <div className="bg-[#0d5c03] py-4">
+      <div className="bg-[#3c8fb8] py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link href="/">
             <button className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-white hover:bg-white/30 transition-all duration-200 group">

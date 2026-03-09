@@ -27,9 +27,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "lucide-react";
-import { getFullImageUrl, handleImageError, compressImage, generateThumbnail, uploadMedia } from "@/lib/image-utils";
+import {
+  getFullImageUrl,
+  handleImageError,
+  compressImage,
+  generateThumbnail,
+  uploadMedia,
+} from "@/lib/image-utils";
 import { logger } from "@/lib/logger";
-
 
 interface ProductFormProps {
   product?: Product;
@@ -40,7 +45,10 @@ interface ProductFormProps {
 // Extend the product schema for form validation with multilingual fields
 const productFormSchema = insertProductSchema.extend({
   price: z.string().min(1, "Үнэ ору울на уу"),
-  minOrderQuantity: z.string().min(1, "Хамгийн бага захиалгын хэмжээ оруулна уу").default("1"),
+  minOrderQuantity: z
+    .string()
+    .min(1, "Хамгийн бага захиалгын хэмжээ оруулна уу")
+    .default("1"),
   nameRu: z.string().optional(),
   nameEn: z.string().optional(),
   descriptionRu: z.string().optional(),
@@ -50,7 +58,11 @@ const productFormSchema = insertProductSchema.extend({
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
-export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
+export function ProductForm({
+  product,
+  onSuccess,
+  onCancel,
+}: ProductFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,16 +72,16 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   // Fetch categories from categories management
   const { data: categoryItems = [] } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     queryFn: async () => {
       try {
         const res = await apiRequest("GET", "/api/categories");
         return res;
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
         return [];
       }
-    }
+    },
   });
 
   // Set default values including multilingual fields
@@ -84,13 +96,18 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     price: product ? product.price.toString() : "",
     imageUrl: product?.imageUrl || "",
     stock: 999, // Үлдэгдлийг үргэлж 999-өөр тохируулах - 2025-05-04
-    minOrderQuantity: product ? product.minOrderQuantity?.toString() || "1" : "1",
+    minOrderQuantity: product
+      ? product.minOrderQuantity?.toString() || "1"
+      : "1",
   };
 
   // Set image preview if product has an image
   useEffect(() => {
     if (product?.imageUrl) {
-      console.log('Setting product image preview:', getFullImageUrl(product.imageUrl));
+      console.log(
+        "Setting product image preview:",
+        getFullImageUrl(product.imageUrl),
+      );
       setImagePreview(product.imageUrl); // 원본 경로를 저장하고 렌더링 시 getFullImageUrl로 변환
     }
   }, [product]);
@@ -117,10 +134,10 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
-    logger.custom('⏳', 'Бүтээгдэхүүн хадгалж эхэллээ...');
+    logger.custom("⏳", "Бүтээгдэхүүн хадгалж эхэллээ...");
 
     // Log data to be saved
-    logger.custom('📦', 'Хадгалах өгөгдөл:', {
+    logger.custom("📦", "Хадгалах өгөгдөл:", {
       name: data.name,
       price: data.price,
       category: data.category,
@@ -139,7 +156,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       // Upload image if selected
       if (selectedFile) {
         try {
-          logger.custom('🖼️', 'Compressing and generating thumbnail...');
+          logger.custom("🖼️", "Compressing and generating thumbnail...");
 
           // 1. Compress original to WebP
           const compressedFile = await compressImage(selectedFile, 1200); // 1200px is enough for product details
@@ -147,18 +164,18 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           // 2. Generate thumbnail WebP
           const thumbnailFile = await generateThumbnail(selectedFile, 300);
 
-          logger.custom('📤', 'Uploading images...');
+          logger.custom("📤", "Uploading images...");
 
           // 3. Upload both
           const [imageResult, thumbnailResult] = await Promise.all([
             uploadMedia(compressedFile),
-            uploadMedia(thumbnailFile)
+            uploadMedia(thumbnailFile),
           ]);
 
           imageUrl = imageResult.url;
           thumbnailUrl = thumbnailResult.url;
 
-          logger.info('이미지 업로드 완료:', { imageUrl, thumbnailUrl });
+          logger.info("이미지 업로드 완료:", { imageUrl, thumbnailUrl });
         } catch (uploadError) {
           console.error("Image processing/upload failed:", uploadError);
           toast({
@@ -187,49 +204,55 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
       if (product) {
         console.log("Updating product ID via Worker:", product.id);
-        await apiRequest('PUT', `/api/products/${product.id}`, productData);
+        await apiRequest("PUT", `/api/products/${product.id}`, productData);
 
         toast({
           title: "Бүтээгдэхүүн шинэчлэгдлээ",
           description: "Бүтээгдэхүүний мэдээлэл амжилттай шинэчлэгдлээ.",
         });
 
-        logger.success('Бүтээгдэхүүн амжилттай засагдлаа:', {
+        logger.success("Бүтээгдэхүүн амжилттай засагдлаа:", {
           productId: product.id,
-          changes: productData
+          changes: productData,
         });
       } else {
         // Create new product via Worker
         console.log("Creating product via Worker");
 
         // Send JSON data directly
-        const newProduct = await apiRequest('POST', '/api/products', productData);
+        const newProduct = await apiRequest(
+          "POST",
+          "/api/products",
+          productData,
+        );
 
         toast({
           title: "Бүтээгдэхүүн нэмэгдлээ",
           description: "Шинэ бүтээгдэхүүн амжилттай нэмэгдлээ.",
         });
 
-        logger.success('Бүтээгдэхүүн амжилттай хадгалагдлаа:', {
+        logger.success("Бүтээгдэхүүн амжилттай хадгалагдлаа:", {
           // @ts-ignore
           productId: newProduct?.id,
           productName: productData.name,
           imageUrl: productData.imageUrl,
-          price: productData.price
+          price: productData.price,
         });
       }
 
       // Invalidate queries to reload product list
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
 
       // Clear filtering
       setSelectedFile(null);
       if (!product) {
         setImagePreview(null);
         // Reset the file input
-        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        const fileInput = document.querySelector(
+          'input[type="file"]',
+        ) as HTMLInputElement;
         if (fileInput) {
-          fileInput.value = '';
+          fileInput.value = "";
         }
       }
 
@@ -237,15 +260,17 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     } catch (error: any) {
       console.error("Error submitting product form:", error);
 
-      logger.error('Бүтээгдэхүүн хадгалахад алдаа гарлаа:', {
+      logger.error("Бүтээгдэхүүн хадгалахад алдаа гарлаа:", {
         formData: data,
         error: error.message,
-        details: error
+        details: error,
       });
 
       toast({
         title: "Алдаа гарлаа",
-        description: error.message || "Бүтээгдэхүүн хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
+        description:
+          error.message ||
+          "Бүтээгдэхүүн хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
         variant: "destructive",
       });
     } finally {
@@ -263,7 +288,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Бүтээгдэхүүний нэр *</FormLabel>
+                <FormLabel className="text-sm font-medium">
+                  Бүтээгдэхүүний нэр *
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Үхрийн мах"
@@ -317,28 +344,28 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   </FormControl>
                   <SelectContent className="max-h-[50vh]">
                     {/* Use categories from category management */}
-                    {categoryItems.length > 0 ? (
-                      categoryItems.map((category: any) => (
-                        <SelectItem
-                          key={`cat-${category.id}`}
-                          value={category.name}
-                          className="text-base py-2.5 md:py-2"
-                        >
-                          {category.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      // Fallback to default categories only if no categories exist
-                      MEAT_CATEGORIES.filter(cat => cat.value !== "all").map((category) => (
-                        <SelectItem
-                          key={category.value}
-                          value={category.value}
-                          className="text-base py-2.5 md:py-2"
-                        >
-                          {category.label}
-                        </SelectItem>
-                      ))
-                    )}
+                    {categoryItems.length > 0
+                      ? categoryItems.map((category: any) => (
+                          <SelectItem
+                            key={`cat-${category.id}`}
+                            value={category.name}
+                            className="text-base py-2.5 md:py-2"
+                          >
+                            {category.name}
+                          </SelectItem>
+                        ))
+                      : // Fallback to default categories only if no categories exist
+                        MEAT_CATEGORIES.filter(
+                          (cat) => cat.value !== "all",
+                        ).map((category) => (
+                          <SelectItem
+                            key={category.value}
+                            value={category.value}
+                            className="text-base py-2.5 md:py-2"
+                          >
+                            {category.label}
+                          </SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
                 <FormMessage className="text-xs md:text-sm" />
@@ -371,7 +398,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             name="minOrderQuantity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Хамгийн бага захиалга (кг)</FormLabel>
+                <FormLabel className="text-sm font-medium">
+                  Хамгийн бага захиалга (кг)
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -384,7 +413,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                   />
                 </FormControl>
                 <FormDescription className="text-xs">
-                  Анхдагч: 1кг (4кг-аас дээш захиалах боломжтой болгохын тулд 4 гэж оруулна)
+                  Анхдагч: 1кг (4кг-аас дээш захиалах боломжтой болгохын тулд 4
+                  гэж оруулна)
                 </FormDescription>
                 <FormMessage className="text-xs md:text-sm" />
               </FormItem>
@@ -400,7 +430,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Зурагны URL</FormLabel>
+                  <FormLabel className="text-sm font-medium">
+                    Зурагны URL
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="https://example.com/image.jpg"
@@ -420,7 +452,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             {/* Mobile-optimized Image upload component */}
             <div className="mt-2">
               <div className="flex items-center mb-1 md:mb-2">
-                <span className="text-xs md:text-sm font-medium">Зураг оруулах</span>
+                <span className="text-xs md:text-sm font-medium">
+                  Зураг оруулах
+                </span>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -462,12 +496,22 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                         setSelectedFile(null);
                         setImagePreview(null);
                         if (fileInputRef.current) {
-                          fileInputRef.current.value = '';
+                          fileInputRef.current.value = "";
                         }
                       }}
                       aria-label="Зураг устгах"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                       </svg>
@@ -480,11 +524,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
           {/* Үлдэгдлийн талбар устгагдсан - 2025-05-04 */}
           <div className="hidden">
-            <input
-              type="hidden"
-              name="stock"
-              value="999"
-            />
+            <input type="hidden" name="stock" value="999" />
           </div>
         </div>
 
@@ -501,7 +541,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full md:w-auto order-1 md:order-2 bg-[#0d5c03] hover:bg-[#0d5c03]/90 text-white h-11 md:h-10"
+            className="w-full md:w-auto order-1 md:order-2 bg-[#3c8fb8] hover:bg-[#3c8fb8]/90 text-white h-11 md:h-10"
           >
             {isSubmitting && (
               <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></span>

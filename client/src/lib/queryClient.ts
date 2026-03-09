@@ -22,21 +22,21 @@ export async function apiRequest(
     let requestData: unknown | undefined;
 
     // Use environment variable for API base URL or default to empty (relative)
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
 
     if (urlOrData === undefined) {
       // Pattern: apiRequest('/api/endpoint')
-      method = 'GET';
+      method = "GET";
       url = apiBaseUrl + methodOrUrl;
       requestData = undefined;
-    } else if (typeof urlOrData === 'string') {
+    } else if (typeof urlOrData === "string") {
       // Pattern: apiRequest('GET', '/api/endpoint', data)
       method = methodOrUrl;
       url = apiBaseUrl + urlOrData;
       requestData = data;
     } else {
       // Pattern: apiRequest('/api/endpoint', data)
-      method = 'POST';
+      method = "POST";
       url = apiBaseUrl + methodOrUrl;
       requestData = urlOrData;
     }
@@ -46,21 +46,26 @@ export async function apiRequest(
       console.log("Request data:", requestData);
     }
 
-    const headers: Record<string, string> = requestData ? { "Content-Type": "application/json" } : {};
+    const headers: Record<string, string> = requestData
+      ? { "Content-Type": "application/json" }
+      : {};
 
     // Enhanced mobile cookie handling for API requests
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
 
     if (isMobile) {
-      headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-      headers['Pragma'] = 'no-cache';
-      headers['Expires'] = '0';
-      headers['X-Requested-With'] = 'XMLHttpRequest';
+      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+      headers["Pragma"] = "no-cache";
+      headers["Expires"] = "0";
+      headers["X-Requested-With"] = "XMLHttpRequest";
     }
 
     // Add explicit cookie header if available for mobile compatibility
-    if (typeof document !== 'undefined' && document.cookie) {
-      headers['Cookie'] = document.cookie;
+    if (typeof document !== "undefined" && document.cookie) {
+      headers["Cookie"] = document.cookie;
     }
 
     const options: RequestInit = {
@@ -69,7 +74,7 @@ export async function apiRequest(
       body: requestData ? JSON.stringify(requestData) : undefined,
       credentials: "include", // Important for cookies/session
       cache: "no-cache", // Prevent caching issues
-      mode: "same-origin"
+      mode: "same-origin",
     };
 
     console.log("Sending fetch request with options:", options);
@@ -78,7 +83,7 @@ export async function apiRequest(
 
     // Log cookies and headers for debugging
     const resHeaders: Record<string, string> = {};
-    res.headers.forEach((v, k) => resHeaders[k] = v);
+    res.headers.forEach((v, k) => (resHeaders[k] = v));
     console.log("Response headers:", resHeaders);
 
     await throwIfResNotOk(res);
@@ -105,7 +110,10 @@ export async function apiRequest(
     } else {
       // If it's not JSON (e.g., HTML), return success object
       const text = await res.text();
-      console.log("Non-JSON response:", text.substring(0, 100) + (text.length > 100 ? "..." : ""));
+      console.log(
+        "Non-JSON response:",
+        text.substring(0, 100) + (text.length > 100 ? "..." : ""),
+      );
       return { success: true, status: res.status };
     }
   } catch (error) {
@@ -119,57 +127,60 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-    async ({ queryKey }) => {
-      console.log(`Querying: ${queryKey[0]}`);
+  async ({ queryKey }) => {
+    console.log(`Querying: ${queryKey[0]}`);
 
-      const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {};
 
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
-      // Only prepend if it's a relative path starting with /
-      const key = queryKey[0] as string;
-      const url = key.startsWith('/') ? apiBaseUrl + key : key;
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+    // Only prepend if it's a relative path starting with /
+    const key = queryKey[0] as string;
+    const url = key.startsWith("/") ? apiBaseUrl + key : key;
 
-      // Enhanced mobile cookie handling
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // Enhanced mobile cookie handling
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
 
-      if (isMobile) {
-        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-        headers['Pragma'] = 'no-cache';
-        headers['Expires'] = '0';
-        headers['X-Requested-With'] = 'XMLHttpRequest';
-      }
+    if (isMobile) {
+      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+      headers["Pragma"] = "no-cache";
+      headers["Expires"] = "0";
+      headers["X-Requested-With"] = "XMLHttpRequest";
+    }
 
-      // Add explicit cookie header if available for mobile compatibility
-      if (typeof document !== 'undefined' && document.cookie) {
-        headers['Cookie'] = document.cookie;
-      }
+    // Add explicit cookie header if available for mobile compatibility
+    if (typeof document !== "undefined" && document.cookie) {
+      headers["Cookie"] = document.cookie;
+    }
 
-      const options: RequestInit = {
-        headers,
-        credentials: "include", // Important for cookies/session
-        cache: "no-cache", // Prevent caching issues
-        mode: "same-origin"
-      };
-
-      console.log("Query fetch options:", options);
-      const res = await fetch(url, options);
-      console.log(`Query response status: ${res.status}`);
-
-      // Log headers for debugging
-      const resHeaders: Record<string, string> = {};
-      res.headers.forEach((v, k) => resHeaders[k] = v);
-      console.log("Query response headers:", resHeaders);
-
-      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-        console.log("401 Unauthorized - returning null as specified");
-        return null;
-      }
-
-      await throwIfResNotOk(res);
-      const data = await res.json();
-      console.log("Query response data:", data);
-      return data as any;
+    const options: RequestInit = {
+      headers,
+      credentials: "include", // Important for cookies/session
+      cache: "no-cache", // Prevent caching issues
+      mode: "same-origin",
     };
+
+    console.log("Query fetch options:", options);
+    const res = await fetch(url, options);
+    console.log(`Query response status: ${res.status}`);
+
+    // Log headers for debugging
+    const resHeaders: Record<string, string> = {};
+    res.headers.forEach((v, k) => (resHeaders[k] = v));
+    console.log("Query response headers:", resHeaders);
+
+    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      console.log("401 Unauthorized - returning null as specified");
+      return null;
+    }
+
+    await throwIfResNotOk(res);
+    const data = await res.json();
+    console.log("Query response data:", data);
+    return data as any;
+  };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

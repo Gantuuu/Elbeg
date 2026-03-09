@@ -21,8 +21,8 @@ export function Hero() {
 
   // Fetch hero content
   const { data: heroData, isLoading } = useQuery<any>({
-    queryKey: ['/api/settings/hero'],
-    queryFn: () => apiRequest('GET', '/api/settings/hero'),
+    queryKey: ["/api/settings/hero"],
+    queryFn: () => apiRequest("GET", "/api/settings/hero"),
     staleTime: 60000,
   });
 
@@ -37,7 +37,7 @@ export function Hero() {
   // Custom Autoplay with API
   useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
     const autoPlayInterval = setInterval(() => {
@@ -51,26 +51,31 @@ export function Hero() {
     return () => clearInterval(autoPlayInterval);
   }, [api]);
 
-
   // Prepare slides data
   const slides = React.useMemo(() => {
     if (!heroData) return [];
 
     // New format
-    if (heroData.slides && Array.isArray(heroData.slides) && heroData.slides.length > 0) {
+    if (
+      heroData.slides &&
+      Array.isArray(heroData.slides) &&
+      heroData.slides.length > 0
+    ) {
       return heroData.slides;
     }
 
     // Legacy format or default
-    return [{
-      title: heroData.title || t.heroTitle,
-      text: heroData.text || t.heroSubtitle,
-      imageUrl: heroData.imageUrl
-    }];
+    return [
+      {
+        title: heroData.title || t.heroTitle,
+        text: heroData.text || t.heroSubtitle,
+        imageUrl: heroData.imageUrl,
+      },
+    ];
   }, [heroData, t]);
 
   return (
-    <section className="bg-[#0d5c03] pt-3 pb-8">
+    <section className="bg-[#3c8fb8] pt-3 pb-8">
       <div className="container mx-auto px-0 md:px-6">
         {/* Scrolling delivery message */}
         <div className="px-4 md:px-0">
@@ -100,14 +105,17 @@ export function Hero() {
         >
           <CarouselContent className="-ml-2 md:-ml-4">
             {slides.map((slide: any, index: number) => (
-              <CarouselItem key={index} className="pl-2 md:pl-4 basis-[90%] md:basis-[95%] lg:basis-full">
+              <CarouselItem
+                key={index}
+                className="pl-2 md:pl-4 basis-[90%] md:basis-[95%] lg:basis-full"
+              >
                 <div className="relative overflow-hidden rounded-xl shadow-lg">
                   <div className="w-full aspect-[16/9] md:aspect-[21/9] bg-gray-100 rounded-xl transition-all duration-500 overflow-hidden relative">
                     <img
                       src={getFullImageUrl(slide.imageUrl)}
                       alt={slide.title}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-                      style={{ objectPosition: 'center 35%' }}
+                      style={{ objectPosition: "center 35%" }}
                       onError={(e) => handleImageError(e, slide.imageUrl)}
                       loading="eager"
                     />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export function useImagePreloader(imageUrls: string[]) {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
@@ -20,8 +20,9 @@ export function useImagePreloader(imageUrls: string[]) {
         img.onload = () => {
           newLoadedImages.add(url);
           loadedCount++;
-          
-          if (loadedCount >= Math.min(totalImages, 6)) { // Load first 6 images quickly
+
+          if (loadedCount >= Math.min(totalImages, 6)) {
+            // Load first 6 images quickly
             setLoadedImages(new Set(newLoadedImages));
             setIsLoading(false);
           }

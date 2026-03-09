@@ -8,13 +8,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { loginSchema, signupSchema } from "@shared/schema";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { getFullImageUrl } from "@/lib/image-utils";
-
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -23,7 +29,7 @@ export default function AuthPage() {
 
   // Fetch background images
   const { data: loginImagesData } = useQuery<{ images: string[] }>({
-    queryKey: ['/api/settings/login-images'],
+    queryKey: ["/api/settings/login-images"],
     queryFn: async () => {
       const res = await fetch("/api/settings/login-images");
       if (!res.ok) throw new Error("Failed to fetch images");
@@ -32,24 +38,29 @@ export default function AuthPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  const IMAGES = (loginImagesData?.images && loginImagesData.images.length > 0) ? loginImagesData.images : [
-    "/uploads/제목을_입력해주세요_ (2)/001.png",
-    "/uploads/제목을_입력해주세요_ (2)/002.png",
-    "/uploads/제목을_입력해주세요_ (2)/003.png",
-    "/uploads/제목을_입력해주세요_ (2)/004.png",
-    "/uploads/제목을_입력해주세요_ (2)/005.png",
-    "/uploads/제목을_입력해주세요_ (2)/006.png",
-    "/uploads/제목을_입력해주세요_ (2)/007.png",
-    "/uploads/제목을_입력해주세요_ (2)/008.png",
-    "/uploads/제목을_입력해주세요_ (2)/009.png",
-    "/uploads/제목을_입력해주세요_ (2)/010.png",
-  ];
+  const IMAGES =
+    loginImagesData?.images && loginImagesData.images.length > 0
+      ? loginImagesData.images
+      : [
+          "/uploads/제목을_입력해주세요_ (2)/001.png",
+          "/uploads/제목을_입력해주세요_ (2)/002.png",
+          "/uploads/제목을_입력해주세요_ (2)/003.png",
+          "/uploads/제목을_입력해주세요_ (2)/004.png",
+          "/uploads/제목을_입력해주세요_ (2)/005.png",
+          "/uploads/제목을_입력해주세요_ (2)/006.png",
+          "/uploads/제목을_입력해주세요_ (2)/007.png",
+          "/uploads/제목을_입력해주세요_ (2)/008.png",
+          "/uploads/제목을_입력해주세요_ (2)/009.png",
+          "/uploads/제목을_입력해주세요_ (2)/010.png",
+        ];
 
   // Logic for columns based on current images
   const COLUMN_1 = IMAGES.slice(0, Math.ceil(IMAGES.length / 3));
-  const COLUMN_2 = IMAGES.slice(Math.ceil(IMAGES.length / 3), Math.ceil(IMAGES.length * 2 / 3));
-  const COLUMN_3 = IMAGES.slice(Math.ceil(IMAGES.length * 2 / 3));
-
+  const COLUMN_2 = IMAGES.slice(
+    Math.ceil(IMAGES.length / 3),
+    Math.ceil((IMAGES.length * 2) / 3),
+  );
+  const COLUMN_3 = IMAGES.slice(Math.ceil((IMAGES.length * 2) / 3));
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -92,7 +103,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-[#0d5c03] flex flex-col items-center justify-center">
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#3c8fb8] flex flex-col items-center justify-center">
       {/* Scrolling Background */}
       <div className="absolute inset-0 grid grid-cols-3 gap-6 opacity-60 select-none pointer-events-none -skew-y-6 scale-110 transform-gpu">
         <Column images={COLUMN_1} duration={45} />
@@ -101,7 +112,7 @@ export default function AuthPage() {
       </div>
 
       {/* Dark Gradient Overlay for Readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a4202]/70 via-[#0d5c03]/50 to-[#072e01]/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a4202]/70 via-[#3c8fb8]/50 to-[#072e01]/80 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-md px-6 my-10">
@@ -112,7 +123,11 @@ export default function AuthPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-xl mb-2">
-            <img src="/logo-new.png" alt="Ивээл махны дэлгүүр" className="h-16 md:h-24 w-auto object-contain mx-auto" />
+            <img
+              src="/logo-new.png"
+              alt="Арвижих махны дэлгүүр"
+              className="h-16 md:h-24 w-auto object-contain mx-auto"
+            />
           </h1>
           <p className="text-gray-200 text-sm md:text-base font-medium">
             Шинэ, чанартай мах махан бүтээгдэхүүн
@@ -125,16 +140,33 @@ export default function AuthPage() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden"
         >
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "register")} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "login" | "register")}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2 p-1 bg-gray-100/50">
-              <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:text-[#0d5c03] font-bold">Нэвтрэх</TabsTrigger>
-              <TabsTrigger value="register" className="data-[state=active]:bg-white data-[state=active]:text-[#0d5c03] font-bold">Бүртгүүлэх</TabsTrigger>
+              <TabsTrigger
+                value="login"
+                className="data-[state=active]:bg-white data-[state=active]:text-[#3c8fb8] font-bold"
+              >
+                Нэвтрэх
+              </TabsTrigger>
+              <TabsTrigger
+                value="register"
+                className="data-[state=active]:bg-white data-[state=active]:text-[#3c8fb8] font-bold"
+              >
+                Бүртгүүлэх
+              </TabsTrigger>
             </TabsList>
 
             <div className="p-6">
               <TabsContent value="login" className="mt-0">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={loginForm.handleSubmit(onLoginSubmit)}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -142,7 +174,10 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Имэйл эсвэл Хэрэглэгчийн нэр</FormLabel>
                           <FormControl>
-                            <Input placeholder="Имэйл эсвэл Хэрэглэгчийн нэр" {...field} />
+                            <Input
+                              placeholder="Имэйл эсвэл Хэрэглэгчийн нэр"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -155,7 +190,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Нууц үг</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Нууц үг" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Нууц үг"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -163,7 +202,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full bg-[#0d5c03] hover:brightness-110 text-white font-bold h-11"
+                      className="w-full bg-[#3c8fb8] hover:brightness-110 text-white font-bold h-11"
                       disabled={loginMutation.isPending}
                     >
                       {loginMutation.isPending ? (
@@ -181,7 +220,9 @@ export default function AuthPage() {
                         <span className="w-full border-t border-gray-300"></span>
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-gray-500">Эсвэл</span>
+                        <span className="bg-white px-2 text-gray-500">
+                          Эсвэл
+                        </span>
                       </div>
                     </div>
 
@@ -189,7 +230,9 @@ export default function AuthPage() {
                       type="button"
                       variant="outline"
                       className="w-full border-gray-300 hover:bg-gray-50 text-gray-700 font-medium h-11 flex items-center justify-center gap-2"
-                      onClick={() => window.location.href = '/api/auth/google'}
+                      onClick={() =>
+                        (window.location.href = "/api/auth/google")
+                      }
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
@@ -218,7 +261,10 @@ export default function AuthPage() {
 
               <TabsContent value="register" className="mt-0">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={registerForm.control}
                       name="username"
@@ -252,7 +298,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Нууц үг</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Нууц үг" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Нууц үг"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -265,7 +315,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Нууц үг давтах</FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Нууц үг давтах" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Нууц үг давтах"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -278,7 +332,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Утас (Заавал биш)</FormLabel>
                           <FormControl>
-                            <Input placeholder="010-0000-0000" {...field} value={field.value || ""} />
+                            <Input
+                              placeholder="010-0000-0000"
+                              {...field}
+                              value={field.value || ""}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -286,7 +344,7 @@ export default function AuthPage() {
                     />
                     <Button
                       type="submit"
-                      className="w-full bg-[#0d5c03] hover:brightness-110 text-white font-bold h-11"
+                      className="w-full bg-[#3c8fb8] hover:brightness-110 text-white font-bold h-11"
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? (
@@ -311,20 +369,26 @@ export default function AuthPage() {
       </div>
 
       {/* Only for admin bypass - hidden trigger (DEV ONLY) */}
-      {
-        import.meta.env.DEV && (
-          <div
-            className="absolute bottom-0 right-0 w-10 h-10 cursor-alias z-50 opacity-0"
-            onClick={() => window.location.href = '/admin/login'}
-            title="Admin Login"
-          />
-        )
-      }
-    </div >
+      {import.meta.env.DEV && (
+        <div
+          className="absolute bottom-0 right-0 w-10 h-10 cursor-alias z-50 opacity-0"
+          onClick={() => (window.location.href = "/admin/login")}
+          title="Admin Login"
+        />
+      )}
+    </div>
   );
 }
 
-const Column = ({ images, duration, reverse = false }: { images: string[], duration: number, reverse?: boolean }) => {
+const Column = ({
+  images,
+  duration,
+  reverse = false,
+}: {
+  images: string[];
+  duration: number;
+  reverse?: boolean;
+}) => {
   return (
     <motion.div
       initial={{ y: reverse ? -1000 : 0 }}
@@ -339,7 +403,10 @@ const Column = ({ images, duration, reverse = false }: { images: string[], durat
     >
       {/* Loop the images multiple times to creating seamless infinite scroll */}
       {[...images, ...images, ...images, ...images].map((src, index) => (
-        <div key={index} className="relative rounded-xl overflow-hidden shadow-2xl w-full aspect-[3/4]">
+        <div
+          key={index}
+          className="relative rounded-xl overflow-hidden shadow-2xl w-full aspect-[3/4]"
+        >
           <img
             src={getFullImageUrl(src)}
             alt="background"

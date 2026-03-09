@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload, X, Search, Trash2, Check } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { HelpTooltip } from './help-tooltip';
-import { helpIllustrations } from '@/assets/help';
-import {
-  Button,
-  Input,
-} from '@/components/ui';
-import { getFullImageUrl, compressImage } from '@/lib/image-utils';
-import { logger } from '@/lib/logger';
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Upload, X, Search, Trash2, Check } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { HelpTooltip } from "./help-tooltip";
+import { helpIllustrations } from "@/assets/help";
+import { Button, Input } from "@/components/ui";
+import { getFullImageUrl, compressImage } from "@/lib/image-utils";
+import { logger } from "@/lib/logger";
 
 interface MediaItem {
   id: number;
@@ -27,8 +24,11 @@ interface MediaGalleryProps {
   selectable?: boolean;
 }
 
-export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+export function MediaGallery({
+  onSelect,
+  selectable = false,
+}: MediaGalleryProps) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedMediaId, setSelectedMediaId] = useState<number | null>(null);
@@ -36,15 +36,15 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
   const queryClient = useQueryClient();
 
   const { data: mediaItems = [], isLoading } = useQuery({
-    queryKey: ['/api/media'],
+    queryKey: ["/api/media"],
     queryFn: async () => {
-      const data = await apiRequest('GET', '/api/media');
+      const data = await apiRequest("GET", "/api/media");
       return data as MediaItem[];
-    }
+    },
   });
 
-  const filteredItems = mediaItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = mediaItems.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,33 +58,33 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append('file', uploadingFile);
+    formData.append("file", uploadingFile);
 
     try {
-      logger.custom('🖼️', 'Compressing image before gallery upload...');
+      logger.custom("🖼️", "Compressing image before gallery upload...");
       const compressedFile = await compressImage(uploadingFile, 1600);
 
       const uploadFormData = new FormData();
-      uploadFormData.append('file', compressedFile);
+      uploadFormData.append("file", compressedFile);
 
-      await apiRequest('POST', '/api/media', uploadFormData);
+      await apiRequest("POST", "/api/media", uploadFormData);
 
       toast({
-        title: 'Зураг амжилттай хуулагдлаа',
+        title: "Зураг амжилттай хуулагдлаа",
         description: `${uploadingFile.name} амжилттай хуулагдлаа.`,
       });
 
       // Refresh media list
-      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
 
       // Reset state
       setUploadingFile(null);
       setIsUploading(false);
     } catch (error) {
       toast({
-        title: 'Зураг хуулах үед алдаа гарлаа',
-        description: 'Файл хуулах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Зураг хуулах үед алдаа гарлаа",
+        description: "Файл хуулах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
       setIsUploading(false);
     }
@@ -92,20 +92,20 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
 
   const handleDeleteMedia = async (id: number) => {
     try {
-      await apiRequest('DELETE', `/api/media/${id}`);
+      await apiRequest("DELETE", `/api/media/${id}`);
 
       toast({
-        title: 'Зураг устгагдлаа',
-        description: 'Зураг амжилттай устгагдлаа.',
+        title: "Зураг устгагдлаа",
+        description: "Зураг амжилттай устгагдлаа.",
       });
 
       // Refresh media list
-      queryClient.invalidateQueries({ queryKey: ['/api/media'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/media"] });
     } catch (error) {
       toast({
-        title: 'Зураг устгах үед алдаа гарлаа',
-        description: 'Зураг устгах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Зураг устгах үед алдаа гарлаа",
+        description: "Зураг устгах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -128,7 +128,9 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
               content={
                 <div>
                   <p className="font-medium mb-1">Шинэ зураг нэмэх:</p>
-                  <p className="mb-2">JPG, PNG, GIF, SVG файлуудыг оруулах боломжтой.</p>
+                  <p className="mb-2">
+                    JPG, PNG, GIF, SVG файлуудыг оруулах боломжтой.
+                  </p>
                   <ol className="list-decimal list-inside space-y-1 text-xs">
                     <li>Файл сонгох товч дээр дарна</li>
                     <li>Компьютерээс зураг файл сонгоно</li>
@@ -157,9 +159,25 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
           >
             {isUploading ? (
               <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Хуулж байна...
               </span>
@@ -208,25 +226,40 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
 
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
-            <svg className="animate-spin h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="animate-spin h-8 w-8 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="bg-gray-50 border border-gray-200 p-4 rounded-md">
             <div className="font-medium text-lg">Зурагнууд хоосон байна</div>
-            <div className="text-gray-500">
-              Шинэ зураг нэмж эхлэнэ үү.
-            </div>
+            <div className="text-gray-500">Шинэ зураг нэмж эхлэнэ үү.</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                className={`relative group overflow-hidden rounded-md border shadow-sm hover:shadow-md transition-all ${selectable ? 'cursor-pointer' : ''
-                  } ${selectedMediaId === item.id ? 'ring-2 ring-primary' : ''}`}
+                className={`relative group overflow-hidden rounded-md border shadow-sm hover:shadow-md transition-all ${
+                  selectable ? "cursor-pointer" : ""
+                } ${selectedMediaId === item.id ? "ring-2 ring-primary" : ""}`}
                 onClick={() => selectable && handleSelect(item)}
               >
                 <div className="aspect-square overflow-hidden bg-gray-100 flex items-center justify-center">
@@ -268,7 +301,7 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
         <div className="flex justify-end pt-4 border-t">
           <Button
             variant="outline"
-            onClick={() => onSelect && onSelect('')}
+            onClick={() => onSelect && onSelect("")}
             className="mr-2"
           >
             Цуцлах
@@ -276,7 +309,9 @@ export function MediaGallery({ onSelect, selectable = false }: MediaGalleryProps
           <Button
             disabled={selectedMediaId === null}
             onClick={() => {
-              const selectedItem = mediaItems.find(item => item.id === selectedMediaId);
+              const selectedItem = mediaItems.find(
+                (item) => item.id === selectedMediaId,
+              );
               if (selectedItem && onSelect) {
                 onSelect(selectedItem.url);
               }

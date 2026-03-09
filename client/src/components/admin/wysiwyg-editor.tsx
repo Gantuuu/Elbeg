@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
-import { HelpTooltip } from './help-tooltip';
-import { helpIllustrations } from '@/assets/help';
-import { MediaGallery } from './media-gallery';
+import React, { useState } from "react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import { HelpTooltip } from "./help-tooltip";
+import { helpIllustrations } from "@/assets/help";
+import { MediaGallery } from "./media-gallery";
 import {
   Bold,
   Italic,
@@ -21,15 +21,15 @@ import {
   Heading2,
   Undo,
   Redo,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 import {
   Button,
   Popover,
   PopoverContent,
   PopoverTrigger,
   Input,
-} from '@/components/ui';
+} from "@/components/ui";
 
 interface WysiwygEditorProps {
   content: string;
@@ -38,7 +38,7 @@ interface WysiwygEditorProps {
 
 export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
   const [isMediaGalleryOpen, setIsMediaGalleryOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState('');
+  const [linkUrl, setLinkUrl] = useState("");
   const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 
   const editor = useEditor({
@@ -47,12 +47,12 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline',
+          class: "text-blue-600 underline",
         },
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'rounded-md max-w-full h-auto',
+          class: "rounded-md max-w-full h-auto",
         },
       }),
     ],
@@ -68,18 +68,23 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
 
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
-  const toggleUnderline = () => 
-    editor.chain().focus().toggleMark('underline').run();
-  
+  const toggleUnderline = () =>
+    editor.chain().focus().toggleMark("underline").run();
+
   const setLink = () => {
     if (linkUrl) {
       // if a URL is provided, create a link
-      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
-      setLinkUrl('');
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: linkUrl })
+        .run();
+      setLinkUrl("");
       setIsLinkPopoverOpen(false);
     } else {
       // if no URL is provided and a link exists, remove it
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
       setIsLinkPopoverOpen(false);
     }
   };
@@ -104,17 +109,17 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
   // Text alignment will be implemented in future updates
   const alignLeft = () => {
     // Not implemented in default tiptap starter kit
-    console.log('Text align left not implemented');
+    console.log("Text align left not implemented");
   };
 
   const alignCenter = () => {
     // Not implemented in default tiptap starter kit
-    console.log('Text align center not implemented');
+    console.log("Text align center not implemented");
   };
 
   const alignRight = () => {
     // Not implemented in default tiptap starter kit
-    console.log('Text align right not implemented');
+    console.log("Text align right not implemented");
   };
 
   const undo = () => {
@@ -129,11 +134,13 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
     <div className="border rounded-md">
       <div className="flex flex-wrap gap-1 p-2 border-b bg-gray-50">
         <div className="flex items-center mr-2">
-          <HelpTooltip 
+          <HelpTooltip
             content={
               <div>
                 <p className="font-medium mb-1">Редактор үйлдлүүд:</p>
-                <p className="mb-2">Текстээ сонгоод дараах үйлдлүүдийг хийх боломжтой:</p>
+                <p className="mb-2">
+                  Текстээ сонгоод дараах үйлдлүүдийг хийх боломжтой:
+                </p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Текст форматлах (Bold, Italic, Underline)</li>
                   <li>Гарчиг оруулах (H1, H2)</li>
@@ -152,7 +159,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
           variant="ghost"
           size="sm"
           onClick={toggleBold}
-          className={editor.isActive('bold') ? 'bg-gray-200' : ''}
+          className={editor.isActive("bold") ? "bg-gray-200" : ""}
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -160,7 +167,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
           variant="ghost"
           size="sm"
           onClick={toggleItalic}
-          className={editor.isActive('italic') ? 'bg-gray-200' : ''}
+          className={editor.isActive("italic") ? "bg-gray-200" : ""}
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -168,18 +175,20 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
           variant="ghost"
           size="sm"
           onClick={toggleUnderline}
-          className={editor.isActive('underline') ? 'bg-gray-200' : ''}
+          className={editor.isActive("underline") ? "bg-gray-200" : ""}
         >
           <Underline className="h-4 w-4" />
         </Button>
-        
+
         <span className="border-r mx-1 h-6"></span>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={() => toggleHeading(1)}
-          className={editor.isActive('heading', { level: 1 }) ? 'bg-gray-200' : ''}
+          className={
+            editor.isActive("heading", { level: 1 }) ? "bg-gray-200" : ""
+          }
         >
           <Heading1 className="h-4 w-4" />
         </Button>
@@ -187,18 +196,20 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
           variant="ghost"
           size="sm"
           onClick={() => toggleHeading(2)}
-          className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}
+          className={
+            editor.isActive("heading", { level: 2 }) ? "bg-gray-200" : ""
+          }
         >
           <Heading2 className="h-4 w-4" />
         </Button>
-        
+
         <span className="border-r mx-1 h-6"></span>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleBulletList}
-          className={editor.isActive('bulletList') ? 'bg-gray-200' : ''}
+          className={editor.isActive("bulletList") ? "bg-gray-200" : ""}
         >
           <List className="h-4 w-4" />
         </Button>
@@ -206,35 +217,23 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
           variant="ghost"
           size="sm"
           onClick={toggleOrderedList}
-          className={editor.isActive('orderedList') ? 'bg-gray-200' : ''}
+          className={editor.isActive("orderedList") ? "bg-gray-200" : ""}
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
-        
+
         <span className="border-r mx-1 h-6"></span>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={alignLeft}
-        >
+        <Button variant="ghost" size="sm" onClick={alignLeft}>
           <AlignLeft className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={alignCenter}
-        >
+        <Button variant="ghost" size="sm" onClick={alignCenter}>
           <AlignCenter className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={alignRight}
-        >
+        <Button variant="ghost" size="sm" onClick={alignRight}>
           <AlignRight className="h-4 w-4" />
         </Button>
-        
+
         <span className="border-r mx-1 h-6"></span>
 
         <Popover open={isLinkPopoverOpen} onOpenChange={setIsLinkPopoverOpen}>
@@ -242,7 +241,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
             <Button
               variant="ghost"
               size="sm"
-              className={editor.isActive('link') ? 'bg-gray-200' : ''}
+              className={editor.isActive("link") ? "bg-gray-200" : ""}
             >
               <LinkIcon className="h-4 w-4" />
             </Button>
@@ -265,10 +264,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
                     <X className="h-4 w-4 mr-1" />
                     Цуцлах
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={setLink}
-                  >
+                  <Button size="sm" onClick={setLink}>
                     <LinkIcon className="h-4 w-4 mr-1" />
                     Линк оруулах
                   </Button>
@@ -285,26 +281,21 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
-        
+
         <span className="border-r mx-1 h-6"></span>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={undo}
-        >
+        <Button variant="ghost" size="sm" onClick={undo}>
           <Undo className="h-4 w-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={redo}
-        >
+        <Button variant="ghost" size="sm" onClick={redo}>
           <Redo className="h-4 w-4" />
         </Button>
       </div>
 
-      <EditorContent editor={editor} className="prose max-w-none p-4 min-h-[200px]" />
+      <EditorContent
+        editor={editor}
+        className="prose max-w-none p-4 min-h-[200px]"
+      />
 
       {editor && (
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
@@ -313,7 +304,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
               variant="ghost"
               size="sm"
               onClick={toggleBold}
-              className={editor.isActive('bold') ? 'bg-gray-200' : ''}
+              className={editor.isActive("bold") ? "bg-gray-200" : ""}
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -321,7 +312,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
               variant="ghost"
               size="sm"
               onClick={toggleItalic}
-              className={editor.isActive('italic') ? 'bg-gray-200' : ''}
+              className={editor.isActive("italic") ? "bg-gray-200" : ""}
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -329,7 +320,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
               variant="ghost"
               size="sm"
               onClick={toggleUnderline}
-              className={editor.isActive('underline') ? 'bg-gray-200' : ''}
+              className={editor.isActive("underline") ? "bg-gray-200" : ""}
             >
               <Underline className="h-4 w-4" />
             </Button>
@@ -338,7 +329,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={editor.isActive('link') ? 'bg-gray-200' : ''}
+                  className={editor.isActive("link") ? "bg-gray-200" : ""}
                 >
                   <LinkIcon className="h-4 w-4" />
                 </Button>
@@ -361,10 +352,7 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
                         <X className="h-4 w-4 mr-1" />
                         Цуцлах
                       </Button>
-                      <Button
-                        size="sm"
-                        onClick={setLink}
-                      >
+                      <Button size="sm" onClick={setLink}>
                         <LinkIcon className="h-4 w-4 mr-1" />
                         Линк оруулах
                       </Button>
@@ -383,15 +371,22 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">Зургийн сан</h2>
               <div className="ml-2">
-                <HelpTooltip 
+                <HelpTooltip
                   content={
                     <div>
                       <p className="font-medium mb-1">Зургийн сан:</p>
-                      <p className="mb-2">Контент дотор оруулах зургаа сонгоно уу:</p>
+                      <p className="mb-2">
+                        Контент дотор оруулах зургаа сонгоно уу:
+                      </p>
                       <ul className="list-disc list-inside space-y-1 text-xs">
                         <li>Зураг дээр дарж сонгоно</li>
-                        <li>Шинэ зураг нэмэх бол "Шинэ зураг" товч дээр дарна</li>
-                        <li>Зураг хуулагдсаны дараа "Зураг оруулах" товч дээр дарна</li>
+                        <li>
+                          Шинэ зураг нэмэх бол "Шинэ зураг" товч дээр дарна
+                        </li>
+                        <li>
+                          Зураг хуулагдсаны дараа "Зураг оруулах" товч дээр
+                          дарна
+                        </li>
                       </ul>
                     </div>
                   }
@@ -400,9 +395,9 @@ export function WysiwygEditor({ content, onChange }: WysiwygEditorProps) {
                   side="right"
                 />
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setIsMediaGalleryOpen(false)}
               >
                 <X className="h-4 w-4" />

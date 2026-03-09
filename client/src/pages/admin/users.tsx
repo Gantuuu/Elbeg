@@ -1,27 +1,28 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AdminLayout } from '@/components/admin/layout';
-import { AdminHeader } from '@/components/admin/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { User } from '@shared/schema';
-import { Loader2, Search, User as UserIcon } from 'lucide-react';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AdminLayout } from "@/components/admin/layout";
+import { AdminHeader } from "@/components/admin/header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { User } from "@shared/schema";
+import { Loader2, Search, User as UserIcon } from "lucide-react";
 
 export default function AdminUsers() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch users
   const { data: users = [], isLoading } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
+    queryKey: ["/api/admin/users"],
   });
 
   // Filter users based on search query
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -60,28 +61,42 @@ export default function AdminUsers() {
                   <thead>
                     <tr className="text-left border-b">
                       <th className="px-4 py-3 text-sm font-medium">ID</th>
-                      <th className="px-4 py-3 text-sm font-medium">Хэрэглэгчийн нэр</th>
-                      <th className="px-4 py-3 text-sm font-medium">Бүтэн нэр</th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Хэрэглэгчийн нэр
+                      </th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Бүтэн нэр
+                      </th>
                       <th className="px-4 py-3 text-sm font-medium">Имэйл</th>
                       <th className="px-4 py-3 text-sm font-medium">Утас</th>
-                      <th className="px-4 py-3 text-sm font-medium">Админ эрх</th>
-                      <th className="px-4 py-3 text-sm font-medium">Бүртгүүлсэн огноо</th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Админ эрх
+                      </th>
+                      <th className="px-4 py-3 text-sm font-medium">
+                        Бүртгүүлсэн огноо
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-4 text-center text-muted-foreground">
+                        <td
+                          colSpan={7}
+                          className="px-4 py-4 text-center text-muted-foreground"
+                        >
                           Хэрэглэгч олдсонгүй
                         </td>
                       </tr>
                     ) : (
                       filteredUsers.map((user) => {
                         // Helper function to mask sensitive data
-                        const maskData = (str: string | null | undefined, type: 'email' | 'phone') => {
-                          if (!str) return '-';
-                          if (type === 'email') {
-                            const parts = str.split('@');
+                        const maskData = (
+                          str: string | null | undefined,
+                          type: "email" | "phone",
+                        ) => {
+                          if (!str) return "-";
+                          if (type === "email") {
+                            const parts = str.split("@");
                             if (parts.length !== 2) return str;
                             const name = parts[0];
                             if (name.length <= 3) return str; // Don't mask very short emails
@@ -94,13 +109,22 @@ export default function AdminUsers() {
                         };
 
                         return (
-                          <tr key={user.id} className="border-b hover:bg-muted/50">
+                          <tr
+                            key={user.id}
+                            className="border-b hover:bg-muted/50"
+                          >
                             <td className="px-4 py-3 text-sm">{user.id}</td>
-                            <td className="px-4 py-3 text-sm">{user.username}</td>
-                            <td className="px-4 py-3 text-sm">{user.name || '-'}</td>
                             <td className="px-4 py-3 text-sm">
-                              {user.email && user.email.trim() !== '' ? (
-                                <span title={user.email}>{maskData(user.email, 'email')}</span>
+                              {user.username}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.name || "-"}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {user.email && user.email.trim() !== "" ? (
+                                <span title={user.email}>
+                                  {maskData(user.email, "email")}
+                                </span>
                               ) : (
                                 <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
                                   И-мэйл байхгүй
@@ -109,8 +133,12 @@ export default function AdminUsers() {
                             </td>
                             <td className="px-4 py-3 text-sm">
                               {user.phone ? (
-                                <span title={user.phone}>{maskData(user.phone, 'phone')}</span>
-                              ) : '-'}
+                                <span title={user.phone}>
+                                  {maskData(user.phone, "phone")}
+                                </span>
+                              ) : (
+                                "-"
+                              )}
                             </td>
                             <td className="px-4 py-3 text-sm">
                               {user.isAdmin ? (
@@ -125,8 +153,10 @@ export default function AdminUsers() {
                             </td>
                             <td className="px-4 py-3 text-sm">
                               {user.createdAt
-                                ? new Date(user.createdAt).toLocaleDateString('mn-MN')
-                                : '-'}
+                                ? new Date(user.createdAt).toLocaleDateString(
+                                    "mn-MN",
+                                  )
+                                : "-"}
                             </td>
                           </tr>
                         );

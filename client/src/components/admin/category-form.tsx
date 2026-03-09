@@ -1,10 +1,10 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { insertCategorySchema } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { insertCategorySchema } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
@@ -20,7 +20,7 @@ import {
   CardTitle,
   Switch,
   Textarea,
-} from '@/components/ui';
+} from "@/components/ui";
 
 // Extend the schema for form validation
 const categoryFormSchema = insertCategorySchema.extend({
@@ -35,17 +35,21 @@ interface CategoryFormProps {
   onCancel: () => void;
 }
 
-export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
+export function CategoryForm({
+  category,
+  onSuccess,
+  onCancel,
+}: CategoryFormProps) {
   const { toast } = useToast();
   const isEditing = !!category;
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: {
-      name: category?.name || '',
-      slug: category?.slug || '',
-      description: category?.description || '',
-      imageUrl: category?.imageUrl || '',
+      name: category?.name || "",
+      slug: category?.slug || "",
+      description: category?.description || "",
+      imageUrl: category?.imageUrl || "",
       order: category?.order || 0,
       isActive: category?.isActive ?? true,
     },
@@ -55,18 +59,21 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
-      .replace(/[^\w\sа-яөү]/g, '') // Remove special characters, keep Mongolian letters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-'); // Replace multiple hyphens with a single one
+      .replace(/[^\w\sа-яөү]/g, "") // Remove special characters, keep Mongolian letters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-"); // Replace multiple hyphens with a single one
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
-    form.setValue('name', name);
+    form.setValue("name", name);
 
     // Only auto-generate slug if we're creating a new category or the slug hasn't been manually edited
-    if (!isEditing || form.getValues('slug') === generateSlug(category?.name || '')) {
-      form.setValue('slug', generateSlug(name));
+    if (
+      !isEditing ||
+      form.getValues("slug") === generateSlug(category?.name || "")
+    ) {
+      form.setValue("slug", generateSlug(name));
     }
   };
 
@@ -78,31 +85,33 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         description: data.description,
         imageUrl: data.imageUrl,
         order: data.order,
-        isActive: data.isActive
+        isActive: data.isActive,
       };
 
       if (isEditing && category.id) {
         await apiRequest("PATCH", `/api/categories/${category.id}`, payload);
 
         toast({
-          title: 'Ангилал шинэчлэгдлээ',
-          description: 'Ангилал амжилттай шинэчлэгдлээ.',
+          title: "Ангилал шинэчлэгдлээ",
+          description: "Ангилал амжилттай шинэчлэгдлээ.",
         });
       } else {
         await apiRequest("POST", "/api/categories", payload);
 
         toast({
-          title: 'Ангилал үүсгэгдлээ',
-          description: 'Шинэ ангилал амжилттай нэмэгдлээ.',
+          title: "Ангилал үүсгэгдлээ",
+          description: "Шинэ ангилал амжилттай нэмэгдлээ.",
         });
       }
       onSuccess();
     } catch (error: any) {
       console.error("Error submitting category:", error);
       toast({
-        title: 'Алдаа гарлаа',
-        description: error.message || 'Ангилал хадгалах үед алдаа гарлаа. Дахин оролдоно уу.',
-        variant: 'destructive',
+        title: "Алдаа гарлаа",
+        description:
+          error.message ||
+          "Ангилал хадгалах үед алдаа гарлаа. Дахин оролдоно уу.",
+        variant: "destructive",
       });
     }
   };
@@ -111,7 +120,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
     <Card>
       <CardHeader>
         <CardTitle>
-          {isEditing ? 'Ангилал засах' : 'Шинэ ангилал нэмэх'}
+          {isEditing ? "Ангилал засах" : "Шинэ ангилал нэмэх"}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -162,7 +171,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                       placeholder="Ангилалын тайлбар..."
                       className="resize-none"
                       {...field}
-                      value={field.value || ''}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -177,7 +186,11 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                 <FormItem>
                   <FormLabel>Зурган хаяг (URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} value={field.value || ''} />
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -195,7 +208,9 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                       <Input
                         type="number"
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -230,7 +245,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
                 Цуцлах
               </Button>
               <Button type="submit" variant="default">
-                {isEditing ? 'Хадгалах' : 'Үүсгэх'}
+                {isEditing ? "Хадгалах" : "Үүсгэх"}
               </Button>
             </div>
           </form>

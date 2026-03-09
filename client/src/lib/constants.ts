@@ -14,4 +14,5 @@ export const ORDER_STATUSES = [
   { value: "cancelled", label: "Цуцлагдсан" },
 ];
 
-export const HERO_BACKGROUND = "https://images.unsplash.com/photo-1551024559-b33e1a0702e5?auto=format&fit=crop&w=1920&h=800&q=80";
+export const HERO_BACKGROUND =
+  "https://images.unsplash.com/photo-1551024559-b33e1a0702e5?auto=format&fit=crop&w=1920&h=800&q=80";

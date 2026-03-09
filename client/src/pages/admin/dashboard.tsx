@@ -10,7 +10,6 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/use-order-notifications";
 
-
 export default function AdminDashboard() {
   const { toast } = useToast();
 
@@ -19,19 +18,19 @@ export default function AdminDashboard() {
 
   // Fetch stats
   const { data: stats, isLoading: isStatsLoading } = useQuery({
-    queryKey: ['stats'],
+    queryKey: ["stats"],
     queryFn: async () => {
-      return await apiRequest('GET', '/api/orders/stats');
-    }
+      return await apiRequest("GET", "/api/orders/stats");
+    },
   });
 
   // Fetch recent orders
   const { data: orders = [], isLoading: isOrdersLoading } = useQuery<any[]>({
-    queryKey: ['orders'],
+    queryKey: ["orders"],
     queryFn: async () => {
       // We can reuse the orders endpoint, maybe add a limit query param later
       // For now fetching all and slicing is fine for low volume
-      return await apiRequest('GET', '/api/orders');
+      return await apiRequest("GET", "/api/orders");
     },
   });
 
@@ -50,15 +49,16 @@ export default function AdminDashboard() {
       <div className="flex-1 overflow-hidden">
         <AdminHeader title="Хянах самбар" />
 
-        <div className="p-6 overflow-auto" style={{ height: "calc(100vh - 70px)" }}>
-
-
+        <div
+          className="p-6 overflow-auto"
+          style={{ height: "calc(100vh - 70px)" }}
+        >
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
+                  <div className="p-3 rounded-full bg-[#3c8fb8] text-white">
                     <span className="material-icons">shopping_basket</span>
                   </div>
                   <div className="ml-4">
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
+                  <div className="p-3 rounded-full bg-[#3c8fb8] text-white">
                     <span className="material-icons">receipt_long</span>
                   </div>
                   <div className="ml-4">
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
                       {isStatsLoading ? (
                         <div className="h-6 w-20 bg-gray-200 animate-pulse rounded"></div>
                       ) : (
-                        formatPrice(totalSales).replace('₩', 'M₩')
+                        formatPrice(totalSales).replace("₩", "M₩")
                       )}
                     </h3>
                   </div>
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
+                  <div className="p-3 rounded-full bg-[#3c8fb8] text-white">
                     <span className="material-icons">inventory_2</span>
                   </div>
                   <div className="ml-4">
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-[#0d5c03] text-white">
+                  <div className="p-3 rounded-full bg-[#3c8fb8] text-white">
                     <span className="material-icons">person</span>
                   </div>
                   <div className="ml-4">
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
               <h2 className="font-bold text-lg">Сүүлийн захиалгууд</h2>
               <Button
                 variant="link"
-                className="text-[#0d5c03] font-medium"
+                className="text-[#3c8fb8] font-medium"
                 asChild
               >
                 <Link href="/admin/orders">Бүгдийг харах</Link>
@@ -152,27 +152,46 @@ export default function AdminDashboard() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Захиалгын ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Харилцагч</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Бүтээгдэхүүн</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дүн</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Төлөв</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Огноо</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үйлдэл</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Захиалгын ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Харилцагч
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Бүтээгдэхүүн
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Дүн
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Төлөв
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Огноо
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Үйлдэл
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {isOrdersLoading ? (
-                    Array(3).fill(0).map((_, i) => (
-                      <tr key={i}>
-                        <td colSpan={7} className="px-6 py-4">
-                          <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
-                        </td>
-                      </tr>
-                    ))
+                    Array(3)
+                      .fill(0)
+                      .map((_, i) => (
+                        <tr key={i}>
+                          <td colSpan={7} className="px-6 py-4">
+                            <div className="h-8 bg-gray-200 animate-pulse rounded"></div>
+                          </td>
+                        </tr>
+                      ))
                   ) : recentOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                      <td
+                        colSpan={7}
+                        className="px-6 py-4 text-center text-gray-500"
+                      >
                         Захиалга байхгүй байна
                       </td>
                     </tr>
@@ -186,20 +205,28 @@ export default function AdminDashboard() {
                           {order.customerName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {order.items?.map((item: any) => item.product?.name).join(', ')}
+                          {order.items
+                            ?.map((item: any) => item.product?.name)
+                            .join(", ")}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {formatPrice(order.totalAmount)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <OrderStatusBadge status={order.status} orderId={order.id} isEditable={true} />
+                          <OrderStatusBadge
+                            status={order.status}
+                            orderId={order.id}
+                            isEditable={true}
+                          />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {formatDate(order.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link href={`/admin/orders?id=${order.id}`}>
-                            <a className="text-[#0d5c03] hover:brightness-125 mr-3 font-medium">Харах</a>
+                            <a className="text-[#3c8fb8] hover:brightness-125 mr-3 font-medium">
+                              Харах
+                            </a>
                           </Link>
                         </td>
                       </tr>
@@ -215,7 +242,7 @@ export default function AdminDashboard() {
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h2 className="font-bold text-lg">Бүтээгдэхүүний удирдлага</h2>
               <Button
-                className="bg-[#0d5c03] hover:brightness-105 text-white font-medium py-2 px-4 rounded flex items-center"
+                className="bg-[#3c8fb8] hover:brightness-105 text-white font-medium py-2 px-4 rounded flex items-center"
                 asChild
               >
                 <Link href="/admin/products?new=true">
@@ -227,29 +254,35 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <Link href="/admin/products">
-                  <Button variant="outline" className="w-full md:w-auto border-[#0d5c03] hover:border-[#0d5c03] hover:text-[#0d5c03]">
+                  <Button
+                    variant="outline"
+                    className="w-full md:w-auto border-[#3c8fb8] hover:border-[#3c8fb8] hover:text-[#3c8fb8]"
+                  >
                     Бүтээгдэхүүний жагсаалт руу очих
                     <span className="material-icons ml-2">arrow_forward</span>
                   </Button>
                 </Link>
               </div>
 
-              <div className="bg-amber-50 border border-[#0d5c03]/20 rounded-lg p-4 mb-4">
+              <div className="bg-amber-50 border border-[#3c8fb8]/20 rounded-lg p-4 mb-4">
                 <div className="flex items-start">
-                  <span className="material-icons text-[#0d5c03] mr-2">info</span>
+                  <span className="material-icons text-[#3c8fb8] mr-2">
+                    info
+                  </span>
                   <div>
-                    <h3 className="font-bold text-[#0d5c03]">Өнөөдрийн статистик</h3>
+                    <h3 className="font-bold text-[#3c8fb8]">
+                      Өнөөдрийн статистик
+                    </h3>
                     <p className="text-sm text-gray-700">
-                      Нийт {totalProducts} төрлийн бүтээгдэхүүнтэй, {totalOrders} захиалга хүлээн авсан.
-                      Одоогоор {totalCustomers} харилцагч бүртгэлтэй байна.
-                      Бүх бүтээгдэхүүн, захиалга, хэрэглэгчийн мэдээллийг дэлгэрэнгүй харахыг хүсвэл дээрх цэснээс сонгоно уу.
+                      Нийт {totalProducts} төрлийн бүтээгдэхүүнтэй,{" "}
+                      {totalOrders} захиалга хүлээн авсан. Одоогоор{" "}
+                      {totalCustomers} харилцагч бүртгэлтэй байна. Бүх
+                      бүтээгдэхүүн, захиалга, хэрэглэгчийн мэдээллийг
+                      дэлгэрэнгүй харахыг хүсвэл дээрх цэснээс сонгоно уу.
                     </p>
                   </div>
                 </div>
               </div>
-
-
-
             </div>
           </Card>
         </div>
