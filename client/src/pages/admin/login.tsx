@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { logMobileCookieDebug } from "@/utils/cookieUtils";
 import {
@@ -79,6 +79,9 @@ export default function AdminLogin() {
       });
 
       // apiRequest handles response parsing, so 'user' is already the data
+
+      // Add to React Query cache so the AdminRoute wrapper knows we are authenticated
+      queryClient.setQueryData(["/api/user"], user);
 
       toast({
         title: "Амжилттай нэвтэрлээ",
