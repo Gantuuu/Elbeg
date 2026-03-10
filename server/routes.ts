@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
 import { setupAuth } from "./auth";
 import { hashPassword } from "./auth";
 import { sendOrderConfirmationEmail, sendNewOrderNotificationEmail, testEmailTemplate } from "./email";
@@ -258,6 +259,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   };
 
+  // Helper to convert an uploaded image to WebP
+  const convertToWebp = async (file: Express.Multer.File): Promise<string> => {
+    const dataDir = path.resolve('./data/uploads');
+    const filenameWithoutExt = path.parse(file.filename).name;
+    const webpFilename = `${filenameWithoutExt}.webp`;
+    const webpPath = path.join(dataDir, webpFilename);
+    const originalPath = file.path;
+
+    await sharp(originalPath)
+      .webp({ quality: 80 }) // Compress and convert to webp
+      .toFile(webpPath);
+
+    // After successful conversion, optionally delete the original uploaded non-webp file
+    if (path.extname(originalPath).toLowerCase() !== '.webp') {
+      try { fs.unlinkSync(originalPath); } catch (e) { console.error("Could not delete original file:", e); }
+    }
+
+    return webpFilename;
+  };
+
 
 
   app.post("/api/products", authenticateAdmin, upload.single('image'), async (req, res) => {
@@ -279,16 +300,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Add image URL if a file was uploaded
       if (req.file) {
-        // Set the image URL path
-        productData.imageUrl = `/uploads/${req.file.filename}`;
-
-        // Ensure image persistence in both directories
         try {
-          await ensureImagePersistence(req.file.filename);
-          console.log(`✅ Product image uploaded with full persistence: ${req.file.filename}`);
-        } catch (persistenceError) {
-          console.error('Could not ensure image persistence:', persistenceError);
-          // Continue anyway as the image exists in data directory
+          // Convert the image to webp
+          const webpFilename = await convertToWebp(req.file);
+
+          // Set the image URL path using the new webp filename
+          productData.imageUrl = `/uploads/${webpFilename}`;
+
+          // Ensure image persistence in both directories for the new webp file
+          await ensureImagePersistence(webpFilename);
+          console.log(`✅ Product image uploaded, converted to webp, and persisted: ${webpFilename}`);
+        } catch (processError) {
+          console.error('Failed to process image to webp or persist:', processError);
+          return res.status(500).json({ message: "Зураг боловсруулахад алдаа гарлаа" });
         }
       }
 
@@ -326,17 +350,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Add image URL if a file was uploaded
       if (req.file) {
-        productData.imageUrl = `/uploads/${req.file.filename}`;
-        console.log(`📸 New image uploaded: ${req.file.filename}`);
-        console.log(`📸 Image URL set to: ${productData.imageUrl}`);
-
-        // Ensure image persistence in both directories
         try {
-          await ensureImagePersistence(req.file.filename);
-          console.log(`✅ Product image updated with full persistence: ${req.file.filename}`);
-        } catch (persistenceError) {
-          console.error('Could not ensure image persistence:', persistenceError);
-          // Continue anyway as the image exists in data directory
+          // Convert the image to webp
+          const webpFilename = await convertToWebp(req.file);
+
+          productData.imageUrl = `/uploads/${webpFilename}`;
+          console.log(`📸 New image uploaded and converted to webp: ${webpFilename}`);
+          console.log(`📸 Image URL set to: ${productData.imageUrl}`);
+
+          // Ensure image persistence in both directories
+          await ensureImagePersistence(webpFilename);
+          console.log(`✅ Product image updated with full persistence: ${webpFilename}`);
+        } catch (processError) {
+          console.error('Failed to process image to webp or persist:', processError);
+          return res.status(500).json({ message: "Зураг боловсруулахад алдаа гарлаа" });
         }
       } else {
         console.log('📸 No new image uploaded, keeping existing imageUrl');
