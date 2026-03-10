@@ -3,6 +3,7 @@ import { CartItem } from "@shared/schema";
 import { useCart } from "@/hooks/use-cart";
 import { useLanguage } from "@/contexts/language-context";
 import { getFullImageUrl } from "@/lib/image-utils";
+import { isBulkyMeat } from "@/lib/utils";
 
 interface CartItemProps {
   item: CartItem;
@@ -13,12 +14,14 @@ export function CartItemComponent({ item }: CartItemProps) {
   const { t } = useLanguage();
 
   const handleIncrement = () => {
-    updateQuantity(item.productId, item.quantity + 1);
+    const step = isBulkyMeat(item.name) ? 4 : 1;
+    updateQuantity(item.productId, item.quantity + step);
   };
 
   const handleDecrement = () => {
-    if (item.quantity > 1) {
-      updateQuantity(item.productId, item.quantity - 1);
+    const step = isBulkyMeat(item.name) ? 4 : 1;
+    if (item.quantity > step) {
+      updateQuantity(item.productId, item.quantity - step);
     } else {
       removeItem(item.productId);
     }
@@ -40,10 +43,10 @@ export function CartItemComponent({ item }: CartItemProps) {
       <div className="ml-4 flex-grow">
         <h3 className="font-medium text-foreground">{item.name}</h3>
         <p className="text-muted-foreground text-sm">
-          {formatPrice(item.price)} / кг
+          {formatPrice(item.price)} {isBulkyMeat(item.name) ? "/ 4кг" : "/ кг"}
         </p>
         <p className="text-[#3c8fb8] font-medium text-sm mt-1">
-          {t.total}: {formatPrice(item.price * item.quantity)}
+          {t.total}: {formatPrice(isBulkyMeat(item.name) ? item.price * (item.quantity / 4) : item.price * item.quantity)}
         </p>
       </div>
       <div className="flex flex-col items-end space-y-2">

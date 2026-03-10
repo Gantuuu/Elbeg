@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Helper to identify "Хонины хаа" which has special 4kg package rules
+export function isBulkyMeat(name?: string): boolean {
+  if (!name) return false;
+  const normalized = name.trim().toLowerCase();
+  return normalized === "хонины хаа" || normalized.includes("хонины хаа");
+}
+
 // Format price in KRW (Korean Won)
 export function formatPrice(price: number | string): string {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;

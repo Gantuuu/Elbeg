@@ -10,6 +10,7 @@ import {
 import { CartItem, cartItemSchema } from "@shared/schema";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { isBulkyMeat } from "@/lib/utils";
 
 interface CartContextType {
   items: CartItem[];
@@ -33,7 +34,7 @@ export function CartProvider({ children }: CartProviderProps) {
   const totalPrice = useMemo(
     () =>
       items.reduce((total, item) => {
-        if (item.name === "Хонины хаа") {
+        if (isBulkyMeat(item.name)) {
           // For "Хонины хаа", price is per 4kg package, so calculate packages
           const packages = item.quantity / 4;
           return total + item.price * packages;

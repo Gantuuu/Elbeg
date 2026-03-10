@@ -12,6 +12,7 @@ import { Product } from "@shared/schema";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
+import { isBulkyMeat } from "@/lib/utils";
 
 interface QuantityModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ const QuantityModalComponent = ({
   const calculatedPrice = useMemo(() => {
     if (!product) return 0;
 
-    if (product.name === "Хонины хаа") {
+    if (isBulkyMeat(product.name)) {
       // For "Хонины хаа", price is per 4kg package
       const packages = quantity / 4;
       return productPrice * packages;
@@ -80,7 +81,7 @@ const QuantityModalComponent = ({
 
   // Determine quantity step (4kg for special products, 1kg for others)
   const quantityStep = useMemo(() => {
-    return product?.name === "Хонины хаа" ? 4 : 1;
+    return isBulkyMeat(product?.name) ? 4 : 1;
   }, [product?.name]);
 
   // Memoize event handlers
@@ -102,7 +103,7 @@ const QuantityModalComponent = ({
 
     // Calculate the unit price for the cart
     let unitPrice = productPrice;
-    if (product.name === "Хонины хаа") {
+    if (isBulkyMeat(product.name)) {
       // For "Хонины хаа", store price per 4kg unit
       unitPrice = productPrice; // ₩50,000 per 4kg package
     }
@@ -185,7 +186,7 @@ const QuantityModalComponent = ({
               <label className="text-sm font-medium text-gray-700">
                 {t.quantity}
               </label>
-              {product?.name === "Хонины хаа" ? (
+              {isBulkyMeat(product?.name) ? (
                 <span className="text-xs text-orange-600 font-medium">
                   {t.packageUnit}
                 </span>
@@ -213,7 +214,7 @@ const QuantityModalComponent = ({
 
               <div className="min-w-[50px] text-center">
                 <span className="text-xl font-bold">
-                  {product?.name === "Хонины хаа" ? `${quantity}кг` : quantity}
+                  {isBulkyMeat(product?.name) ? `${quantity}кг` : quantity}
                 </span>
               </div>
 
