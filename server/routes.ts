@@ -1310,6 +1310,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/orders/:id/status", handleUpdateOrderStatus);
   app.patch("/api/orders/:id/status", handleUpdateOrderStatus);
 
+  // Delete an order (Admin only)
+  app.delete("/api/orders/:id", authenticateAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      if (isNaN(orderId)) {
+        return res.status(400).json({ message: "Захиалгын ID буруу байна" });
+      }
+
+      // Check if order exists first
+      const order = await storage.getOrder(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Захиалга олдсонгүй" });
+      }
+
+      const success = await storage.deleteOrder(orderId);
+      if (success) {
+        res.status(200).json({ message: "Захиалга амжилттай устгагдлаа", id: orderId });
+      } else {
+        res.status(500).json({ message: "Захиалгийг устгахад алдаа гарлаа" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting order:", error);
+      res.status(500).json({ message: "Захиалгийг устгахад алдаа гарлаа" });
+    }
+  });
+
   // Bank Account routes
   app.get("/api/bank-accounts", async (req, res) => {
     try {

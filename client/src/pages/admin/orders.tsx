@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 import { useLanguage } from "@/contexts/language-context";
@@ -33,6 +33,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // SMS message templates based on order status
 const SMS_TEMPLATES: Record<string, (amount: string) => string> = {
@@ -58,6 +68,8 @@ export default function AdminOrders() {
   );
   const orderIdParam = urlParams.get("id");
 
+  const queryClient = useQueryClient();
+
   // State for filtering and order details
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -71,6 +83,9 @@ export default function AdminOrders() {
   // SMS dialog state
   const [smsDialogOpen, setSmsDialogOpen] = useState(false);
   const [smsOrder, setSmsOrder] = useState<Order | null>(null);
+
+  // Delete dialog state
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
   // Format dates for API queries
   const formatDateForQuery = (date?: Date) => {
@@ -134,6 +149,27 @@ export default function AdminOrders() {
     refetchOnWindowFocus: true, // Refetch when window gains focus
     refetchOnMount: true, // Always refetch when component mounts
     staleTime: 5000, // Consider data stale after 5 seconds
+  });
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/orders/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Амжилттай",
+        description: "Захиалга устгагдлаа.",
+      });
+      setOrderToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "Алдаа",
+        description: "Захиалга устгахад алдаа гарлаа.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Selected order for detailed view
@@ -410,13 +446,24 @@ export default function AdminOrders() {
                             {formatDate(order.createdAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Button
-                              variant="ghost"
-                              className="text-primary hover:text-primary-dark"
-                              onClick={() => handleViewOrder(order.id)}
-                            >
-                              Харах
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                className="text-primary hover:text-primary-dark"
+                                onClick={() => handleViewOrder(order.id)}
+                              >
+                                Харах
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 p-0 h-8 w-8"
+                                onClick={() => setOrderToDelete(order)}
+                                title="Устгах"
+                              >
+                                <span className="material-icons text-lg">delete</span>
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -467,9 +514,9 @@ export default function AdminOrders() {
                             <p className="text-sm font-bold">
                               {selectedOrder.createdAt
                                 ? format(
-                                    new Date(selectedOrder.createdAt),
-                                    "HH:mm",
-                                  )
+                                  new Date(selectedOrder.createdAt),
+                                  "HH:mm",
+                                )
                                 : "-"}
                             </p>
                             {selectedOrder.createdAt &&
@@ -592,7 +639,7 @@ export default function AdminOrders() {
                               <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                                 {formatPrice(
                                   parseFloat(item.price.toString()) *
-                                    item.quantity,
+                                  item.quantity,
                                 )}
                               </td>
                             </tr>
@@ -695,11 +742,10 @@ export default function AdminOrders() {
                         return (
                           <div
                             key={status}
-                            className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${
-                              smsOrder.status === status
+                            className={`p-3 rounded-lg border cursor-pointer transition-all hover:border-green-500 ${smsOrder.status === status
                                 ? "border-green-500 bg-green-50"
                                 : "border-gray-200"
-                            }`}
+                              }`}
                             onClick={() => {
                               const encodedMessage =
                                 encodeURIComponent(message);
@@ -757,6 +803,39 @@ export default function AdminOrders() {
               )}
             </DialogContent>
           </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={!!orderToDelete} onOpenChange={(open) => !open && setOrderToDelete(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Захиалга устгах</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {orderToDelete && (
+                    <>
+                      Та <strong>{formatOrderId(orderToDelete.id)}</strong> дугаартай захиалгыг устгахдаа итгэлтэй байна уу?
+                      <br />
+                      Энэ үйлдлийг буцаах боломжгүй бөгөөд захиалгын бүх мэдээлэл устах болно.
+                    </>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleteOrderMutation.isPending}>Болих</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                  disabled={deleteOrderMutation.isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (orderToDelete) {
+                      deleteOrderMutation.mutate(orderToDelete.id);
+                    }
+                  }}
+                >
+                  {deleteOrderMutation.isPending ? "Устгаж байна..." : "Устгах"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

@@ -26,14 +26,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Define our validation schema
-const ruleSchema = z.object({
-  min: z.coerce.number().min(0, { message: "0-с их байх ёстой" }),
-  max: z.coerce.number().min(0, { message: "0-с их байх ёстой" }),
-  fee: z.coerce.number().min(0, { message: "0-с их байх ёстой" }),
-});
-
 const shippingRulesSchema = z.object({
-  rules: z.array(ruleSchema),
+  fee: z.coerce.number().min(0, { message: "0-с их байх ёстой" }),
 });
 
 type ShippingRulesFormValues = z.infer<typeof shippingRulesSchema>;
@@ -66,33 +60,26 @@ export default function AdminSettings() {
   const form = useForm<ShippingRulesFormValues>({
     resolver: zodResolver(shippingRulesSchema),
     defaultValues: {
-      rules: [],
+      fee: 0,
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "rules",
   });
 
   // Update form when data loads
   useEffect(() => {
     if (shippingRulesData && shippingRulesData.length > 0) {
-      form.reset({ rules: shippingRulesData });
-    } else if (
-      shippingRulesData &&
-      shippingRulesData.length === 0 &&
-      fields.length === 0
-    ) {
-      form.reset({ rules: [{ min: 0, max: 4, fee: 5700 }] });
+      form.reset({ fee: shippingRulesData[0].fee });
+    } else if (shippingRulesData && shippingRulesData.length === 0) {
+      form.reset({ fee: 3000 }); // Default
     }
-  }, [shippingRulesData, form, fields.length]);
+  }, [shippingRulesData, form]);
 
   // Update shipping rules mutation
   const { mutate: updateShippingRules, isPending } = useMutation({
     mutationFn: async (data: ShippingRulesFormValues) => {
+      // Keep backend schema structure the same by wrapping in array for 'shipping_rules' setting
+      const rules = [{ min: 0, max: 999999, fee: data.fee }];
       return apiRequest("PUT", "/api/settings/shipping-fee", {
-        value: JSON.stringify(data.rules),
+        value: JSON.stringify(rules),
       });
     },
     onSuccess: () => {
@@ -142,13 +129,10 @@ export default function AdminSettings() {
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>
-              Хүргэлтийн төлбөрийн тохиргоо (Жингийн хамаарал)
+              Хүргэлтийн төлбөрийн тохиргоо
             </CardTitle>
             <div className="text-sm text-gray-500 mt-1">
-              Захиалга хийх үед барааны нийт жингээс хамаарч автоматаар нэмэгдэх
-              хүргэлтийн төлбөрийг тохируулна. Хэрэв сагсан дахь нийт жин
-              интервалд багтахгүй бол хамгийн дээд интервалын төлбөрийг авах
-              болно.
+              Бүх захиалгад автоматаар нэмэгдэх хүргэлтийн тогтмол төлбөрийг тохируулна.
             </div>
           </CardHeader>
           <CardContent>
@@ -163,82 +147,19 @@ export default function AdminSettings() {
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <div className="flex items-center justify-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => append({ min: 0, max: 0, fee: 0 })}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Интервал нэмэх
-                      </Button>
-                    </div>
-
-                    {fields.length === 0 && (
-                      <div className="text-center py-4 text-gray-500 border rounded-md">
-                        Жингийн интервал тохируулаагүй байна.
-                      </div>
-                    )}
-
-                    {fields.map((field, index) => (
-                      <div
-                        key={field.id}
-                        className="flex items-end gap-4 p-4 border rounded-md relative bg-gray-50/50"
-                      >
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`rules.${index}.min`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Доод жин (кг)</FormLabel>
-                                <FormControl>
-                                  <Input {...field} type="number" step="0.1" />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`rules.${index}.max`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Дээд жин (кг)</FormLabel>
-                                <FormControl>
-                                  <Input {...field} type="number" step="0.1" />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`rules.${index}.fee`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Төлбөр (₩)</FormLabel>
-                                <FormControl>
-                                  <Input {...field} type="number" step="10" />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(index)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 mb-0.5"
-                          title="Устгах"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                    <FormField
+                      control={form.control}
+                      name="fee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Төлбөр (₩)</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="number" step="10" className="max-w-xs" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <Button type="submit" disabled={isPending}>

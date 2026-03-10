@@ -53,21 +53,10 @@ export default function CartPage() {
     enabled: !isEmpty && !!user,
   });
 
-  // Calculate total weight (assuming 1 quantity = 1 kg for now)
-  const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0);
-
-  // Calculate dynamic shipping fee
+  // Calculate fixed shipping fee
   let shippingFee = 0;
   if (shippingRulesData && shippingRulesData.length > 0) {
-    const applicableRule = shippingRulesData.find(
-      (rule) => totalWeight >= rule.min && totalWeight <= rule.max,
-    );
-    if (applicableRule) {
-      shippingFee = applicableRule.fee;
-    } else {
-      const maxRule = [...shippingRulesData].sort((a, b) => b.max - a.max)[0];
-      shippingFee = maxRule ? maxRule.fee : 0;
-    }
+    shippingFee = shippingRulesData[0].fee;
   } else if (!isLoadingShippingFee) {
     shippingFee = 3000;
   }
@@ -166,12 +155,7 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Нийт жин / тоо хэмжээ:
-                  </span>
-                  <span className="font-medium">{totalWeight} кг / ширхэг</span>
-                </div>
+
               </div>
 
               <div className="border-t border-gray-100 pt-4 mb-6">

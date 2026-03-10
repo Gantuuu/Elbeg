@@ -88,8 +88,7 @@ export default function Checkout() {
     }
   }, [user, isAuthLoading, setLocation, toast]);
 
-  // Calculate total weight (assuming 1 quantity = 1 kg for now)
-  const totalWeight = items.reduce((acc, item) => acc + item.quantity, 0);
+
 
   // Fetch shipping rules from server
   const { data: shippingRulesData, isLoading: isLoadingShippingFee } = useQuery(
@@ -113,25 +112,17 @@ export default function Checkout() {
     },
   );
 
-  // Update shipping fee when data or weight changes
+  // Update shipping fee when data changes
   useEffect(() => {
     let fee = 0;
     if (shippingRulesData && shippingRulesData.length > 0) {
-      const applicableRule = shippingRulesData.find(
-        (rule) => totalWeight >= rule.min && totalWeight <= rule.max,
-      );
-      if (applicableRule) {
-        fee = applicableRule.fee;
-      } else {
-        const maxRule = [...shippingRulesData].sort((a, b) => b.max - a.max)[0];
-        fee = maxRule ? maxRule.fee : 0;
-      }
+      fee = shippingRulesData[0].fee;
     } else if (!isLoadingShippingFee) {
       fee = 3000;
     }
-    console.log(`Calculated shipping fee: ${fee} for weight: ${totalWeight}`);
+    console.log(`Calculated shipping fee: ${fee}`);
     setShippingFee(fee);
-  }, [shippingRulesData, totalWeight, isLoadingShippingFee]);
+  }, [shippingRulesData, isLoadingShippingFee]);
 
   // Fetch all bank accounts
   const { data: bankAccounts = [], isLoading: isBankAccountsLoading } =
