@@ -7,5 +7,7 @@ export type Bindings = {
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
     BASE_URL?: string;
+    ADMIN_USERNAME?: string;
+    ADMIN_PASSWORD?: string;
     ASSETS: Fetcher;
 };

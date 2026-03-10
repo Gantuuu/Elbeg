@@ -125,30 +125,54 @@ app.post('/admin/login', async (c) => {
             user = await storage.getUserByEmail(username);
         }
 
-        if (!user) {
-            return c.json({ success: false, message: "User not found" }, 401);
-        }
+        const envAdminUsername = c.env.ADMIN_USERNAME || 'admin';
+        const envAdminPassword = c.env.ADMIN_PASSWORD || 'arvijix2025';
 
-        // Verify password
-        let isValid = false;
-        try {
-            isValid = await comparePasswords(password, user.password);
-        } catch (e: any) {
-            return c.json({
-                success: false,
-                message: "Password verification crashed",
-                error: e.message
-            }, 500);
-        }
+        if (username === envAdminUsername && password === envAdminPassword) {
+            // Environment variables matched!
+            if (!user) {
+                // Auto-create in DB if doesn't exist so session works
+                const hashedPassword = await hashPassword(envAdminPassword);
+                await c.env.DB.prepare(
+                    "INSERT INTO users (username, email, password, is_admin, name, created_at) VALUES (?, ?, ?, 1, 'Admin', ?)"
+                ).bind(username, 'admin@arvijix.kr', hashedPassword, new Date().toISOString()).run();
+                user = await storage.getUserByUsername(username);
+                if (!user) {
+                    return c.json({ success: false, message: "Could not create admin user" }, 500);
+                }
+            } else if (!user.isAdmin) {
+                // Ensure they are admin in DB
+                await c.env.DB.prepare(
+                    "UPDATE users SET is_admin = 1 WHERE id = ?"
+                ).bind(user.id).run();
+                user.isAdmin = true;
+            }
+        } else {
+            if (!user) {
+                return c.json({ success: false, message: "User not found" }, 401);
+            }
 
-        if (!isValid) {
-            return c.json({ success: false, message: "Invalid password" }, 401);
-        }
+            // Verify password
+            let isValid = false;
+            try {
+                isValid = await comparePasswords(password, user.password);
+            } catch (e: any) {
+                return c.json({
+                    success: false,
+                    message: "Password verification crashed",
+                    error: e.message
+                }, 500);
+            }
 
-        // Check Admin Status
-        if (!user.isAdmin) {
-            console.log(`[Admin Login] User ${username} is not an admin`);
-            return c.json({ success: false, message: "Not authorized as admin" }, 403);
+            if (!isValid) {
+                return c.json({ success: false, message: "Invalid password" }, 401);
+            }
+
+            // Check Admin Status
+            if (!user.isAdmin) {
+                console.log(`[Admin Login] User ${username} is not an admin`);
+                return c.json({ success: false, message: "Not authorized as admin" }, 403);
+            }
         }
 
         // Set session
