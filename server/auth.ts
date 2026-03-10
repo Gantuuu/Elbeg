@@ -269,7 +269,7 @@ export function setupAuth(app: Express): void {
       passport.authenticate("google", { failureRedirect: "/auth?error=google_failed" }),
       (req, res) => {
         console.log("Google OAuth login successful");
-        res.redirect("/");
+        res.redirect("/auth/callback");
       }
     );
   } else {
