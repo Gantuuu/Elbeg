@@ -112,6 +112,24 @@ app.patch('/orders/:id/status', requireAdmin, async (c) => {
     return c.json(order);
 });
 
+app.delete('/orders/:id', requireAdmin, async (c) => {
+    const storage = c.get('storage');
+    const id = parseInt(c.req.param('id'));
+
+    // Check if order exists
+    const order = await storage.getOrder(id);
+    if (!order) {
+        return c.json({ message: "Захиалга олдсонгүй" }, 404);
+    }
+
+    const success = await storage.deleteOrder(id);
+    if (success) {
+        return c.json({ message: "Захиалга амжилттай устгагдлаа", id });
+    } else {
+        return c.json({ message: "Захиалгийг устгахад алдаа гарлаа" }, 500);
+    }
+});
+
 // Bank Accounts
 app.get('/bank-accounts', async (c) => {
     const storage = c.get('storage');

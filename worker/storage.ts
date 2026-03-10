@@ -44,6 +44,7 @@ export interface IStorage {
     getOrderWithItems(id: number): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
     createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
     updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+    deleteOrder(id: number): Promise<boolean>;
 
     // User operations
     getAllUsers(): Promise<User[]>;
@@ -518,6 +519,23 @@ export class D1Storage implements IStorage {
             .returning();
 
         return result[0];
+    }
+
+    async deleteOrder(id: number): Promise<boolean> {
+        try {
+            // First delete associated order items
+            await this.db.delete(orderItems)
+                .where(eq(orderItems.orderId, id));
+
+            // Then delete the order
+            const result = await this.db.delete(orders)
+                .where(eq(orders.id, id));
+
+            return result.meta.changes > 0;
+        } catch (error) {
+            console.error("Error deleting order:", error);
+            return false;
+        }
     }
 
     // User operations
