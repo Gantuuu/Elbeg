@@ -24,9 +24,13 @@ export default function Contact() {
       {/* Image Section */}
       <div className="flex-1 bg-white">
         <img
-          src="https://placehold.co/1200x400?text=Overview"
-          alt="Overview"
+          src="/contact.jpg"
+          alt="Компанийн танилцуулга"
           className="w-full h-auto"
+          onError={(e) => {
+            // Fallback to placeholder if contact.jpg doesn't exist
+            e.currentTarget.src = "https://placehold.co/1200x400?text=Компанийн+танилцуулга+зураг+оруулна+уу";
+          }}
         />
       </div>
 
