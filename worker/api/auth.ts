@@ -247,24 +247,135 @@ app.post('/register', async (c) => {
     }, 201);
 });
 
-// Google OAuth Skeleton Routes
-app.get('/google', (c) => {
-    // In a real implementation, you would redirect to Google's OAuth consent screen
-    // Example: const googleConsentUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${c.env.GOOGLE_CLIENT_ID}...`;
-    // return c.redirect(googleConsentUrl);
+// --- Google OAuth Implementation ---
+app.get('/auth/google', (c) => {
+    // Redirect to Google's OAuth consent screen
+    const clientId = c.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+        return c.json({ message: "Google Login is not configured. Please provide GOOGLE_CLIENT_ID." }, 501);
+    }
 
-    return c.json({
-        message: "Google Login is not yet fully configured. Please provide GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.",
-        action: "Redirect to Google Auth"
-    }, 501);
+    // Usually domain is https://arvijix.kr for production
+    const origin = (new URL(c.req.url)).origin;
+    const redirectUri = `${origin}/api/auth/google/callback`;
+
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.append('client_id', clientId);
+    authUrl.searchParams.append('redirect_uri', redirectUri);
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('scope', 'email profile');
+    authUrl.searchParams.append('access_type', 'online');
+    authUrl.searchParams.append('prompt', 'select_account');
+
+    return c.redirect(authUrl.toString());
 });
 
-app.get('/google/callback', async (c) => {
-    // This would handle the code from Google and exchange it for tokens
-    return c.json({
-        message: "Google Login callback received, but configuration is incomplete.",
-        status: "Development Phase"
-    }, 501);
+app.get('/auth/google/callback', async (c) => {
+    try {
+        const code = c.req.query('code');
+        const error = c.req.query('error');
+
+        if (error || !code) {
+            console.error("Google OAuth error or no code:", error);
+            // Redirect to frontend auth page with error
+            return c.redirect('/auth?error=google_failed');
+        }
+
+        const clientId = c.env.GOOGLE_CLIENT_ID;
+        const clientSecret = c.env.GOOGLE_CLIENT_SECRET;
+
+        // Origin for redirect URI mismatch check
+        const origin = (new URL(c.req.url)).origin;
+        const redirectUri = `${origin}/api/auth/google/callback`;
+
+        // 1. Exchange code for access token
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                code,
+                client_id: clientId || '',
+                client_secret: clientSecret || '',
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code',
+            }).toString(),
+        });
+
+        if (!tokenResponse.ok) {
+            const errBody = await tokenResponse.text();
+            console.error("Failed to exchange token:", tokenResponse.status, errBody);
+            return c.redirect('/auth?error=token_exchange_failed');
+        }
+
+        const tokenData = await tokenResponse.json() as any;
+
+        // 2. Get user profile from Google
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+            headers: {
+                Authorization: `Bearer ${tokenData.access_token}`,
+            },
+        });
+
+        if (!userResponse.ok) {
+            console.error("Failed to fetch user profile:", await userResponse.text());
+            return c.redirect('/auth?error=profile_fetch_failed');
+        }
+
+        const profile = await userResponse.json() as any;
+        const email = profile.email;
+        const googleId = profile.id;
+        const name = profile.name;
+        // profile_image is not directly saved in our DB schema currently, but available as profile.picture
+
+        if (!email) {
+            return c.redirect('/auth?error=no_email_provided');
+        }
+
+        const storage = c.get('storage');
+
+        // 3. User Resolution (Login or Register)
+        let user = await storage.getUserByGoogleId(googleId);
+
+        if (!user) {
+            user = await storage.getUserByEmail(email);
+
+            if (user) {
+                // Link account
+                user = await storage.updateUserGoogleId(user.id, googleId);
+            } else {
+                // Register new user
+                const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 6);
+
+                // create random password hash
+                const randomPasswordHash = await hashPassword(crypto.randomUUID());
+
+                const newUser = await storage.createUser({
+                    username,
+                    email,
+                    password: randomPasswordHash,
+                    name: name || '',
+                    phone: null,
+                });
+                // update google id on the new user
+                user = await storage.updateUserGoogleId(newUser.id, googleId);
+            }
+        }
+
+        // 4. Create Session
+        if (user) {
+            await setUserSession(c, user.id);
+            // Redirect to home or callback page on success
+            return c.redirect('/');
+        } else {
+            return c.redirect('/auth?error=user_creation_failed');
+        }
+
+    } catch (e: any) {
+        console.error("Error in Google Auth Callback:", e);
+        return c.redirect('/auth?error=internal_auth_error');
+    }
 });
 
 app.post('/logout', async (c) => {
