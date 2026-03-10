@@ -73,7 +73,7 @@ export default function AdminLogin() {
 
     try {
       // API Login
-      const user = await apiRequest("POST", "/api/login", {
+      const user = await apiRequest("POST", "/api/admin/login", {
         username: data.email, // Use email as username for now or update API to accept email
         password: data.password,
       });
