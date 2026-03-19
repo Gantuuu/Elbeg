@@ -21,24 +21,32 @@ export function calculateDeliveryDate(
 ): Date {
   const { cutoffHour, cutoffMinute, processingDays } = settings;
 
+  let effectiveTime = new Date(currentTime);
+
+  // If order is placed on a weekend, treat it as if it was placed on Monday before cutoff
+  // so that it ships out on Monday.
+  if (effectiveTime.getDay() === 6) { // Saturday
+    effectiveTime = addDays(effectiveTime, 2);
+    effectiveTime = setHours(effectiveTime, cutoffHour - 1);
+  } else if (effectiveTime.getDay() === 0) { // Sunday
+    effectiveTime = addDays(effectiveTime, 1);
+    effectiveTime = setHours(effectiveTime, cutoffHour - 1);
+  }
+
   const cutoffTime = setMinutes(
-    setHours(currentTime, cutoffHour),
+    setHours(effectiveTime, cutoffHour),
     cutoffMinute,
   );
 
   let deliveryDate: Date;
 
-  if (currentTime < cutoffTime) {
-    deliveryDate = addDays(currentTime, processingDays);
+  if (effectiveTime < cutoffTime) {
+    deliveryDate = addDays(effectiveTime, processingDays);
   } else {
-    deliveryDate = addDays(currentTime, processingDays + 1);
+    deliveryDate = addDays(effectiveTime, processingDays + 1);
   }
 
-  while (
-    isNonDeliveryDay(deliveryDate, nonDeliveryDays) ||
-    deliveryDate.getDay() === 0 || // Sunday
-    deliveryDate.getDay() === 6    // Saturday
-  ) {
+  while (isNonDeliveryDay(deliveryDate, nonDeliveryDays)) {
     deliveryDate = addDays(deliveryDate, 1);
   }
 
