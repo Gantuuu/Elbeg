@@ -34,7 +34,11 @@ export function calculateDeliveryDate(
     deliveryDate = addDays(currentTime, processingDays + 1);
   }
 
-  while (isNonDeliveryDay(deliveryDate, nonDeliveryDays)) {
+  while (
+    isNonDeliveryDay(deliveryDate, nonDeliveryDays) ||
+    deliveryDate.getDay() === 0 || // Sunday
+    deliveryDate.getDay() === 6    // Saturday
+  ) {
     deliveryDate = addDays(deliveryDate, 1);
   }
 
