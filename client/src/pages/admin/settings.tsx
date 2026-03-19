@@ -69,7 +69,7 @@ export default function AdminSettings() {
     if (shippingRulesData && shippingRulesData.length > 0) {
       form.reset({ fee: shippingRulesData[0].fee });
     } else if (shippingRulesData && shippingRulesData.length === 0) {
-      form.reset({ fee: 3000 }); // Default
+      form.reset({ fee: 6000 }); // Default
     }
   }, [shippingRulesData, form]);
 

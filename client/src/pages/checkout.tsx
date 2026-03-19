@@ -118,7 +118,7 @@ export default function Checkout() {
     if (shippingRulesData && shippingRulesData.length > 0) {
       fee = shippingRulesData[0].fee;
     } else if (!isLoadingShippingFee) {
-      fee = 3000;
+      fee = 6000;
     }
     console.log(`Calculated shipping fee: ${fee}`);
     setShippingFee(fee);

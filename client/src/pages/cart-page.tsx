@@ -58,7 +58,7 @@ export default function CartPage() {
   if (shippingRulesData && shippingRulesData.length > 0) {
     shippingFee = shippingRulesData[0].fee;
   } else if (!isLoadingShippingFee) {
-    shippingFee = 3000;
+    shippingFee = 6000;
   }
 
   // Calculate final total price

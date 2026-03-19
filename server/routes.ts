@@ -846,12 +846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!setting) {
         // Create default shipping rules setting if it doesn't exist
         const defaultRules = JSON.stringify([
-          { min: 0, max: 4, fee: 5700 },
-          { min: 5, max: 8, fee: 6200 },
-          { min: 9, max: 11, fee: 6700 },
-          { min: 12, max: 14, fee: 8000 },
-          { min: 15, max: 18, fee: 9500 },
-          { min: 18, max: 9999, fee: 9500 }
+          { min: 0, max: 999999, fee: 6000 }
         ]);
         const newSetting = await storage.createSiteSetting({
           key: "shipping_rules",
