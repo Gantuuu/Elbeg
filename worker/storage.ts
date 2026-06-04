@@ -408,29 +408,29 @@ export class D1Storage implements IStorage {
             const order = orderMap.get(row.orderId)!;
 
             // Only add item if it exists (left join might have null values)
-            if (row.itemId && row.productId && row.productName) {
+            if (row.itemId) {
                 order.items.push({
-                    id: row.itemId!,
+                    id: row.itemId,
                     orderId: row.itemOrderId!,
                     productId: row.itemProductId!,
                     quantity: row.itemQuantity!,
                     price: row.itemPrice!,
                     product: {
-                        id: row.productId!,
-                        name: row.productName!,
+                        id: row.productId || row.itemProductId!,
+                        name: row.productName || `Устгагдсан бүтээгдэхүүн (ID: ${row.itemProductId})`,
                         description: row.productDescription || '',
                         nameRu: null,
                         nameEn: null,
                         descriptionRu: null,
                         descriptionEn: null,
-                        category: row.productCategory!,
-                        price: row.productPrice!,
+                        category: row.productCategory || 'Unknown',
+                        price: row.productPrice || row.itemPrice!,
                         imageUrl: row.productImageUrl || '',
                         thumbnailUrl: row.productThumbnailUrl || null,
-                        stock: row.productStock!,
+                        stock: row.productStock || 0,
                         minOrderQuantity: 1,
-                        storeId: row.productStoreId,
-                        createdAt: row.productCreatedAt!
+                        storeId: row.productStoreId || null,
+                        createdAt: row.productCreatedAt || new Date()
                     }
                 });
             }
@@ -458,10 +458,28 @@ export class D1Storage implements IStorage {
         const itemsWithProducts: (OrderItem & { product: Product })[] = [];
 
         for (const item of items) {
-            const product = await this.getProduct(item.productId);
-            if (product) {
-                itemsWithProducts.push({ ...item, product });
+            let product = await this.getProduct(item.productId);
+            if (!product) {
+                // Fallback for deleted/missing product
+                product = {
+                    id: item.productId,
+                    name: `Устгагдсан бүтээгдэхүүн (ID: ${item.productId})`,
+                    nameRu: null,
+                    nameEn: null,
+                    description: 'Deleted Product',
+                    descriptionRu: null,
+                    descriptionEn: null,
+                    category: 'Unknown',
+                    price: item.price,
+                    imageUrl: '',
+                    thumbnailUrl: null,
+                    stock: 0,
+                    minOrderQuantity: 1,
+                    storeId: null,
+                    createdAt: new Date()
+                };
             }
+            itemsWithProducts.push({ ...item, product });
         }
 
         return { ...order, items: itemsWithProducts };

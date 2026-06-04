@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
-import { formatOrderId, formatPrice, formatDate } from "@/lib/utils";
+import { formatOrderId, formatPrice, formatDate, isBulkyMeat } from "@/lib/utils";
 import { ORDER_STATUSES } from "@/lib/constants";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -638,8 +638,9 @@ export default function AdminOrders() {
                               </td>
                               <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                                 {formatPrice(
-                                  parseFloat(item.price.toString()) *
-                                  item.quantity,
+                                  isBulkyMeat(item.product.name)
+                                    ? parseFloat(item.price.toString()) * (item.quantity / 4)
+                                    : parseFloat(item.price.toString()) * item.quantity,
                                 )}
                               </td>
                             </tr>
