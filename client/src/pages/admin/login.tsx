@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { setAuthToken } from "@/lib/auth-token";
 import { useToast } from "@/hooks/use-toast";
 import { logMobileCookieDebug } from "@/utils/cookieUtils";
 import {
@@ -79,6 +80,9 @@ export default function AdminLogin() {
       });
 
       // apiRequest handles response parsing, so 'user' is already the data
+
+      // 네이티브 앱: 응답의 토큰을 저장 (이후 요청에 Authorization 헤더로 첨부됨)
+      setAuthToken(user?.token);
 
       // Add to React Query cache so the AdminRoute wrapper knows we are authenticated
       queryClient.setQueryData(["/api/user"], user);

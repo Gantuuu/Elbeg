@@ -4,6 +4,7 @@ import { Bindings } from '../types';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage, IStorage } from '../storage';
 import { hashPassword, comparePasswords } from '../utils';
+import { signToken } from '../token';
 // import { sendWelcomeEmail } from '../../server/email'; // Removed currently incompatible import
 // validated: server/email uses nodemailer which uses 'net' etc. Might work with nodejs_compat.
 // If it fails, we'll need to stub it or use an email service API (MailChannels is standard for Cloudflare).
@@ -90,12 +91,13 @@ app.post('/login', async (c) => {
             }, 401);
         }
 
-        // Set session
+        // Set session (cookie for web) + token (for native app)
         await setUserSession(c, user.id);
+        const token = await signToken(user.id, c.env.SESSION_SECRET || 'gerinmah-secret-key');
 
-        // Return user without password
+        // Return user without password + auth token
         const { password: _, ...userWithoutPassword } = user as UserWithNullablePhone;
-        return c.json(userWithoutPassword);
+        return c.json({ ...userWithoutPassword, token });
     } catch (error: any) {
         console.error('[Login] Unexpected error:', error);
         return c.json({
@@ -180,12 +182,13 @@ app.post('/admin/login', async (c) => {
             }
         }
 
-        // Set session
+        // Set session (cookie for web) + token (for native app)
         await setUserSession(c, user.id);
+        const token = await signToken(user.id, c.env.SESSION_SECRET || 'gerinmah-secret-key');
 
-        // Return user without password
+        // Return user without password + auth token
         const { password: _, ...userWithoutPassword } = user as UserWithNullablePhone;
-        return c.json(userWithoutPassword);
+        return c.json({ ...userWithoutPassword, token });
     } catch (error: any) {
         console.error('[Admin Login] Unexpected error:', error);
         return c.json({
@@ -236,8 +239,9 @@ app.post('/register', async (c) => {
         phone: body.phone || null,
     });
 
-    // Login
+    // Login (cookie for web) + token (for native app)
     await setUserSession(c, newUser.id);
+    const token = await signToken(newUser.id, c.env.SESSION_SECRET || 'gerinmah-secret-key');
 
     const { password: _, ...userWithoutPassword } = newUser as UserWithNullablePhone;
 
@@ -248,6 +252,7 @@ app.post('/register', async (c) => {
     return c.json({
         success: true,
         user: userWithoutPassword,
+        token,
         message: "Бүртгэл амжилттай үүсгэгдлээ"
     }, 201);
 });

@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { User, loginSchema, signupSchema } from "@shared/schema";
 import { queryClient } from "../lib/queryClient";
+import { setAuthToken, clearAuthToken } from "../lib/auth-token";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
 import { z } from "zod";
@@ -70,6 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (user) => {
+      // 네이티브 앱: 응답의 토큰 저장 (이후 요청에 Authorization 헤더로 첨부)
+      setAuthToken((user as any)?.token);
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: t.toast.loginSuccess,
@@ -99,8 +102,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(error.message || "Registration failed");
       }
 
-      const result = (await res.json()) as { user: User; message?: string };
-      return result.user; // API returns { success: true, user: ..., message: ... }
+      const result = (await res.json()) as {
+        user: User;
+        token?: string;
+        message?: string;
+      };
+      // 네이티브 앱: 응답의 토큰 저장
+      setAuthToken(result.token);
+      return result.user; // API returns { success: true, user: ..., token: ..., message: ... }
     },
     onSuccess: (user) => {
       queryClient.setQueryData(["/api/user"], user);
@@ -125,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error("Logout failed");
     },
     onSuccess: () => {
+      clearAuthToken();
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
       toast({
