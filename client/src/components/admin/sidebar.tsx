@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { clearAuthToken } from "@/lib/auth-token";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderNotifications } from "@/hooks/use-order-notifications";
 import { Menu, X } from "lucide-react";
 
 export function AdminSidebar() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -34,13 +35,15 @@ export function AdminSidebar() {
   const handleLogout = async () => {
     try {
       await apiRequest("POST", "/api/admin/logout", {});
-      window.location.href = "/admin/login";
     } catch (error) {
-      toast({
-        title: "Гарах үед алдаа гарлаа",
-        description: "Дахин оролдоно уу.",
-        variant: "destructive",
-      });
+      // 서버 호출이 실패해도 로컬 세션은 정리한다
+      console.error("Admin logout API error:", error);
+    } finally {
+      // 토큰(앱)·쿠키(웹) 모두 정리 후 클라이언트 라우팅으로 이동 (하드 네비게이션은 앱에서 404)
+      clearAuthToken();
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      setLocation("/admin/login");
     }
   };
 

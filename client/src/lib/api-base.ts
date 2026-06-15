@@ -29,9 +29,55 @@ function withApiOptions(init?: RequestInit): RequestInit {
   };
 }
 
+// <img src="/uploads/..."> 같은 상대경로 이미지는 fetch가 아니라 브라우저가 직접 로드하므로
+// 위 fetch 래퍼로 못 잡는다. DOM을 관찰해 /uploads·/api 이미지 src를 운영 도메인으로 바꾼다.
+function installImageRewriter(origin: string) {
+  const rewrite = (src: string | null): string | null => {
+    if (!src) return null;
+    if (src.startsWith("/uploads") || src.startsWith("/api")) return API_BASE + src;
+    if (src.startsWith(origin + "/uploads") || src.startsWith(origin + "/api")) {
+      return API_BASE + src.slice(origin.length);
+    }
+    return null; // data:, http(s):, blob:, 이미 절대경로 등은 건드리지 않음 → 무한루프 방지
+  };
+  const fixImg = (img: HTMLImageElement) => {
+    const next = rewrite(img.getAttribute("src"));
+    if (next) img.setAttribute("src", next);
+  };
+  const scan = (root: ParentNode) => {
+    root.querySelectorAll?.("img").forEach((el) => fixImg(el as HTMLImageElement));
+  };
+  const start = () => {
+    scan(document);
+    new MutationObserver((muts) => {
+      for (const m of muts) {
+        if (m.type === "attributes" && m.target instanceof HTMLImageElement) {
+          fixImg(m.target);
+        } else if (m.type === "childList") {
+          m.addedNodes.forEach((n) => {
+            if (n instanceof HTMLImageElement) fixImg(n);
+            else if (n instanceof Element) scan(n);
+          });
+        }
+      }
+    }).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["src"],
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+}
+
 if (API_BASE && typeof window !== "undefined" && typeof window.fetch === "function") {
   const nativeFetch = window.fetch.bind(window);
   const origin = window.location.origin;
+  installImageRewriter(origin);
 
   window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
     try {
