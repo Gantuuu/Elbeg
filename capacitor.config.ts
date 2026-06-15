@@ -14,6 +14,14 @@ const config: CapacitorConfig = {
     // 일부 안드로이드 웹뷰에서 쿠키 혼합 차단 방지
     allowMixedContent: false,
   },
+  plugins: {
+    SplashScreen: {
+      // 네이티브 스플래시 → 앱 로딩 사이 배경을 브랜드 색으로 (흰 화면 깜빡임 방지)
+      backgroundColor: "#3c8fb8",
+      launchAutoHide: true,
+      showSpinner: false,
+    },
+  },
 };
 
 export default config;

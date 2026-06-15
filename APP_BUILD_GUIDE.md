@@ -104,3 +104,22 @@ Android Studio가 열리면:
 >     <data android:scheme="mn.elbeg.meat" />
 > </intent-filter>
 > ```
+
+### 아이콘 / 스플래시 (브랜드 색 #3c8fb8)
+
+로고가 흰색이라 배경을 브랜드 청록색(#3c8fb8)으로 둬야 보인다. 재생성 명령:
+
+```bash
+npx @capacitor/assets generate --android \
+  --iconBackgroundColor "#3c8fb8" --iconBackgroundColorDark "#3c8fb8" \
+  --splashBackgroundColor "#3c8fb8" --splashBackgroundColorDark "#3c8fb8"
+```
+
+> ⚠️ android/ 재생성 시 `android/app/src/main/res/values/styles.xml`의
+> `AppTheme.NoActionBarLaunch`에 Android 12+ 스플래시 배경을 다시 넣어야 한다:
+>
+> ```xml
+> <item name="windowSplashScreenBackground">#3c8fb8</item>
+> <item name="android:windowSplashScreenBackground">#3c8fb8</item>
+> <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+> ```
