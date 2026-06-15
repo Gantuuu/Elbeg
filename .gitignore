@@ -4,3 +4,9 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Capacitor: 생성된 네이티브 프로젝트 (capacitor.config.ts + assets/ 로 재생성 가능)
+android/
+ios/
+*.apk
+*.aab

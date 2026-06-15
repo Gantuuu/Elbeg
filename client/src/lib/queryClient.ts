@@ -74,7 +74,9 @@ export async function apiRequest(
       body: requestData ? JSON.stringify(requestData) : undefined,
       credentials: "include", // Important for cookies/session
       cache: "no-cache", // Prevent caching issues
-      mode: "same-origin",
+      // "cors" allows cross-origin calls from the native app (origin https://localhost)
+      // to the Cloudflare API domain. Same-origin web requests still work under "cors".
+      mode: "cors",
     };
 
     console.log("Sending fetch request with options:", options);
@@ -159,7 +161,8 @@ export const getQueryFn: <T>(options: {
       headers,
       credentials: "include", // Important for cookies/session
       cache: "no-cache", // Prevent caching issues
-      mode: "same-origin",
+      // "cors" allows cross-origin calls from the native app to the Cloudflare API domain.
+      mode: "cors",
     };
 
     console.log("Query fetch options:", options);

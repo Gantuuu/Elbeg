@@ -23,17 +23,22 @@ const app = new Hono<Env>();
 async function setUserSession(c: any, userId: number) {
     const secret = c.env.SESSION_SECRET || 'gerinmah-secret-key';
     const isSecure = c.req.url.startsWith("https://");
+    // 네이티브 앱(origin https://localhost)에서 보낸 cross-site 요청에도 쿠키가 전송되도록
+    // HTTPS에서는 SameSite=None을 사용. (None은 반드시 Secure 필요 → HTTPS 전제)
+    // 로컬 개발(http)에서는 브라우저가 None+비Secure를 거부하므로 Lax로 폴백.
+    const crossSite = isSecure ? 'None' : 'Lax';
     await setSignedCookie(c, 'auth_user_id', userId.toString(), secret, {
         path: '/',
         secure: isSecure, // Only secure in HTTPS
         domain: undefined,
         httpOnly: true,
         maxAge: 30 * 24 * 60 * 60, // 30 days
-        sameSite: 'Lax',
+        sameSite: crossSite,
     });
 
     // Non-httpOnly cookie for frontend to know we're logged in (optional, matching existing behavior)
-    c.header('Set-Cookie', `sessionActive=true; Path=/; Max-Age=${60 * 60 * 24}; SameSite=Lax`, { append: true });
+    const secureAttr = isSecure ? '; Secure' : '';
+    c.header('Set-Cookie', `sessionActive=true; Path=/; Max-Age=${60 * 60 * 24}; SameSite=${crossSite}${secureAttr}`, { append: true });
 }
 
 app.post('/login', async (c) => {
