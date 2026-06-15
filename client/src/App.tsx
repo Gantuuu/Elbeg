@@ -53,7 +53,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { queryClient } from "@/lib/queryClient";
 import { installAuthDeepLinkHandler } from "@/lib/native-auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -97,7 +96,6 @@ function AppContent() {
   const { items } = useCart();
   const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   console.log("AppContent rendering immediately, isLoading:", isLoading); // Debug log
@@ -106,9 +104,9 @@ function AppContent() {
   useEffect(() => {
     const cleanup = installAuthDeepLinkHandler(
       () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-        setLocation("/");
-        toast({ title: "Амжилттай нэвтэрлээ" });
+        // 토큰은 이미 저장됨. 앱을 홈으로 새로고침하면 저장된 토큰으로
+        // /api/user를 다시 불러와 로그인 상태가 확실히 반영된다.
+        window.location.href = "/";
       },
       () => {
         toast({
