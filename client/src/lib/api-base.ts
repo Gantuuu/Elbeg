@@ -19,6 +19,7 @@ function isApiPath(path: string): boolean {
 // API 요청에 인증/CORS 옵션을 병합
 function withApiOptions(init?: RequestInit): RequestInit {
   const headers = new Headers(init?.headers || {});
+  headers.set("X-Client", "capacitor"); // 서버가 앱 요청을 식별 → 쿠키 무시, 토큰만 사용
   const token = getAuthToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   return {
@@ -107,6 +108,7 @@ if (API_BASE && typeof window !== "undefined" && typeof window.fetch === "functi
         }
         if (target) {
           const headers = new Headers(input.headers);
+          headers.set("X-Client", "capacitor");
           const token = getAuthToken();
           if (token) headers.set("Authorization", `Bearer ${token}`);
           const rebuilt = new Request(target, input);

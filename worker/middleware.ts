@@ -28,16 +28,20 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 
     const sessionSecret = c.env.SESSION_SECRET || 'gerinmah-secret-key';
 
+    // 네이티브 앱은 X-Client: capacitor 헤더를 보낸다. 이 경우 토큰만 신뢰하고 쿠키는 무시한다.
+    // (앱은 cross-site 쿠키 삭제가 불안정하므로, 로그아웃 시 토큰만 지우면 확실히 로그아웃되도록)
+    const isAppClient = c.req.header('X-Client') === 'capacitor';
+
     let userId: number | null = null;
 
-    // 1) 네이티브 앱: Authorization: Bearer <token>
+    // 1) 네이티브 앱/웹 공통: Authorization: Bearer <token>
     const authHeader = c.req.header('Authorization');
     if (authHeader && authHeader.startsWith('Bearer ')) {
         userId = await verifyToken(authHeader.slice(7), sessionSecret);
     }
 
-    // 2) 웹: 서명된 세션 쿠키 (폴백)
-    if (userId === null) {
+    // 2) 웹: 서명된 세션 쿠키 (폴백). 앱(isAppClient)에서는 쿠키 무시.
+    if (userId === null && !isAppClient) {
         const userIdCookie = await getSignedCookie(c, sessionSecret, 'auth_user_id');
         if (userIdCookie) {
             const parsed = parseInt(userIdCookie);

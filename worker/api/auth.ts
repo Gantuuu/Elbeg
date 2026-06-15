@@ -389,10 +389,17 @@ app.get('/auth/google/callback', async (c) => {
 });
 
 app.post('/logout', async (c) => {
-    deleteCookie(c, 'auth_user_id', { path: '/' });
-    deleteCookie(c, 'sessionActive', { path: '/' });
+    // 쿠키 삭제는 설정 시와 같은 속성(SameSite=None; Secure)을 맞춰야
+    // cross-site 환경(앱 origin localhost → arvijix.kr)의 WebView가 삭제용 쿠키를 받아들인다.
+    // (Hono deleteCookie는 sameSite를 안 붙여 Lax로 거부되므로 Set-Cookie를 직접 작성)
+    const isSecure = c.req.url.startsWith('https://');
+    const sameSite = isSecure ? 'None' : 'Lax';
+    const secureAttr = isSecure ? '; Secure' : '';
+    const expired = 'Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    c.header('Set-Cookie', `auth_user_id=; Path=/; ${expired}; HttpOnly; SameSite=${sameSite}${secureAttr}`, { append: true });
+    c.header('Set-Cookie', `sessionActive=; Path=/; ${expired}; SameSite=${sameSite}${secureAttr}`, { append: true });
     // Also clear legacy cookies just in case
-    deleteCookie(c, 'gerinmah.sid', { path: '/' });
+    c.header('Set-Cookie', `gerinmah.sid=; Path=/; ${expired}; SameSite=${sameSite}${secureAttr}`, { append: true });
 
     return c.json({ success: true, message: "Амжилттай гарлаа" });
 });
