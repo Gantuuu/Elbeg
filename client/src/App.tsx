@@ -53,6 +53,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { queryClient } from "@/lib/queryClient";
+import { installAuthDeepLinkHandler } from "@/lib/native-auth";
+import { useToast } from "@/hooks/use-toast";
 
 // Define type for the auth response
 interface AuthCheckResponse {
@@ -94,8 +97,29 @@ function AppContent() {
   const { items } = useCart();
   const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   console.log("AppContent rendering immediately, isLoading:", isLoading); // Debug log
+
+  // 네이티브 앱: 구글 로그인 딥링크(mn.elbeg.meat://auth?token=...) 수신 처리
+  useEffect(() => {
+    const cleanup = installAuthDeepLinkHandler(
+      () => {
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        setLocation("/");
+        toast({ title: "Амжилттай нэвтэрлээ" });
+      },
+      () => {
+        toast({
+          title: "Google нэвтрэлт амжилтгүй",
+          variant: "destructive",
+        });
+      },
+    );
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 

@@ -78,3 +78,29 @@ Android Studio가 열리면:
 
 저장소에 `.env`, `cookies.txt`, `login.json` 등 민감 파일이 커밋되어 있습니다.
 출시 전 키 교체 및 git 기록 정리를 권장합니다.
+
+## 7. 인증 구조 (앱)
+
+앱은 쿠키 대신 **토큰 인증**을 쓴다 (origin `https://localhost` → `arvijix.kr` cross-site).
+- 로그인 응답의 토큰을 localStorage에 저장, 모든 API 요청에 `Authorization: Bearer` + `X-Client: capacitor` 헤더 첨부.
+- 서버는 `X-Client: capacitor`면 쿠키를 무시하고 토큰만 사용 → 로그아웃이 확실히 동작.
+- 웹(Cloudflare Pages)은 기존 쿠키 방식 그대로.
+
+### 구글 로그인 (네이티브, 딥링크)
+
+구글은 WebView 안 OAuth를 차단하므로, 시스템 브라우저(Custom Tabs)로 로그인 후
+딥링크 `mn.elbeg.meat://auth?token=...` 로 앱에 복귀한다. 기존 구글 OAuth 클라이언트를
+재사용하므로 Google Cloud Console 추가 설정은 불필요.
+
+> ⚠️ **android/ 는 .gitignore 처리됨.** 만약 `npx cap add android`로 네이티브 프로젝트를
+> 다시 생성하면 아래 딥링크 intent-filter를 `android/app/src/main/AndroidManifest.xml`의
+> `.MainActivity` 안에 다시 넣어야 한다:
+>
+> ```xml
+> <intent-filter>
+>     <action android:name="android.intent.action.VIEW" />
+>     <category android:name="android.intent.category.DEFAULT" />
+>     <category android:name="android.intent.category.BROWSABLE" />
+>     <data android:scheme="mn.elbeg.meat" />
+> </intent-filter>
+> ```

@@ -269,6 +269,9 @@ app.get('/auth/google', (c) => {
     const origin = (new URL(c.req.url)).origin;
     const redirectUri = `${origin}/api/auth/google/callback`;
 
+    // 네이티브 앱은 ?client=app 으로 호출 → state로 전달해 콜백에서 딥링크로 복귀시킨다
+    const client = c.req.query('client');
+
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.append('client_id', clientId);
     authUrl.searchParams.append('redirect_uri', redirectUri);
@@ -276,19 +279,27 @@ app.get('/auth/google', (c) => {
     authUrl.searchParams.append('scope', 'email profile');
     authUrl.searchParams.append('access_type', 'online');
     authUrl.searchParams.append('prompt', 'select_account');
+    authUrl.searchParams.append('state', client === 'app' ? 'app' : 'web');
 
     return c.redirect(authUrl.toString());
 });
 
 app.get('/auth/google/callback', async (c) => {
+    // 앱 플로우 여부 (auth/google에서 넣은 state). 앱이면 결과를 딥링크로 돌려준다.
+    const isApp = c.req.query('state') === 'app';
+    const APP_SCHEME = 'mn.elbeg.meat';
+    const fail = (reason: string) =>
+        isApp
+            ? c.redirect(`${APP_SCHEME}://auth?error=${encodeURIComponent(reason)}`)
+            : c.redirect(`/auth?error=${reason}`);
+
     try {
         const code = c.req.query('code');
         const error = c.req.query('error');
 
         if (error || !code) {
             console.error("Google OAuth error or no code:", error);
-            // Redirect to frontend auth page with error
-            return c.redirect('/auth?error=google_failed');
+            return fail('google_failed');
         }
 
         const clientId = c.env.GOOGLE_CLIENT_ID;
@@ -316,7 +327,7 @@ app.get('/auth/google/callback', async (c) => {
         if (!tokenResponse.ok) {
             const errBody = await tokenResponse.text();
             console.error("Failed to exchange token:", tokenResponse.status, errBody);
-            return c.redirect('/auth?error=token_exchange_failed');
+            return fail('token_exchange_failed');
         }
 
         const tokenData = await tokenResponse.json() as any;
@@ -330,7 +341,7 @@ app.get('/auth/google/callback', async (c) => {
 
         if (!userResponse.ok) {
             console.error("Failed to fetch user profile:", await userResponse.text());
-            return c.redirect('/auth?error=profile_fetch_failed');
+            return fail('profile_fetch_failed');
         }
 
         const profile = await userResponse.json() as any;
@@ -340,7 +351,7 @@ app.get('/auth/google/callback', async (c) => {
         // profile_image is not directly saved in our DB schema currently, but available as profile.picture
 
         if (!email) {
-            return c.redirect('/auth?error=no_email_provided');
+            return fail('no_email_provided');
         }
 
         const storage = c.get('storage');
@@ -376,15 +387,20 @@ app.get('/auth/google/callback', async (c) => {
         // 4. Create Session
         if (user) {
             await setUserSession(c, user.id);
+            if (isApp) {
+                // 앱: 토큰을 딥링크로 전달 → 앱이 받아서 저장
+                const token = await signToken(user.id, c.env.SESSION_SECRET || 'gerinmah-secret-key');
+                return c.redirect(`${APP_SCHEME}://auth?token=${encodeURIComponent(token)}`);
+            }
             // Redirect to home or callback page on success
             return c.redirect('/');
         } else {
-            return c.redirect('/auth?error=user_creation_failed');
+            return fail('user_creation_failed');
         }
 
     } catch (e: any) {
         console.error("Error in Google Auth Callback:", e);
-        return c.redirect('/auth?error=internal_auth_error');
+        return fail('internal_auth_error');
     }
 });
 

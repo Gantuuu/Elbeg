@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
+import { loginWithGoogle } from "@/lib/native-auth";
 import { Redirect } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -230,9 +231,7 @@ export default function AuthPage() {
                       type="button"
                       variant="outline"
                       className="w-full border-gray-300 hover:bg-gray-50 text-gray-700 font-medium h-11 flex items-center justify-center gap-2"
-                      onClick={() =>
-                        (window.location.href = "/api/auth/google")
-                      }
+                      onClick={() => loginWithGoogle()}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
