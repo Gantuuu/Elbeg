@@ -28,9 +28,10 @@ import {
   DeliverySettings,
   NonDeliveryDay,
 } from "@/lib/delivery-date";
-import { Truck, Star, MessageSquare } from "lucide-react";
+import { Truck, Star, MessageSquare, ShoppingCart } from "lucide-react";
 import { Review } from "@shared/schema";
 import { getFullImageUrl } from "@/lib/image-utils";
+import { isDesignPreview } from "@/lib/design-preview";
 
 export default function HomePage() {
   const [location, setLocation] = useLocation();
@@ -56,8 +57,9 @@ export default function HomePage() {
 
   // Fetch featured products
   const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
-    queryKey: ["products"],
+    queryKey: [isDesignPreview ? "design-preview-products" : "products"],
     queryFn: async () => {
+      if (isDesignPreview) return (await import("@/lib/design-preview-data")).previewProducts;
       return await apiRequest("GET", "/api/products");
     },
     staleTime: 2 * 60 * 1000,
@@ -66,6 +68,7 @@ export default function HomePage() {
   // Fetch delivery settings and non-delivery days
   const { data: deliverySettings } = useQuery<DeliverySettings>({
     queryKey: ["delivery-settings"],
+    enabled: !isDesignPreview,
     queryFn: async () => {
       return await apiRequest("GET", "/api/delivery-settings");
     },
@@ -74,6 +77,7 @@ export default function HomePage() {
 
   const { data: nonDeliveryDays = [] } = useQuery<NonDeliveryDay[]>({
     queryKey: ["non-delivery-days"],
+    enabled: !isDesignPreview,
     queryFn: async () => {
       return await apiRequest("GET", "/api/non-delivery-days");
     },
@@ -91,8 +95,9 @@ export default function HomePage() {
 
   // Fetch product categories from category management
   const { data: productCategories = [] } = useQuery<any[]>({
-    queryKey: ["categories"],
+    queryKey: [isDesignPreview ? "design-preview-categories" : "categories"],
     queryFn: async () => {
+      if (isDesignPreview) return (await import("@/lib/design-preview-data")).previewCategories;
       const response = await fetch("/api/categories");
       if (!response.ok) throw new Error("Failed to fetch categories");
       return await response.json();
@@ -175,6 +180,10 @@ export default function HomePage() {
   // Memoize event handlers
   const handleAddToCartClick = useCallback(
     (product: Product) => {
+      if (isDesignPreview) {
+        toast({ title: "Загварын урьдчилсан харагдац", description: "Туршилтын бүтээгдэхүүн. Сагсанд нэмэгдэхгүй, бодит захиалга үүсэхгүй." });
+        return;
+      }
       if (!user) {
         toast({
           title: t.toast.loginRequired,
@@ -188,7 +197,7 @@ export default function HomePage() {
       setSelectedProduct(product);
       setIsQuantityModalOpen(true);
     },
-    [user, toast, setLocation],
+    [user, toast, setLocation, t],
   );
 
   const handleCloseModal = useCallback(() => {
@@ -219,7 +228,7 @@ export default function HomePage() {
   }, [nonDeliveryDays]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="storefront min-h-screen flex flex-col">
       <Navbar />
 
       {/* Non-delivery Days Warning Banner */}
@@ -252,6 +261,224 @@ export default function HomePage() {
       <main className="flex-grow">
         <Hero />
 
+        {/* Featured Products Section */}
+        <section id="products" className="catalog-section py-10 md:py-16">
+          <div className="container mx-auto px-6">
+            <motion.div
+              className="catalog-heading mb-7"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight mb-3">
+                {t.featuredProducts}
+              </h2>
+              <p className="text-slate-500 max-w-2xl text-sm md:text-base">
+                {t.featuredProductsDesc}
+              </p>
+            </motion.div>
+
+            {/* Category Pills - Below title */}
+            <div className="category-bar sticky top-0 z-40 mb-7 -mx-6 px-6">
+              <div className="py-3">
+                <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                  <button
+                    aria-pressed={selectedCategory === "all"} onClick={() => setSelectedCategory("all")}
+                    className={`category-pill shrink-0 px-5 py-2.5 rounded-full font-medium transition-colors flex items-center justify-center ${
+                      selectedCategory === "all"
+                        ? "bg-[#3c8fb8] text-white"
+                        : "bg-white text-slate-600 border border-slate-200 hover:border-[#3c8fb8]"
+                    }`}
+                  >
+                    <span className="font-bold text-center text-xs md:text-sm leading-tight">
+                      {t.categories.all}
+                    </span>
+                  </button>
+
+                  {/* Dynamic categories from API */}
+                  {Array.isArray(productCategories) &&
+                    productCategories
+                      .filter((cat: any) => cat.isActive !== false)
+                      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                      .map((category: any) => (
+                        <button
+                          key={category.id}
+                          aria-pressed={selectedCategory === category.name}
+                          onClick={() => setSelectedCategory(category.name)}
+                          className={`category-pill shrink-0 px-5 py-2.5 rounded-full font-medium transition-colors flex items-center justify-center ${
+                            selectedCategory === category.name
+                              ? "bg-[#3c8fb8] text-white"
+                              : "bg-white text-slate-600 border border-slate-200 hover:border-[#3c8fb8]"
+                          }`}
+                        >
+                          <span className="font-bold text-center text-xs md:text-sm leading-tight">
+                            {category.name}
+                          </span>
+                        </button>
+                      ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Product display section */}
+            <div className="mb-10">
+              {productsLoading ? (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
+                  {Array(8)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse"
+                      >
+                        <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
+                        <div className="p-3 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-full"></div>
+                          <div className="flex justify-between items-center pt-2">
+                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-8 bg-gray-200 rounded w-16"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : displayedProducts.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
+                    {displayedProducts.map((product, index) => (
+                      <motion.div
+                        key={product.id}
+                        className="catalog-card bg-white overflow-hidden h-full flex flex-col"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                      >
+                        <Link href={isDesignPreview ? "#products" : `/products/${product.id}`} onClick={isDesignPreview ? (event) => { event.preventDefault(); handleAddToCartClick(product); } : undefined} className="product-image aspect-square relative block overflow-hidden bg-slate-100">
+                          <img
+                            src={getFullImageUrl(
+                              product.thumbnailUrl || product.imageUrl,
+                            )}
+                            alt={getLocalizedProductName(product, language)}
+                            className="w-full h-full object-cover transition-opacity duration-300"
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (
+                                parent &&
+                                !parent.querySelector(".fallback-bg")
+                              ) {
+                                const fallback = document.createElement("div");
+                                fallback.className =
+                                  "fallback-bg absolute inset-0 bg-[#3c8fb8] flex items-center justify-center";
+                                fallback.innerHTML = `<span class="text-white font-bold text-xs text-center px-2">${product.name}</span>`;
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                          />
+
+                          {/* Description Badge */}
+                          {product.description && (
+                            <div className="absolute bottom-2 right-2 max-w-[calc(100%-16px)]">
+                              <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full text-right ml-auto w-fit">
+                                <span className="block truncate">
+                                  {getLocalizedProductDescription(
+                                    product,
+                                    language,
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </Link>
+
+                        <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                          <h3 className="font-bold text-sm sm:text-base mb-2 line-clamp-2 text-slate-900">
+                            {getLocalizedProductName(product, language)}
+                          </h3>
+
+                          <div className="mt-auto space-y-2">
+                            {/* Price display - centered */}
+                            <div className="text-left">
+                              <span className="font-extrabold text-lg sm:text-xl text-[#3c8fb8]">
+                                {(() => {
+                                  const price = parseFloat(
+                                    product.price.toString(),
+                                  );
+
+                                  // Display the price as stored (already calculated for packages)
+                                  return `${price.toLocaleString()}₩`;
+                                })()}
+                              </span>
+                            </div>
+
+                            {/* Cart button - full width and centered */}
+                            <Button
+                              size="sm"
+                              className="w-full rounded-full border border-[#3c8fb8]/30 bg-white hover:bg-[#3c8fb8] text-[#287397] hover:text-white h-10 text-xs sm:text-sm font-semibold transition-colors"
+                              onClick={() => handleAddToCartClick(product)}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-1" aria-hidden="true" />{t.addToCart}
+                            </Button>
+
+                            {/* Delivery date badge - mobile optimized */}
+                            {isDesignPreview ? <div className="flex items-center gap-1 py-1 text-[10px] sm:text-xs text-slate-500"><Truck className="h-3 w-3 shrink-0" aria-hidden="true" /><span>Хүргэлтийн мэдээлэл · Жишээ</span></div> : deliveryDate && (
+                              <div
+                                className="flex flex-col items-start justify-center text-slate-500 text-[10px] sm:text-xs py-1"
+                                data-testid={`delivery-badge-${product.id}`}
+                              >
+                                <div className="flex items-center gap-0.5 sm:gap-1">
+                                  <Truck className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                                  <span>
+                                    {formatDeliveryDate(deliveryDate, language)}
+                                  </span>
+                                </div>
+                                <span>{getDeliveryMessage(language)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Load More Indicator */}
+                  {displayedCount < filteredProducts.length && (
+                    <div className="text-center mt-8">
+                      <div className="inline-flex items-center gap-2 text-gray-500">
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#3c8fb8] rounded-full animate-spin"></div>
+                        {t.loading}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                    <span className="material-icons text-gray-400 text-3xl">
+                      inventory_2
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">
+                    Бүтээгдэхүүн олдсонгүй
+                  </h3>
+                  <p className="text-gray-500 max-w-md mx-auto mb-4">
+                    Таны сонгосон ангилалд одоогоор бүтээгдэхүүн байхгүй байна.
+                  </p>
+                  <Button
+                    onClick={() => setSelectedCategory("all")}
+                    className="bg-[#3c8fb8] text-white"
+                  >
+                    Бүх бүтээгдэхүүн үзэх
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
         {/* Reviews Section */}
         {reviewsData.length > 0 && (
           <section className="py-8 bg-gray-50">
@@ -346,223 +573,6 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* Featured Products Section */}
-        <section className="py-12 md:py-16">
-          <div className="container mx-auto px-6">
-            <motion.div
-              className="text-center mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                {t.featuredProducts}
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-                {t.featuredProductsDesc}
-              </p>
-            </motion.div>
-
-            {/* Category Pills - Below title */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 z-40 shadow-sm mb-8 -mx-6 px-6">
-              <div className="py-3">
-                <div className="flex flex-wrap gap-2 justify-center pb-2">
-                  <button
-                    onClick={() => setSelectedCategory("all")}
-                    className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${
-                      selectedCategory === "all"
-                        ? "bg-[#3c8fb8] text-white"
-                        : "bg-gray-100/80 text-gray-700"
-                    }`}
-                  >
-                    <span className="font-bold text-center text-xs md:text-sm leading-tight">
-                      {t.categories.all}
-                    </span>
-                  </button>
-
-                  {/* Dynamic categories from API */}
-                  {Array.isArray(productCategories) &&
-                    productCategories
-                      .filter((cat: any) => cat.isActive !== false)
-                      .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
-                      .map((category: any) => (
-                        <button
-                          key={category.id}
-                          onClick={() => setSelectedCategory(category.name)}
-                          className={`px-3 py-2 rounded-full font-medium transition-colors flex items-center justify-center ${
-                            selectedCategory === category.name
-                              ? "bg-[#3c8fb8] text-white"
-                              : "bg-gray-100/80 text-gray-700"
-                          }`}
-                        >
-                          <span className="font-bold text-center text-xs md:text-sm leading-tight">
-                            {category.name}
-                          </span>
-                        </button>
-                      ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Product display section */}
-            <div className="mb-10 max-w-4xl mx-auto">
-              {productsLoading ? (
-                <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  {Array(8)
-                    .fill(0)
-                    .map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse"
-                      >
-                        <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
-                        <div className="p-3 space-y-2">
-                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                          <div className="h-3 bg-gray-200 rounded w-full"></div>
-                          <div className="flex justify-between items-center pt-2">
-                            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                            <div className="h-8 bg-gray-200 rounded w-16"></div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : displayedProducts.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-2 gap-4 md:gap-6">
-                    {displayedProducts.map((product, index) => (
-                      <motion.div
-                        key={product.id}
-                        className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                      >
-                        <div className="aspect-square relative overflow-hidden bg-gray-50">
-                          <img
-                            src={getFullImageUrl(
-                              product.thumbnailUrl || product.imageUrl,
-                            )}
-                            alt={getLocalizedProductName(product, language)}
-                            className="w-full h-full object-cover transition-opacity duration-300"
-                            loading="lazy"
-                            decoding="async"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = "none";
-                              const parent = target.parentElement;
-                              if (
-                                parent &&
-                                !parent.querySelector(".fallback-bg")
-                              ) {
-                                const fallback = document.createElement("div");
-                                fallback.className =
-                                  "fallback-bg absolute inset-0 bg-[#3c8fb8] flex items-center justify-center";
-                                fallback.innerHTML = `<span class="text-white font-bold text-xs text-center px-2">${product.name}</span>`;
-                                parent.appendChild(fallback);
-                              }
-                            }}
-                          />
-
-                          {/* Description Badge */}
-                          {product.description && (
-                            <div className="absolute bottom-2 right-2 max-w-[calc(100%-16px)]">
-                              <div className="bg-black/70 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full text-right ml-auto w-fit">
-                                <span className="block truncate">
-                                  {getLocalizedProductDescription(
-                                    product,
-                                    language,
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="p-3 flex-1 flex flex-col">
-                          <h3 className="font-bold text-sm mb-3 line-clamp-1 h-5 text-center">
-                            {getLocalizedProductName(product, language)}
-                          </h3>
-
-                          <div className="mt-auto space-y-2">
-                            {/* Price display - centered */}
-                            <div className="text-center">
-                              <span className="font-bold text-sm text-[#3c8fb8]">
-                                {(() => {
-                                  const price = parseFloat(
-                                    product.price.toString(),
-                                  );
-
-                                  // Display the price as stored (already calculated for packages)
-                                  return `${price.toLocaleString()}₩`;
-                                })()}
-                              </span>
-                            </div>
-
-                            {/* Cart button - full width and centered */}
-                            <Button
-                              size="sm"
-                              className="w-full bg-[#3c8fb8] hover:brightness-105 text-white h-8 text-xs font-medium"
-                              onClick={() => handleAddToCartClick(product)}
-                            >
-                              {t.addToCart}
-                            </Button>
-
-                            {/* Delivery date badge - mobile optimized */}
-                            {deliveryDate && (
-                              <div
-                                className="flex flex-col items-center justify-center bg-[#3c8fb8] text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg"
-                                data-testid={`delivery-badge-${product.id}`}
-                              >
-                                <div className="flex items-center gap-0.5 sm:gap-1">
-                                  <Truck className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                                  <span>
-                                    {formatDeliveryDate(deliveryDate, language)}
-                                  </span>
-                                </div>
-                                <span>{getDeliveryMessage(language)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Load More Indicator */}
-                  {displayedCount < filteredProducts.length && (
-                    <div className="text-center mt-8">
-                      <div className="inline-flex items-center gap-2 text-gray-500">
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-[#3c8fb8] rounded-full animate-spin"></div>
-                        {t.loading}
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                    <span className="material-icons text-gray-400 text-3xl">
-                      inventory_2
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">
-                    Бүтээгдэхүүн олдсонгүй
-                  </h3>
-                  <p className="text-gray-500 max-w-md mx-auto mb-4">
-                    Таны сонгосон ангилалд одоогоор бүтээгдэхүүн байхгүй байна.
-                  </p>
-                  <Button
-                    onClick={() => setSelectedCategory("all")}
-                    className="bg-[#3c8fb8] text-white"
-                  >
-                    Бүх бүтээгдэхүүн үзэх
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
       </main>
       <Footer />
       {/* Quantity Modal */}
