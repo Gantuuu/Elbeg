@@ -4,6 +4,7 @@ import { Pause, Play, Plus, Truck } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { apiRequest } from "@/lib/queryClient";
 import { getFullImageUrl } from "@/lib/image-utils";
+import { isDesignPreview } from "@/lib/design-preview";
 import { Carousel, type CarouselApi, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -28,7 +29,8 @@ function fallbackImage(event: React.SyntheticEvent<HTMLImageElement>) {
   const image = event.currentTarget;
   if (image.dataset.fallbackApplied) return;
   image.dataset.fallbackApplied = "true";
-  image.src = FALLBACK_IMAGES[0];
+  if (isDesignPreview) image.src = FALLBACK_IMAGES[0];
+  else image.style.visibility = "hidden";
 }
 
 export function Hero() {
@@ -41,7 +43,7 @@ export function Hero() {
   const [hovered, setHovered] = useState(false);
   const [pageVisible, setPageVisible] = useState(() => !document.hidden);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const { data: heroData } = useQuery<HeroSettings>({
+  const { data: heroData, isPending } = useQuery<HeroSettings>({
     queryKey: ["/api/settings/hero"],
     queryFn: () => apiRequest("GET", "/api/settings/hero"),
     staleTime: 60000,
@@ -49,6 +51,8 @@ export function Hero() {
   const slides = useMemo<HeroSlide[]>(() => {
     if (Array.isArray(heroData?.slides) && heroData.slides.length) return heroData.slides;
     if (heroData?.title || heroData?.text || heroData?.imageUrl) return [heroData];
+    // Production must never paint preview photographs while CMS data loads.
+    if (!isDesignPreview) return [];
     return [
       { title: t.heroTitle, text: t.heroSubtitle, imageUrl: FALLBACK_IMAGES[0] },
       { title: t.categories.other, text: t.featuredProductsDesc, imageUrl: FALLBACK_IMAGES[1] },
@@ -118,10 +122,18 @@ export function Hero() {
         }}>
         <Carousel setApi={setApi} opts={{ align: "center", loop: hasMultipleSlides, containScroll: false, duration: reducedMotion ? 0 : 25 }} className="hero-carousel" tabIndex={0} aria-label={t.heroTitle}>
           <CarouselContent className="hero-track" aria-live={autoplayActive ? "off" : "polite"}>
+            {slides.length === 0 && <CarouselItem className="hero-slide">
+              <div className="hero-card hero-card-placeholder" aria-busy={isPending}>
+                <div className="hero-card-copy">
+                  <span className="hero-card-badge">АРВИЖИХ МАХНЫ ДЭЛГҮҮР</span>
+                  <h1>{t.heroTitle}</h1>
+                </div>
+              </div>
+            </CarouselItem>}
             {slides.map((slide, index) => (
               <CarouselItem key={`${index}-${slide.imageUrl}`} className="hero-slide" aria-label={`${labels.slide} ${index + 1} / ${slides.length}`} aria-hidden={index !== current}>
                 <a href="#products" className="hero-card" tabIndex={index === current ? 0 : -1}>
-                  <img src={slide.imageUrl ? getFullImageUrl(slide.imageUrl) : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]} alt="" className="hero-card-image" loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} onError={fallbackImage} />
+                  {slide.imageUrl && <img src={getFullImageUrl(slide.imageUrl)} alt="" className="hero-card-image" loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} onError={fallbackImage} />}
                   <div className="hero-card-shade" aria-hidden="true" />
                   <div className="hero-card-copy">
                     <span className="hero-card-badge">АРВИЖИХ МАХНЫ ДЭЛГҮҮР</span>
@@ -151,7 +163,7 @@ export function Hero() {
                     setIsPlaying(false);
                     setGalleryOpen(false);
                   }}>
-                    <img src={slide.imageUrl ? getFullImageUrl(slide.imageUrl) : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length]} alt="" loading="lazy" onError={fallbackImage} />
+                    {slide.imageUrl && <img src={getFullImageUrl(slide.imageUrl)} alt="" loading="lazy" onError={fallbackImage} />}
                     <span><small>{String(index + 1).padStart(2, "0")}</small>{slide.title || t.heroTitle}</span>
                   </button>)}
                 </div>
