@@ -1,5 +1,6 @@
 import { Route, Switch, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
+import { AppInstallBanner } from "@/components/app-install-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider, useCart } from "@/hooks/use-cart";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
@@ -126,6 +127,7 @@ function AppContent() {
   return (
     <TooltipProvider>
       <Toaster />
+      <AppInstallBanner />
       <div className="pb-16 md:pb-0">
         {" "}
         {/* Add bottom padding for mobile nav */}

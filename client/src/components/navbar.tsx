@@ -78,22 +78,28 @@ export function Navbar() {
       : defaultNavLinks;
 
   return (
-    <header className="shadow-sm relative z-10 bg-[#3c8fb8]">
+    <header className="store-header relative z-50 bg-white border-b border-slate-100">
       {/* Top bar */}
-      <div className="h-1 bg-[#107004]"></div>
 
-      <div className="bg-[#3c8fb8]">
+
+      <div className="bg-white">
         <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex justify-between h-20">
             {/* Site Logo */}
             <div className="flex items-center space-x-4">
-              <Link href="/">
-                <div className="flex-shrink-0 flex items-center cursor-pointer">
+              <Link href="/" aria-label={t.siteTitle}>
+                <div className="flex-shrink-0 flex items-center gap-3 cursor-pointer">
                   <img
-                    src="/logo-new.png"
-                    alt={t.siteTitle}
-                    className="h-16 md:h-20 w-auto object-contain"
+                    src="/icons/app-192.png"
+                    alt=""
+                    width={48}
+                    height={48}
+                    className="h-11 w-11 md:h-12 md:w-12 rounded-xl object-contain"
                   />
+                  <span className="flex flex-col">
+                    <span className="text-lg font-extrabold tracking-tight text-[#3c8fb8]">АРВИЖИХ</span>
+                    <span className="text-[10px] leading-4 font-semibold text-slate-500">МАХНЫ ДЭЛГҮҮР</span>
+                  </span>
                 </div>
               </Link>
 
@@ -109,14 +115,14 @@ export function Navbar() {
                       "px-3 py-2 font-medium cursor-pointer transition-all duration-200 relative group",
                       location === link.href ||
                         (link.href === "/" && location === "/")
-                        ? "text-white font-bold"
-                        : "text-gray-300 hover:text-white",
+                        ? "text-[#3c8fb8] font-bold"
+                        : "text-slate-500 hover:text-[#3c8fb8]",
                     )}
                   >
                     {link.label}
                     <span
                       className={cn(
-                        "absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-200 group-hover:w-full",
+                        "absolute bottom-0 left-0 w-0 h-0.5 bg-[#3c8fb8] transition-all duration-200 group-hover:w-full",
                         (location === link.href ||
                           (link.href === "/" && location === "/")) &&
                         "w-full",
@@ -138,7 +144,7 @@ export function Navbar() {
                   <UserIcon
                     className={cn(
                       "h-5 w-5 transition-all duration-200",
-                      user ? "text-white" : "text-gray-300 hover:text-white",
+                      user ? "text-[#3c8fb8]" : "text-slate-500 hover:text-[#3c8fb8]",
                     )}
                   />
                 </div>
@@ -151,7 +157,7 @@ export function Navbar() {
                     className="p-2 rounded-full hover:bg-white/10 relative transition-all duration-200 cursor-pointer"
                     aria-label={t.cart}
                   >
-                    <ShoppingCartIcon className="h-5 w-5 text-white transition-all duration-200" />
+                    <ShoppingCartIcon className="h-5 w-5 text-[#3c8fb8] transition-all duration-200" />
                     {cartItemCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-white text-[#3c8fb8] text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm">
                         {cartItemCount}
@@ -171,10 +177,10 @@ export function Navbar() {
               {/* Mobile: Menu Button */}
               <div className="md:hidden">
                 <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  aria-label={t.menu} aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="p-2 rounded-full hover:bg-white/10 transition-all duration-200"
                 >
-                  <Menu className="h-5 w-5 text-white" />
+                  <Menu className="h-5 w-5 text-[#3c8fb8]" />
                 </button>
               </div>
             </div>
