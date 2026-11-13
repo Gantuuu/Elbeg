@@ -10,6 +10,9 @@ import { queryClient } from "./lib/queryClient";
 import { CartProvider } from "@/hooks/use-cart";
 
 import { ErrorBoundary } from "./components/ui/error-boundary";
+import { registerAppWorker } from "./lib/register-app-worker";
+
+registerAppWorker();
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>

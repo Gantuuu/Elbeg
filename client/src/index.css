@@ -223,6 +223,8 @@
   transition: color .2s, background .2s;
 }
 .app-install-dismiss:hover { background: #ffffff10; color: #fff; }
+.app-install-launch { display: flex; align-items: center; flex: 1; gap: 10px; min-width: 0; min-height: 44px; text-align: left; border-radius: 10px; }
+.app-install-launch:disabled { opacity: .65; cursor: wait; }
 .app-install-icon {
   width: 38px;
   height: 38px;
@@ -232,8 +234,8 @@
   background: #3c8fb8;
 }
 .app-install-copy { min-width: 0; flex: 1; line-height: 1.4; }
-.app-install-copy p { font-size: 11px; color: #b8cedb; }
-.app-install-copy strong { display: block; font-size: 13px; font-weight: 700; color: #fff; }
+.app-install-caption { display: block; font-size: 11px; color: #b8cedb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-install-copy strong { display: block; font-size: 13px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-install-action {
   flex-shrink: 0;
   min-height: 40px;
@@ -246,14 +248,14 @@
   font-weight: 700;
   transition: background .2s;
 }
-.app-install-action:hover { background: #e2f1f8; }
-.app-install-action:disabled { opacity: .65; cursor: wait; }
+.app-install-launch:hover .app-install-action { background: #e2f1f8; }
 .app-install-banner button:focus-visible { outline: 2px solid #87d1f5; outline-offset: 2px; }
 @media (max-width: 380px) {
   .app-install-inner { gap: 7px; padding-right: 12px; padding-left: 4px; }
   .app-install-dismiss { width: 24px; flex-basis: 24px; }
   .app-install-icon { width: 34px; height: 34px; flex-basis: 34px; }
-  .app-install-copy p { font-size: 10px; }
+  .app-install-launch { gap: 7px; }
+  .app-install-caption { font-size: 10px; }
   .app-install-copy strong { font-size: 11px; }
   .app-install-action { font-size: 11px; max-width: 116px; padding: 10px 12px; }
 }
@@ -318,6 +320,33 @@
 .category-bar { background: #f7f9faf5; backdrop-filter: blur(12px); border-bottom: 1px solid #e2e9ed; }
 .category-pill { min-height: 44px; }
 .catalog-card { border: 1px solid #e8edf0; border-radius: 18px; transition: transform .2s, box-shadow .2s; }
+.catalog-card-body { display: flex; flex: 1; flex-direction: column; min-width: 0; padding: 11px; }
+.catalog-card-title { margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #152c38; font-size: 12px; font-weight: 700; line-height: 18px; }
+.catalog-card-details { display: grid; gap: 8px; margin-top: auto; min-width: 0; }
+.catalog-card-price { display: block; color: #3c8fb8; font-size: 18px; font-weight: 800; line-height: 24px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.catalog-card-cart { min-width: 0; height: 38px; padding: 0 8px; gap: 5px; font-size: 10.5px; line-height: 1; white-space: nowrap; }
+.catalog-card .catalog-card-cart svg { width: 13px; height: 13px; flex-shrink: 0; }
+.catalog-card-cart span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.catalog-card-delivery { display: flex; align-items: center; min-width: 0; gap: 4px; color: #71808b; font-size: 9px; line-height: 15px; white-space: nowrap; }
+.catalog-card-delivery svg { width: 11px; height: 11px; flex-shrink: 0; }
+.catalog-card-delivery span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 380px) {
+  .catalog-card-body { padding: 10px; }
+  .catalog-card-cart { padding: 0 6px; gap: 4px; font-size: 10px; }
+  .catalog-card .catalog-card-cart svg { width: 12px; height: 12px; }
+}
+@media (min-width: 480px) {
+  .catalog-card-body { padding: 13px; }
+  .catalog-card-title { font-size: 14px; line-height: 20px; }
+  .catalog-card-cart { height: 40px; font-size: 12px; }
+  .catalog-card-delivery { font-size: 10px; }
+}
+@media (min-width: 768px) {
+  .catalog-card-body { padding: 16px; }
+  .catalog-card-title { font-size: 15px; line-height: 22px; }
+  .catalog-card-price { font-size: 20px; line-height: 26px; }
+  .catalog-card-delivery { font-size: 11px; }
+}
 .catalog-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px #193f5010; }
 .product-image img { transition: transform .4s; }
 .product-image:hover img { transform: scale(1.04); }

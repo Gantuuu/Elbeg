@@ -395,15 +395,15 @@ export default function HomePage() {
                           )}
                         </Link>
 
-                        <div className="p-3 sm:p-4 flex-1 flex flex-col">
-                          <h3 className="font-bold text-sm sm:text-base mb-2 line-clamp-2 text-slate-900">
+                        <div className="catalog-card-body">
+                          <h3 className="catalog-card-title" title={getLocalizedProductName(product, language)}>
                             {getLocalizedProductName(product, language)}
                           </h3>
 
-                          <div className="mt-auto space-y-2">
+                          <div className="catalog-card-details">
                             {/* Price display - centered */}
                             <div className="text-left">
-                              <span className="font-extrabold text-lg sm:text-xl text-[#3c8fb8]">
+                              <span className="catalog-card-price">
                                 {(() => {
                                   const price = parseFloat(
                                     product.price.toString(),
@@ -418,25 +418,21 @@ export default function HomePage() {
                             {/* Cart button - full width and centered */}
                             <Button
                               size="sm"
-                              className="w-full rounded-full border border-[#3c8fb8]/30 bg-white hover:bg-[#3c8fb8] text-[#287397] hover:text-white h-10 text-xs sm:text-sm font-semibold transition-colors"
+                              className="catalog-card-cart w-full rounded-full border border-[#3c8fb8]/30 bg-white hover:bg-[#3c8fb8] text-[#287397] hover:text-white font-semibold transition-colors"
                               onClick={() => handleAddToCartClick(product)}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-1" aria-hidden="true" />{t.addToCart}
+                              <ShoppingCart aria-hidden="true" /><span>{t.addToCart}</span>
                             </Button>
 
                             {/* Delivery date badge - mobile optimized */}
-                            {isDesignPreview ? <div className="flex items-center gap-1 py-1 text-[10px] sm:text-xs text-slate-500"><Truck className="h-3 w-3 shrink-0" aria-hidden="true" /><span>Хүргэлтийн мэдээлэл · Жишээ</span></div> : deliveryDate && (
+                            {isDesignPreview ? <div className="catalog-card-delivery" title="Хүргэлтийн мэдээлэл · Жишээ"><Truck aria-hidden="true" /><span>Хүргэлт · Жишээ</span></div> : deliveryDate && (
                               <div
-                                className="flex flex-col items-start justify-center text-slate-500 text-[10px] sm:text-xs py-1"
+                                className="catalog-card-delivery"
+                                title={`${formatDeliveryDate(deliveryDate, language)} ${getDeliveryMessage(language)}`}
                                 data-testid={`delivery-badge-${product.id}`}
                               >
-                                <div className="flex items-center gap-0.5 sm:gap-1">
-                                  <Truck className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                                  <span>
-                                    {formatDeliveryDate(deliveryDate, language)}
-                                  </span>
-                                </div>
-                                <span>{getDeliveryMessage(language)}</span>
+                                <Truck aria-hidden="true" />
+                                <span>{deliveryDate.getMonth() + 1}/{deliveryDate.getDate()} {getDeliveryMessage(language)}</span>
                               </div>
                             )}
                           </div>
