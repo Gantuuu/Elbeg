@@ -12,9 +12,9 @@ export function useOrderNotifications() {
   const isAdmin = user?.isAdmin || false;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["/api/orders/pending-count"],
+    queryKey: ["/api/admin/pending-orders-count"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/orders/pending-count");
+      const response = await apiRequest("GET", "/api/admin/pending-orders-count");
       return response;
     },
     // Only fetch if user is admin
