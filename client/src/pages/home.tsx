@@ -1,5 +1,7 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useStorefrontCategories, useStorefrontProducts } from "@/hooks/use-storefront-products";
+import { CatalogLoadNotice } from "@/components/catalog-load-notice";
 import { apiRequest } from "@/lib/queryClient";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -54,15 +56,8 @@ export default function HomePage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch featured products
-  const { data: products, isLoading: productsLoading } = useQuery<Product[]>({
-    queryKey: [isDesignPreview ? "design-preview-products" : "products"],
-    queryFn: async () => {
-      if (isDesignPreview) return (await import("@/lib/design-preview-data")).previewProducts;
-      return await apiRequest("GET", "/api/products");
-    },
-    staleTime: 2 * 60 * 1000,
-  });
+  const catalog = useStorefrontProducts(isDesignPreview);
+  const { products, isLoading: productsLoading } = catalog;
 
   // Fetch delivery settings and non-delivery days
   const { data: deliverySettings } = useQuery<DeliverySettings>({
@@ -92,17 +87,7 @@ export default function HomePage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch product categories from category management
-  const { data: productCategories = [] } = useQuery<any[]>({
-    queryKey: [isDesignPreview ? "design-preview-categories" : "categories"],
-    queryFn: async () => {
-      if (isDesignPreview) return (await import("@/lib/design-preview-data")).previewCategories;
-      const response = await fetch("/api/categories");
-      if (!response.ok) throw new Error("Failed to fetch categories");
-      return await response.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  const productCategories = useStorefrontCategories(isDesignPreview);
 
   // Calculate delivery date
   const deliveryDate = useMemo(() => {
@@ -189,6 +174,10 @@ export default function HomePage() {
     setIsQuantityModalOpen(false);
     setSelectedProduct(null);
   }, []);
+
+  useEffect(() => {
+    if (catalog.readOnly) handleCloseModal();
+  }, [catalog.readOnly, handleCloseModal]);
 
   const handleProductClick = useCallback(
     (productId: number) => {
@@ -307,6 +296,9 @@ export default function HomePage() {
 
             {/* Product display section */}
             <div className="mb-10">
+              {catalog.isError && (
+                <CatalogLoadNotice saved={!!products?.length} fetching={catalog.isFetching} onRetry={catalog.refetch} />
+              )}
               {productsLoading ? (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
                   {Array(8)
@@ -359,7 +351,10 @@ export default function HomePage() {
                                 const fallback = document.createElement("div");
                                 fallback.className =
                                   "fallback-bg absolute inset-0 bg-[#3c8fb8] flex items-center justify-center";
-                                fallback.innerHTML = `<span class="text-white font-bold text-xs text-center px-2">${product.name}</span>`;
+                                const label = document.createElement("span");
+                                label.className = "text-white font-bold text-xs text-center px-2";
+                                label.textContent = product.name;
+                                fallback.appendChild(label);
                                 parent.appendChild(fallback);
                               }
                             }}
@@ -405,6 +400,7 @@ export default function HomePage() {
                               size="sm"
                               className="catalog-card-cart w-full rounded-full border border-[#3c8fb8]/30 bg-white hover:bg-[#3c8fb8] text-[#287397] hover:text-white font-semibold transition-colors"
                               onClick={() => handleAddToCartClick(product)}
+                              disabled={catalog.readOnly}
                             >
                               <ShoppingCart aria-hidden="true" /><span>{t.addToCart}</span>
                             </Button>
@@ -436,7 +432,7 @@ export default function HomePage() {
                     </div>
                   )}
                 </>
-              ) : (
+              ) : catalog.isError ? null : (
                 <div className="text-center py-12">
                   <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                     <span className="material-icons text-gray-400 text-3xl">
@@ -558,7 +554,7 @@ export default function HomePage() {
       <Footer />
       {/* Quantity Modal */}
       <QuantityModal
-        isOpen={isQuantityModalOpen}
+        isOpen={isQuantityModalOpen && !catalog.readOnly}
         onClose={handleCloseModal}
         product={selectedProduct}
       />

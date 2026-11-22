@@ -12,9 +12,10 @@ import { getFullImageUrl, handleImageError } from "@/lib/image-utils";
 
 interface ProductCardProps {
   product: Product;
+  readOnly?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, readOnly = false }: ProductCardProps) {
   const { id, name, category, price, description, imageUrl, minOrderQuantity } =
     product;
   const { addItem } = useCart();
@@ -136,7 +137,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <button
           className="w-full text-white py-3 px-4 rounded-lg flex items-center justify-center bg-[#3c8fb8] hover:brightness-105 transition-all duration-200 shadow-sm font-bold"
           onClick={handleAddToCart}
-          disabled={isLoading}
+          disabled={isLoading || readOnly}
         >
           {isLoading ? (
             <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
