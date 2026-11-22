@@ -7,6 +7,7 @@ import { D1Storage } from './storage';
 import { getDb } from './db';
 
 import authApp from './api/auth';
+import { enforcePasswordRotation } from './password-rotation';
 import productsApp from './api/products';
 import shopApp from './api/shop';
 import ordersApp from './api/orders';
@@ -44,6 +45,9 @@ app.use('*', cors({
 app.use('/api/*', authMiddleware);
 
 // Routes
+app.get('/api/setup-admin', (c) => c.notFound());
+app.use('/api/login', enforcePasswordRotation);
+app.use('/api/admin/login', enforcePasswordRotation);
 app.route('/api', authApp);
 app.route('/api/products', productsApp);
 app.route('/api', shopApp); // shopApp mounts at root of /api (e.g. /api/categories)
