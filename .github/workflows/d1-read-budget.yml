@@ -20,3 +20,4 @@ jobs:
       - run: npm run build
       - run: npm run test:d1-reads
       - run: node --test scripts/test-order-cache-client.cjs
+      - run: node --test scripts/test-storefront-catalog.cjs scripts/test-public-catalog-writer.cjs

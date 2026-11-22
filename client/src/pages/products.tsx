@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useStorefrontProducts } from "@/hooks/use-storefront-products";
+import { CatalogLoadNotice } from "@/components/catalog-load-notice";
 import { Link } from "wouter";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
@@ -23,14 +23,8 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("name");
 
-  // Fetch products
-  const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ["/api/products"],
-    queryFn: async () => {
-      const data = await apiRequest("GET", "/api/products");
-      return data;
-    },
-  });
+  const catalog = useStorefrontProducts();
+  const { products = [], isLoading } = catalog;
 
   // Get unique categories from products
   const categories = useMemo(() => {
@@ -191,11 +185,14 @@ export default function ProductsPage() {
           </div>
 
           {/* Products Display */}
+          {catalog.isError && (
+            <CatalogLoadNotice saved={!!products.length} fetching={catalog.isFetching} onRetry={catalog.refetch} />
+          )}
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#3c8fb8] border-t-transparent"></div>
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts.length === 0 && catalog.isError ? null : filteredProducts.length === 0 ? (
             <div className="text-center py-20">
               <div className="bg-white rounded-lg shadow-sm p-12">
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
@@ -223,7 +220,7 @@ export default function ProductsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {categoryProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product} readOnly={catalog.readOnly} />
                       ))}
                     </div>
                   </div>

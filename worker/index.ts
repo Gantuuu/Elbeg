@@ -9,6 +9,7 @@ import { getDb } from './db';
 import authApp from './api/auth';
 import { enforcePasswordRotation } from './password-rotation';
 import productsApp from './api/products';
+import { publicCatalogKey } from './public-catalog';
 import shopApp from './api/shop';
 import ordersApp from './api/orders';
 import cmsApp from './api/cms';
@@ -71,8 +72,8 @@ app.get('/uploads/*', async (c) => {
         object.writeHttpMetadata(headers);
         headers.set('etag', object.httpEtag);
 
-        // Add Cache-Control for long-term caching (1 year, immutable)
-        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        headers.set('Cache-Control', decodedKey === publicCatalogKey
+            ? 'no-store' : 'public, max-age=31536000, immutable');
 
         // Ensure CORS headers are also present on direct R2 responses
         headers.set('Access-Control-Allow-Origin', '*');
