@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const { test } = require("node:test");
+const { inspect } = require("node:util");
 const vm = require("node:vm");
 const { transformSync } = require("esbuild");
 
@@ -45,3 +46,48 @@ for (const apiBase of ["", "https://api.example.invalid"]) {
     }
   });
 }
+
+test("login and session requests keep credentials and responses out of console messages", async () => {
+  const markers = {
+    username: "fixture-username-canary",
+    password: "fixture-password-canary",
+    cookie: "fixture-cookie-canary",
+    token: "fixture-token-canary",
+    header: "fixture-header-canary",
+    detail: "fixture-error-body-canary",
+  };
+  const credentials = { username: markers.username, password: markers.password };
+  const messages = [];
+  const capture = (...args) => messages.push(inspect(args, { depth: null }));
+  const clientModule = { exports: {} };
+  let status = 200;
+  const { code } = transformSync(source, {
+    loader: "ts", format: "cjs", define: { "import.meta.env.VITE_API_BASE_URL": '""' },
+  });
+  vm.runInNewContext(code, {
+    module: clientModule, require,
+    navigator: { userAgent: "Mozilla/5.0 (iPhone; Mobile)" },
+    document: { cookie: "session=" + markers.cookie },
+    console: { log: capture, info: capture, debug: capture, warn: capture, error: capture },
+    fetch: async (url, options) => {
+      if (url === "/api/admin/login") {
+        assert.deepEqual(JSON.parse(options.body), credentials);
+      }
+      return Response.json(status === 200 ? { token: markers.token } : { error: markers.detail }, {
+        status, headers: { "x-fixture-response": markers.header },
+      });
+    },
+  });
+
+  const { apiRequest, getQueryFn } = clientModule.exports;
+  const login = () => apiRequest("POST", "/api/admin/login", credentials);
+  const session = () => getQueryFn({ on401: "throw" })({ queryKey: ["/api/user"] });
+  assert.equal((await login()).token, markers.token);
+  assert.equal((await session()).token, markers.token);
+  status = 500;
+  await assert.rejects(login);
+  await assert.rejects(session);
+  for (const [field, marker] of Object.entries(markers)) {
+    assert.ok(messages.every(message => !message.includes(marker)), field + " leaked to console");
+  }
+});
