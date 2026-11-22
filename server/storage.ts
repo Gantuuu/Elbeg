@@ -21,7 +21,7 @@ import {
   reviews, type Review, type InsertReview
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, not, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, asc, inArray, not, gte, lte, sql } from "drizzle-orm";
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
@@ -39,7 +39,7 @@ export interface IStorage {
 
   // Order operations
   getOrders(startDate?: Date, endDate?: Date): Promise<Order[]>;
-  getOrdersWithItems(startDate?: Date, endDate?: Date): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
+  getOrdersWithItems(startDate?: Date, endDate?: Date, limit?: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]>;
   getOrder(id: number): Promise<Order | undefined>;
   getOrderWithItems(id: number): Promise<(Order & { items: (OrderItem & { product: Product })[] }) | undefined>;
   createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
@@ -698,7 +698,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getOrdersWithItems(startDate?: Date, endDate?: Date): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
+  async getOrdersWithItems(startDate?: Date, endDate?: Date, limit?: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
     // Build conditions for date filtering
     const conditions = [];
     if (startDate) {
@@ -706,6 +706,13 @@ export class DatabaseStorage implements IStorage {
     }
     if (endDate) {
       conditions.push(lte(orders.createdAt, endDate));
+    }
+
+    if (limit !== undefined) {
+      // Limit order IDs first so all items of each displayed order are included.
+      const latestIds = db.select({ id: orders.id }).from(orders)
+        .where(and(...conditions)).orderBy(desc(orders.createdAt)).limit(limit);
+      conditions.push(inArray(orders.id, latestIds));
     }
 
     // Use a single optimized query with joins to get all data at once

@@ -1177,7 +1177,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Admin can see all orders
         orders = await storage.getOrdersWithItems(
           startDate ? new Date(startDate) : undefined,
-          endDate ? new Date(endDate) : undefined
+          endDate ? new Date(endDate) : undefined,
+          req.query.view === 'recent' ? 5 : undefined
         );
         console.log(`Retrieved ${orders.length} orders for admin`);
       } else if (isAuthenticated) {

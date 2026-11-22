@@ -29,6 +29,7 @@ app.get('/orders/stats', requireAdmin, async (c) => {
 
 app.get('/orders', requireAdmin, async (c) => {
     const storage = c.get('storage');
+    const recentOnly = c.req.query('view') === 'recent';
     const startDateStr = c.req.query('startDate');
     const endDateStr = c.req.query('endDate');
 
@@ -48,13 +49,13 @@ app.get('/orders', requireAdmin, async (c) => {
         }
     }
     if (generation) {
-        const tag = `W/"orders-v1-${c.get('user')!.id}-${startDate?.getTime() ?? "all"}-${endDate?.getTime() ?? "all"}-${generation}"`;
+        const tag = `W/"orders-v1${recentOnly ? "-recent" : ""}-${c.get('user')!.id}-${startDate?.getTime() ?? "all"}-${endDate?.getTime() ?? "all"}-${generation}"`;
         c.header('Cache-Control', 'private, no-cache');
         c.header('Vary', 'Cookie, Authorization, X-Client', { append: true });
         c.header('ETag', tag);
         if (c.req.header('If-None-Match') === tag) return c.body(null, 304);
     }
-    const orders = await storage.getOrdersWithItems(startDate, endDate);
+    const orders = await storage.getOrdersWithItems(startDate, endDate, recentOnly ? 5 : undefined);
     return c.json(orders);
 });
 

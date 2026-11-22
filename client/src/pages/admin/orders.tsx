@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { getOrderPollInterval } from "@/lib/order-polling";
 
 import { useLanguage } from "@/contexts/language-context";
 import { AdminSidebar } from "@/components/admin/sidebar";
@@ -145,7 +146,7 @@ export default function AdminOrders() {
 
       return await apiRequest("GET", url);
     },
-    refetchInterval: 15000, // Refresh every 15 seconds for orders page
+    refetchInterval: getOrderPollInterval,
     refetchOnWindowFocus: true, // Refetch when window gains focus
     refetchOnMount: true, // Always refetch when component mounts
     staleTime: 5000, // Consider data stale after 5 seconds
