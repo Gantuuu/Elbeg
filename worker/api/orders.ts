@@ -15,7 +15,7 @@ type Env = {
 const app = new Hono<Env>();
 
 // Orders
-app.get('/orders/pending-count', requireAdmin, async (c) => {
+app.on('GET', ['/orders/pending-count', '/admin/pending-orders-count'], requireAdmin, async (c) => {
     const storage = c.get('storage');
     const count = await storage.getPendingOrdersCount();
     return c.json({ count });
@@ -35,6 +35,17 @@ app.get('/orders', requireAdmin, async (c) => {
     const startDate = startDateStr ? new Date(startDateStr) : undefined;
     const endDate = endDateStr ? new Date(endDateStr) : undefined;
 
+    // Read the generation first so concurrent writes can only cause an extra refresh.
+    const generation = await c.env.DB.prepare(
+        'SELECT version FROM order_list_revision WHERE id = 1'
+    ).first<string>('version');
+    if (generation) {
+        const tag = `W/"orders-v1-${c.get('user')!.id}-${startDate?.getTime() ?? "all"}-${endDate?.getTime() ?? "all"}-${generation}"`;
+        c.header('Cache-Control', 'private, no-cache');
+        c.header('Vary', 'Cookie, Authorization, X-Client', { append: true });
+        c.header('ETag', tag);
+        if (c.req.header('If-None-Match') === tag) return c.body(null, 304);
+    }
     const orders = await storage.getOrdersWithItems(startDate, endDate);
     return c.json(orders);
 });

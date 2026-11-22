@@ -630,10 +630,10 @@ export class D1Storage implements IStorage {
     }
 
     async getPendingOrdersCount(): Promise<number> {
-        const result = await this.db.select()
+        const [result] = await this.db.select({ count: sql<number>`count(*)` })
             .from(orders)
             .where(eq(orders.status, 'pending'));
-        return result.length;
+        return result.count;
     }
 
     async getStats(): Promise<{ totalOrders: number, totalSales: number, totalProducts: number, totalUsers: number }> {
