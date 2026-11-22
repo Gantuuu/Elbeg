@@ -90,6 +90,7 @@ async function main() {
       headers: etag ? { cookie, "if-none-match": etag } : { cookie },
     });
     assert.equal((await get("/orders")).status, 403);
+    assert.equal((await get("/orders?view=recent")).status, 403);
     assert.equal((await call("/orders")).status, 401);
     await run("UPDATE users SET is_admin=1 WHERE username='tester'");
 
@@ -141,6 +142,14 @@ async function main() {
     assert.deepEqual(await full.json(), originalOrders);
     let tag = full.headers.get("etag");
     assert.ok(tag);
+    const dashboard = await get("/orders?view=recent", tag);
+    assert.equal(dashboard.status, 200, "full-list validator cannot validate a dashboard response");
+    assert.deepEqual(await dashboard.json(), originalOrders.slice(0, 5));
+    assert.equal((await get("/orders?view=recent", dashboard.headers.get("etag"))).status, 304);
+    const dashboardSql = JSON.parse(dashboard.headers.get("x-test-queries")).find(q => /left join/i.test(q));
+    const dashboardReads = (await db.prepare(dashboardSql).bind(5).run()).meta.rows_read;
+    console.log("Five most recent orders with all their items:", dashboardReads, "D1 rows read");
+    assert.ok(dashboardReads <= 100, "dashboard cost should depend on the five displayed orders");
     assert.match(full.headers.get("cache-control"), /private/);
     // Replay 60 polling decisions immediately (15 min worth at the UI's 15s interval).
     for (let i = 0; i < 60; i++) {

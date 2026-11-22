@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { getOrderPollInterval } from "@/lib/order-polling";
 import { useAuth } from "@/hooks/use-auth";
 
 /**
@@ -19,8 +20,7 @@ export function useOrderNotifications() {
     },
     // Only fetch if user is admin
     enabled: !!user && isAdmin,
-    // Poll every 15 seconds
-    refetchInterval: 15000,
+    refetchInterval: getOrderPollInterval,
     // Refetch even when window is not focused for notifications
     refetchIntervalInBackground: true,
   });
