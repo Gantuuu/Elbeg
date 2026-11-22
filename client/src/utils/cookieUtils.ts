@@ -42,28 +42,3 @@ export const getAllCookies = (): Record<string, string> => {
   });
   return cookies;
 };
-
-// Debug function to log all cookies
-export const logAllCookies = (): void => {
-  console.log("All cookies:", getAllCookies());
-  console.log("Raw cookie string:", document.cookie);
-};
-
-// Enhanced mobile cookie debugging
-export const logMobileCookieDebug = (): void => {
-  console.log("=== Mobile Cookie Debug ===");
-  console.log("User Agent:", navigator.userAgent);
-  console.log("All cookies:", getAllCookies());
-  console.log("Raw cookie string:", document.cookie);
-  console.log("Session cookie (gerinmah.sid):", getCookie("gerinmah.sid"));
-  console.log("Connect.sid cookie:", getCookie("connect.sid"));
-  console.log("Cookie string length:", document.cookie.length);
-  console.log("Document ready state:", document.readyState);
-  console.log(
-    "Is mobile browser:",
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent,
-    ),
-  );
-  console.log("========================");
-};

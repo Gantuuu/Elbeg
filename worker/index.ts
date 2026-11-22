@@ -7,7 +7,9 @@ import { D1Storage } from './storage';
 import { getDb } from './db';
 
 import authApp from './api/auth';
+import { enforcePasswordRotation } from './password-rotation';
 import productsApp from './api/products';
+import { publicCatalogKey } from './public-catalog';
 import shopApp from './api/shop';
 import ordersApp from './api/orders';
 import cmsApp from './api/cms';
@@ -44,6 +46,9 @@ app.use('*', cors({
 app.use('/api/*', authMiddleware);
 
 // Routes
+app.get('/api/setup-admin', (c) => c.notFound());
+app.use('/api/login', enforcePasswordRotation);
+app.use('/api/admin/login', enforcePasswordRotation);
 app.route('/api', authApp);
 app.route('/api/products', productsApp);
 app.route('/api', shopApp); // shopApp mounts at root of /api (e.g. /api/categories)
@@ -67,8 +72,8 @@ app.get('/uploads/*', async (c) => {
         object.writeHttpMetadata(headers);
         headers.set('etag', object.httpEtag);
 
-        // Add Cache-Control for long-term caching (1 year, immutable)
-        headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        headers.set('Cache-Control', decodedKey === publicCatalogKey
+            ? 'no-store' : 'public, max-age=31536000, immutable');
 
         // Ensure CORS headers are also present on direct R2 responses
         headers.set('Access-Control-Allow-Origin', '*');

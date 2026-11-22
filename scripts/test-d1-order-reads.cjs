@@ -45,6 +45,7 @@ async function main() {
     compatibilityFlags: ["nodejs_compat"],
     bindings: {
       SESSION_SECRET: "only-for-this-in-memory-test",
+      ADMIN_USERNAME: "rotation-fixture", ADMIN_PASSWORD: "fixture-new-password",
       GOOGLE_CLIENT_ID: "fixture-client", GOOGLE_CLIENT_SECRET: "fixture-secret",
     },
     outboundService: async request => {
@@ -239,6 +240,43 @@ async function main() {
     googleEmail = "new@example.invalid";
     assert.notEqual(await googleLogin(), linkedId);
     assert.equal((await run("SELECT count(*) AS n FROM users")).results[0].n, 2);
+    const managed = { username: "rotation-fixture", email: "rotation@example.invalid", password: "fixture-old-password" };
+    assert.equal((await post("/register", managed)).status, 201);
+    await run("UPDATE users SET is_admin=1 WHERE username='rotation-fixture'");
+    const readStoredPassword = () => db.prepare("SELECT password FROM users WHERE username=?").bind(managed.username).first("password");
+    const oldHash = await readStoredPassword();
+    const routes = ["/login", "/admin/login"];
+    for (const username of [managed.username, managed.email]) {
+      for (const route of routes) {
+        const denied = await post(route, { username, password: managed.password });
+        assert.equal(denied.status, 401);
+        assert.equal(denied.headers.has("set-cookie"), false);
+      }
+    }
+    assert.equal(await readStoredPassword(), oldHash);
+    const replacement = { username: managed.username, password: "fixture-new-password" };
+    await run("CREATE TRIGGER block_fixture_sync BEFORE UPDATE OF password ON users BEGIN SELECT RAISE(ABORT, 'fixture failure'); END");
+    const failure = await post("/admin/login", replacement);
+    assert.equal(failure.status, 500);
+    assert.equal(failure.headers.has("set-cookie"), false);
+    await run("DROP TRIGGER block_fixture_sync");
+    const firstLogin = await post("/admin/login", replacement);
+    assert.equal(firstLogin.status, 200);
+    assert.equal((await firstLogin.json()).isAdmin, true);
+    assert.equal(firstLogin.headers.has("set-cookie"), true);
+    const newHash = await readStoredPassword();
+    assert.ok(newHash && newHash !== oldHash && newHash !== replacement.password);
+    for (const username of [managed.username, managed.email]) {
+      for (const route of routes) {
+        const valid = await post(route, { ...replacement, username });
+        assert.equal(valid.status, 200);
+        assert.equal(JSON.parse(valid.headers.get("x-test-queries")).some(q => /^\s*UPDATE/i.test(q)), false);
+        assert.equal((await post(route, { ...managed, username })).status, 401);
+      }
+    }
+    assert.equal(await readStoredPassword(), newHash);
+    assert.equal((await call("/setup-admin")).status, 404);
+    console.log("PASS: admin identity rotation for both sign-in routes and identifiers");
     console.log("PASS: SQL budgets, conditional polls, migrations, triggers, badges, authorization and mock Google login");
   } finally {
     await runtime.dispose();

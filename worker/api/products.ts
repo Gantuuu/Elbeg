@@ -3,6 +3,7 @@ import { Bindings } from '../types';
 import { requireAdmin } from '../middleware';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage, IStorage } from '../storage';
+import { savePublicCatalog } from '../public-catalog';
 
 type Env = {
     Bindings: Bindings;
@@ -23,7 +24,13 @@ app.get('/', async (c) => {
         return c.json(products);
     }
 
+    const readStartedAt = Date.now();
     const products = await storage.getProducts();
+    if (c.env.BUCKET) {
+        c.executionCtx.waitUntil(savePublicCatalog(c.env.BUCKET, products, readStartedAt).catch(() => {
+            console.warn('Could not refresh public catalog snapshot');
+        }));
+    }
     return c.json(products);
 });
 

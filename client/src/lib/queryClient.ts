@@ -12,121 +12,82 @@ export async function apiRequest(
   urlOrData?: string | unknown,
   data?: unknown | undefined,
 ): Promise<any> {
-  try {
-    // Handle overloaded function signature to support both usage patterns:
-    // 1. apiRequest('GET', '/api/endpoint')
-    // 2. apiRequest('/api/endpoint', 'GET')
-    // 3. apiRequest('/api/endpoint', { data })
-    let method: string;
-    let url: string;
-    let requestData: unknown | undefined;
+  // Handle overloaded function signature to support both usage patterns:
+  // 1. apiRequest('GET', '/api/endpoint')
+  // 2. apiRequest('/api/endpoint', 'GET')
+  // 3. apiRequest('/api/endpoint', { data })
+  let method: string;
+  let url: string;
+  let requestData: unknown | undefined;
 
-    // Use environment variable for API base URL or default to empty (relative)
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+  // Use environment variable for API base URL or default to empty (relative)
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
 
-    if (urlOrData === undefined) {
-      // Pattern: apiRequest('/api/endpoint')
-      method = "GET";
-      url = apiBaseUrl + methodOrUrl;
-      requestData = undefined;
-    } else if (typeof urlOrData === "string") {
-      // Pattern: apiRequest('GET', '/api/endpoint', data)
-      method = methodOrUrl;
-      url = apiBaseUrl + urlOrData;
-      requestData = data;
-    } else {
-      // Pattern: apiRequest('/api/endpoint', data)
-      method = "POST";
-      url = apiBaseUrl + methodOrUrl;
-      requestData = urlOrData;
-    }
-
-    console.log(`API Request: ${method} ${url}`);
-    if (requestData) {
-      console.log("Request data:", requestData);
-    }
-
-    const headers: Record<string, string> = requestData
-      ? { "Content-Type": "application/json" }
-      : {};
-
-    // Enhanced mobile cookie handling for API requests
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
-
-    if (isMobile) {
-      // The admin list must retain its private response to revalidate its ETag on each poll.
-      const revalidateOrders = method === "GET" &&
-        url.split("?")[0] === apiBaseUrl + "/api/orders";
-      if (!revalidateOrders) {
-        headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-        headers["Pragma"] = "no-cache";
-        headers["Expires"] = "0";
-      }
-      headers["X-Requested-With"] = "XMLHttpRequest";
-    }
-
-    // Add explicit cookie header if available for mobile compatibility
-    if (typeof document !== "undefined" && document.cookie) {
-      headers["Cookie"] = document.cookie;
-    }
-
-    const options: RequestInit = {
-      method,
-      headers,
-      body: requestData ? JSON.stringify(requestData) : undefined,
-      credentials: "include", // Important for cookies/session
-      cache: "no-cache", // Prevent caching issues
-      // "cors" allows cross-origin calls from the native app (origin https://localhost)
-      // to the Cloudflare API domain. Same-origin web requests still work under "cors".
-      mode: "cors",
-    };
-
-    console.log("Sending fetch request with options:", options);
-    const res = await fetch(url, options);
-    console.log(`Response status: ${res.status}`);
-
-    // Log cookies and headers for debugging
-    const resHeaders: Record<string, string> = {};
-    res.headers.forEach((v, k) => (resHeaders[k] = v));
-    console.log("Response headers:", resHeaders);
-
-    await throwIfResNotOk(res);
-
-    // If status is 204 No Content, return undefined
-    if (res.status === 204) {
-      console.log("Received 204 No Content");
-      return undefined;
-    }
-
-    // Check content type to determine how to parse the response
-    const contentType = res.headers.get("content-type");
-
-    if (contentType && contentType.includes("application/json")) {
-      // If it's JSON, parse it as JSON
-      try {
-        const jsonResponse = await res.json();
-        console.log("Response data:", jsonResponse);
-        return jsonResponse;
-      } catch (parseError) {
-        console.error("Error parsing JSON response:", parseError);
-        throw parseError;
-      }
-    } else {
-      // If it's not JSON (e.g., HTML), return success object
-      const text = await res.text();
-      console.log(
-        "Non-JSON response:",
-        text.substring(0, 100) + (text.length > 100 ? "..." : ""),
-      );
-      return { success: true, status: res.status };
-    }
-  } catch (error) {
-    console.error("API Request error:", error);
-    throw error;
+  if (urlOrData === undefined) {
+    // Pattern: apiRequest('/api/endpoint')
+    method = "GET";
+    url = apiBaseUrl + methodOrUrl;
+    requestData = undefined;
+  } else if (typeof urlOrData === "string") {
+    // Pattern: apiRequest('GET', '/api/endpoint', data)
+    method = methodOrUrl;
+    url = apiBaseUrl + urlOrData;
+    requestData = data;
+  } else {
+    // Pattern: apiRequest('/api/endpoint', data)
+    method = "POST";
+    url = apiBaseUrl + methodOrUrl;
+    requestData = urlOrData;
   }
+
+  const headers: Record<string, string> = requestData
+    ? { "Content-Type": "application/json" }
+    : {};
+
+  // Enhanced mobile cookie handling for API requests
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
+
+  if (isMobile) {
+    // The admin list must retain its private response to revalidate its ETag on each poll.
+    const revalidateOrders = method === "GET" &&
+      url.split("?")[0] === apiBaseUrl + "/api/orders";
+    if (!revalidateOrders) {
+      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+      headers["Pragma"] = "no-cache";
+      headers["Expires"] = "0";
+    }
+    headers["X-Requested-With"] = "XMLHttpRequest";
+  }
+
+  // Add explicit cookie header if available for mobile compatibility
+  if (typeof document !== "undefined" && document.cookie) {
+    headers["Cookie"] = document.cookie;
+  }
+
+  const options: RequestInit = {
+    method,
+    headers,
+    body: requestData ? JSON.stringify(requestData) : undefined,
+    credentials: "include", // Important for cookies/session
+    cache: "no-cache", // Prevent caching issues
+    // "cors" allows cross-origin calls from the native app (origin https://localhost)
+    // to the Cloudflare API domain. Same-origin web requests still work under "cors".
+    mode: "cors",
+  };
+
+  const res = await fetch(url, options);
+  await throwIfResNotOk(res);
+
+  if (res.status === 204) return undefined;
+
+  const contentType = res.headers.get("content-type");
+  if (contentType?.includes("application/json")) return res.json();
+
+  await res.text();
+  return { success: true, status: res.status };
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -135,8 +96,6 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    console.log(`Querying: ${queryKey[0]}`);
-
     const headers: Record<string, string> = {};
 
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
@@ -170,24 +129,14 @@ export const getQueryFn: <T>(options: {
       mode: "cors",
     };
 
-    console.log("Query fetch options:", options);
     const res = await fetch(url, options);
-    console.log(`Query response status: ${res.status}`);
-
-    // Log headers for debugging
-    const resHeaders: Record<string, string> = {};
-    res.headers.forEach((v, k) => (resHeaders[k] = v));
-    console.log("Query response headers:", resHeaders);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      console.log("401 Unauthorized - returning null as specified");
       return null;
     }
 
     await throwIfResNotOk(res);
-    const data = await res.json();
-    console.log("Query response data:", data);
-    return data as any;
+    return res.json();
   };
 
 export const queryClient = new QueryClient({
