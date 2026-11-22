@@ -12,7 +12,8 @@
     "db:push": "drizzle-kit push",
     "build:app": "vite build --mode capacitor",
     "app:sync": "npm run build:app && npx cap sync android",
-    "app:open": "npm run app:sync && npx cap open android"
+    "app:open": "npm run app:sync && npx cap open android",
+    "test:d1-reads": "node scripts/test-d1-order-reads.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",

@@ -57,9 +57,14 @@ export async function apiRequest(
       );
 
     if (isMobile) {
-      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-      headers["Pragma"] = "no-cache";
-      headers["Expires"] = "0";
+      // The admin list must retain its private response to revalidate its ETag on each poll.
+      const revalidateOrders = method === "GET" &&
+        url.split("?")[0] === apiBaseUrl + "/api/orders";
+      if (!revalidateOrders) {
+        headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+        headers["Pragma"] = "no-cache";
+        headers["Expires"] = "0";
+      }
       headers["X-Requested-With"] = "XMLHttpRequest";
     }
 

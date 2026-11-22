@@ -1,0 +1,47 @@
+const assert = require("node:assert/strict");
+const { readFileSync } = require("node:fs");
+const path = require("node:path");
+const { test } = require("node:test");
+const vm = require("node:vm");
+const { transformSync } = require("esbuild");
+
+const source = readFileSync(path.join(__dirname, "../client/src/lib/queryClient.ts"), "utf8");
+
+for (const apiBase of ["", "https://api.example.invalid"]) {
+  test(`mobile order polling revalidates with ${apiBase || "same-origin"} URLs`, async () => {
+    const { code } = transformSync(source, {
+      loader: "ts",
+      format: "cjs",
+      define: { "import.meta.env.VITE_API_BASE_URL": JSON.stringify(apiBase) },
+    });
+    const calls = [];
+    const clientModule = { exports: {} };
+    vm.runInNewContext(code, {
+      module: clientModule,
+      require,
+      navigator: { userAgent: "Mozilla/5.0 (iPhone; Mobile)" },
+      console: { log() {}, error: console.error },
+      fetch: async (url, options) => {
+        calls.push({ url, options });
+        return Response.json([]);
+      },
+    });
+
+    for (const [method, url, revalidates] of [
+      ["GET", "/api/orders", true],
+      ["GET", "/api/orders?startDate=2026-01-01", true],
+      ["GET", "/api/orders/1", false],
+      ["POST", "/api/orders", false],
+      ["GET", "/api/user", false],
+    ]) {
+      await clientModule.exports.apiRequest(method, url);
+      const call = calls.pop();
+      assert.equal(call.url, apiBase + url);
+      assert.equal(call.options.credentials, "include");
+      assert.equal(call.options.cache, "no-cache");
+      assert.equal(call.options.headers["X-Requested-With"], "XMLHttpRequest");
+      const directive = call.options.headers["Cache-Control"] || "";
+      assert.equal(directive.includes("no-store"), !revalidates, method + " " + url);
+    }
+  });
+}

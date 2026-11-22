@@ -36,9 +36,17 @@ app.get('/orders', requireAdmin, async (c) => {
     const endDate = endDateStr ? new Date(endDateStr) : undefined;
 
     // Read the generation first so concurrent writes can only cause an extra refresh.
-    const generation = await c.env.DB.prepare(
-        'SELECT version FROM order_list_revision WHERE id = 1'
-    ).first<string>('version');
+    let generation: string | null = null;
+    try {
+        generation = await c.env.DB.prepare(
+            'SELECT version FROM order_list_revision WHERE id = 1'
+        ).first<string>('version');
+    } catch (error) {
+        // Older databases serve the original list until the migration is applied.
+        if (!(error instanceof Error) || !/no such table: (?:main\.)?order_list_revision\b/i.test(error.message)) {
+            throw error;
+        }
+    }
     if (generation) {
         const tag = `W/"orders-v1-${c.get('user')!.id}-${startDate?.getTime() ?? "all"}-${endDate?.getTime() ?? "all"}-${generation}"`;
         c.header('Cache-Control', 'private, no-cache');

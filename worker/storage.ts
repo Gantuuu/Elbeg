@@ -630,6 +630,17 @@ export class D1Storage implements IStorage {
     }
 
     async getPendingOrdersCount(): Promise<number> {
+        try {
+            const counter = await this.db.get<{ pending_count: number }>(
+                sql`SELECT pending_count FROM pending_order_count WHERE id = 1`
+            );
+            if (counter) return counter.pending_count;
+        } catch (error) {
+            // Keep existing installations working during the migration.
+            if (!(error instanceof Error) || !/no such table: (?:main\.)?pending_order_count\b/i.test(error.message)) {
+                throw error;
+            }
+        }
         const [result] = await this.db.select({ count: sql<number>`count(*)` })
             .from(orders)
             .where(eq(orders.status, 'pending'));
