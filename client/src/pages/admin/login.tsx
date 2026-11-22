@@ -6,7 +6,6 @@ import { z } from "zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { setAuthToken } from "@/lib/auth-token";
 import { useToast } from "@/hooks/use-toast";
-import { logMobileCookieDebug } from "@/utils/cookieUtils";
 import {
   Form,
   FormControl,
@@ -92,22 +91,11 @@ export default function AdminLogin() {
         description: "Админ хэсэгт тавтай морил.",
       });
 
-      // Debug cookies on mobile after login
-      const isMobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent,
-        );
-      if (isMobile) {
-        console.log("=== POST-LOGIN MOBILE COOKIE DEBUG ===");
-        logMobileCookieDebug();
-      }
-
       // Wait for session to be properly set
       setTimeout(() => {
         setLocation("/admin");
       }, 500);
     } catch (error: any) {
-      console.error("Login error:", error);
       toast({
         title: "Нэвтрэх үед алдаа гарлаа",
         description: error.message || "Нэвтрэх нэр эсвэл нууц үг буруу байна.",

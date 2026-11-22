@@ -20,7 +20,6 @@ import {
 } from "@/contexts/language-context";
 import { QuantityModal } from "@/components/quantity-modal";
 import { useImagePreloader } from "@/hooks/use-image-preloader";
-import { logMobileCookieDebug } from "@/utils/cookieUtils";
 import {
   calculateDeliveryDate,
   formatDeliveryDate,
@@ -138,20 +137,6 @@ export default function HomePage() {
   useEffect(() => {
     setDisplayedCount(12);
   }, [selectedCategory]);
-
-  // Mobile cookie debugging - run once on mount
-  useEffect(() => {
-    // Only run on mobile browsers
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
-    if (isMobile) {
-      setTimeout(() => {
-        logMobileCookieDebug();
-      }, 2000); // Wait 2 seconds for page to fully load
-    }
-  }, []);
 
   // Infinite scroll handler
   useEffect(() => {
