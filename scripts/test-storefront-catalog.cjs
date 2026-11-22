@@ -98,6 +98,40 @@ test("only public catalog fields are accepted in the stored copy", () => {
   assert.throws(() => api.parseCatalogProducts([{ ...product, price: "invalid price" }]));
 });
 
+test("category filters survive an outage, expire, and clear on a successful empty response", async (t) => {
+  const storage = makeStorage();
+  const now = Date.parse("2026-01-01T00:00:00Z");
+  t.mock.timers.enable({ apis: ["Date"], now });
+  const signal = new AbortController().signal;
+  let response = Response.json([
+    { id: 8, name: "Beef", order: 3, isActive: true },
+    { id: 4, name: "Disabled", order: 1, isActive: false },
+  ]);
+  const fetch = async (url, options) => {
+    assert.equal(url.pathname, "/api/categories");
+    assert.equal(options.credentials, "omit");
+    return response;
+  };
+  const load = () => reload(storage, "", fetch).fetchStorefrontCategories(signal);
+  const first = await load();
+  assert.equal(first.categories.length, 1);
+  assert.equal(first.readOnly, false);
+  response = new Response(null, { status: 500 });
+  const saved = await load();
+  assert.equal(saved.categories.length, 1);
+  assert.equal(saved.categories[0].name, "Beef");
+  assert.equal(saved.categories[0].order, 3);
+  assert.equal(saved.readOnly, true);
+  t.mock.timers.setTime(now + reload(storage).CATALOG_SNAPSHOT_TTL_MS);
+  await assert.rejects(load());
+  response = Response.json([]);
+  const recovered = await load();
+  assert.equal(recovered.categories.length, 0);
+  assert.equal(recovered.readOnly, false);
+  response = new Response(null, { status: 500 });
+  assert.equal((await load()).categories.length, 0);
+});
+
 test("the public snapshot requires its schema version and a usable timestamp", () => {
   const api = reload(makeStorage());
   const now = Date.now();
