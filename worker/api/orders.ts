@@ -4,6 +4,8 @@ import { requireAuth, requireAdmin } from '../middleware';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage, IStorage } from '../storage';
 import { scheduleOrderReadMigrations } from '../order-read-migrations';
+import { parseOrderPage } from '../../shared/admin-order-page';
+import { getAdminOrderPage, orderPageTag } from '../admin-order-page';
 
 type Env = {
     Bindings: Bindings;
@@ -27,6 +29,19 @@ app.get('/orders/stats', requireAdmin, async (c) => {
     const storage = c.get('storage');
     const stats = await storage.getStats();
     return c.json(stats);
+});
+
+app.get('/admin/order-summaries', requireAdmin, async (c) => {
+    const filters = parseOrderPage(new URL(c.req.url).searchParams);
+    if (!filters) return c.json({ message: 'Invalid order page or date' }, 400);
+    const { revision, tag } = await orderPageTag(c.env.DB, c.get('user')!.id, filters);
+    c.header('Cache-Control', 'private, no-cache');
+    c.header('Vary', 'Cookie, Authorization, X-Client', { append: true });
+    if (tag) {
+        c.header('ETag', tag);
+        if (c.req.header('If-None-Match') === tag) return c.body(null, 304);
+    }
+    return c.json(await getAdminOrderPage(c.env.DB, filters, revision));
 });
 
 app.get('/orders', requireAdmin, async (c) => {

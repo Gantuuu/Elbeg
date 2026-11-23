@@ -31,6 +31,8 @@ for (const apiBase of ["", "https://api.example.invalid"]) {
     for (const [method, url, revalidates] of [
       ["GET", "/api/orders", true],
       ["GET", "/api/orders?startDate=2026-01-01", true],
+      ["GET", "/api/admin/order-summaries", true],
+      ["GET", "/api/admin/order-summaries?status=pending", true],
       ["GET", "/api/orders/1", false],
       ["POST", "/api/orders", false],
       ["GET", "/api/user", false],

@@ -21,7 +21,8 @@ import {
   reviews, type Review, type InsertReview
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, asc, inArray, not, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, or, asc, gt, lt, isNull, inArray, not, gte, lte, sql } from "drizzle-orm";
+import { orderPageResult, orderPageSize, searchOrderSummaries, type OrderPageFilters } from '../shared/admin-order-page';
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
 
@@ -696,6 +697,35 @@ export class DatabaseStorage implements IStorage {
         .from(orders)
         .orderBy(desc(orders.createdAt));
     }
+  }
+
+  async getAdminOrderPage(filters: OrderPageFilters) {
+    const columns = { id: orders.id, customerName: orders.customerName, customerPhone: orders.customerPhone,
+      totalAmount: orders.totalAmount, status: orders.status, createdAt: orders.createdAt };
+    const conditions = [];
+    if (filters.status !== null) conditions.push(eq(orders.status, filters.status));
+    if (filters.start !== null) conditions.push(gte(orders.createdAt, new Date(filters.start * 1000)));
+    if (filters.end !== null) conditions.push(lte(orders.createdAt, new Date(filters.end * 1000)));
+    const ordering = [sql`${orders.createdAt} DESC NULLS LAST`, asc(orders.id)];
+    const toSeconds = (row: Pick<Order, keyof typeof columns>) => ({ ...row,
+      createdAt: row.createdAt === null ? null : Math.floor(row.createdAt.getTime() / 1000) });
+    if (filters.q) {
+      const rows = await db.select(columns).from(orders).where(and(...conditions)).orderBy(...ordering);
+      return searchOrderSummaries(rows.map(toSeconds), filters, null);
+    }
+    const cursor = filters.cursor;
+    let boundary;
+    if (cursor && cursor.time === null) {
+      boundary = and(isNull(orders.createdAt), gt(orders.id, cursor.id));
+    } else if (cursor && cursor.time !== null) {
+      const date = new Date(cursor.time * 1000);
+      boundary = or(lt(orders.createdAt, date), and(eq(orders.createdAt, date), gt(orders.id, cursor.id)), isNull(orders.createdAt));
+    }
+    return db.transaction(async tx => {
+      const rows = await tx.select(columns).from(orders).where(and(...conditions, boundary)).orderBy(...ordering).limit(orderPageSize + 1);
+      const [count] = await tx.select({ total: sql<number>`count(*)` }).from(orders).where(and(...conditions));
+      return orderPageResult(rows.map(toSeconds), Number(count.total), null);
+    }, { isolationLevel: 'repeatable read', accessMode: 'read only' });
   }
 
   async getOrdersWithItems(startDate?: Date, endDate?: Date, limit?: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
