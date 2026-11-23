@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useSearch } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { getOrderPollInterval } from "@/lib/order-polling";
+import { useAuth } from "@/hooks/use-auth";
 
 import { useLanguage } from "@/contexts/language-context";
 import { AdminSidebar } from "@/components/admin/sidebar";
@@ -59,98 +61,104 @@ const SMS_TEMPLATES: Record<string, (amount: string) => string> = {
   cancelled: () => `[Арвижих махны дэлгүүр] Таны захиалга цуцлагдсан байна.`,
 };
 
+interface OrderSummary {
+  id: number;
+  customerName: string;
+  customerPhone: string;
+  totalAmount: string | number;
+  status: string;
+  createdAt: string | null;
+}
+
+interface OrderPage {
+  orders: OrderSummary[];
+  total: number;
+  nextCursor: string | null;
+  revision: string | null;
+}
+
+interface OrderDetail extends OrderSummary {
+  customerEmail: string;
+  customerAddress: string;
+  items: {
+    id: number;
+    quantity: number;
+    price: string | number;
+    product: { name: string; category: string; imageUrl: string };
+  }[];
+}
+
 export default function AdminOrders() {
+  const { user } = useAuth();
+  return user?.isAdmin ? <AdminOrderList key={user.id} adminId={user.id} /> : null;
+}
+
+function AdminOrderList({ adminId }: { adminId: number }) {
   const { t } = useLanguage();
   const { toast } = useToast();
-
-  // Parse URL parameters to see if we need to open a specific order
-  const urlParams = new URLSearchParams(
-    typeof window !== "undefined" ? window.location.search : "",
-  );
-  const orderIdParam = urlParams.get("id");
-
   const queryClient = useQueryClient();
+  const [location, navigate] = useLocation();
+  const search = useSearch();
+  const orderId = Number(new URLSearchParams(search).get("id"));
+  const orderDetailsOpen = Number.isSafeInteger(orderId) && orderId > 0;
 
   // State for filtering and order details
   const [searchQuery, setSearchQuery] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(
-    orderIdParam ? parseInt(orderIdParam) : null,
-  );
-  const [orderDetailsOpen, setOrderDetailsOpen] = useState(!!orderIdParam);
+  const [cursors, setCursors] = useState<string[]>([]);
+  const cursor = cursors[cursors.length - 1];
 
   // SMS dialog state
   const [smsDialogOpen, setSmsDialogOpen] = useState(false);
-  const [smsOrder, setSmsOrder] = useState<Order | null>(null);
+  const [smsOrder, setSmsOrder] = useState<OrderSummary | null>(null);
 
   // Delete dialog state
-  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<OrderSummary | null>(null);
 
-  // Format dates for API queries
-  const formatDateForQuery = (date?: Date) => {
-    return date ? format(date, "yyyy-MM-dd") : undefined;
-  };
+  useEffect(() => {
+    if (searchQuery === appliedSearch) return;
+    const timer = window.setTimeout(() => {
+      setAppliedSearch(searchQuery);
+      setCursors([]);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery, appliedSearch]);
 
-  // Define types for orders and items
-  interface OrderItem {
-    id: number;
-    orderId: number;
-    productId: number;
-    quantity: number;
-    price: string | number;
-    product: {
-      id: number;
-      name: string;
-      description: string;
-      category: string;
-      price: string | number;
-      imageUrl: string;
-      stock: number;
-    };
+  const params = new URLSearchParams();
+  if (appliedSearch) params.set("q", appliedSearch);
+  if (statusFilter !== "all") params.set("status", statusFilter);
+  if (startDate) params.set("startDate", startDate.toISOString());
+  if (endDate) {
+    const nextDay = new Date(endDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    params.set("endDate", nextDay.toISOString());
   }
-
-  interface Order {
-    id: number;
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
-    customerAddress: string;
-    totalAmount: string | number;
-    status: string;
-    createdAt: string;
-    userId: number | null;
-    items: OrderItem[];
-  }
-
-  // Fetch orders with date filters and improved refresh settings
-  const { data: orders = [], isLoading } = useQuery<Order[]>({
-    queryKey: [
-      "/api/orders",
-      formatDateForQuery(startDate),
-      formatDateForQuery(endDate),
-    ],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (startDate) params.append("startDate", startDate.toISOString());
-      if (endDate) {
-        // Add one day to end date to include the whole day
-        const nextDay = new Date(endDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        params.append("endDate", nextDay.toISOString());
-      }
-
-      const queryString = params.toString();
-      const url = `/api/orders${queryString ? `?${queryString}` : ""}`;
-
-      return await apiRequest("GET", url);
-    },
+  if (cursor) params.set("cursor", cursor);
+  const suffix = params.toString();
+  const url = "/api/admin/order-summaries" + (suffix ? `?${suffix}` : "");
+  const page = useQuery<OrderPage>({
+    queryKey: ["/api/orders", "summary", adminId, url],
+    queryFn: () => apiRequest("GET", url),
     refetchInterval: getOrderPollInterval,
-    refetchOnWindowFocus: true, // Refetch when window gains focus
-    refetchOnMount: true, // Always refetch when component mounts
-    staleTime: 5000, // Consider data stale after 5 seconds
+    staleTime: 5000,
   });
+  // Removing or reclassifying the last order on a later page can invalidate its cursor.
+  useEffect(() => {
+    if (cursor && page.isSuccess && page.data.orders.length === 0) setCursors([]);
+  }, [cursor, page.isSuccess, page.data]);
+
+  const accessDenied = /^(401|403):/.test(page.error?.message ?? "");
+  const detail = useQuery<OrderDetail>({
+    queryKey: ["/api/order-detail", page.data?.revision ?? null, adminId, orderId],
+    queryFn: () => apiRequest("GET", `/api/orders/${orderId}`),
+    enabled: orderDetailsOpen && !page.isPending && !accessDenied,
+    refetchInterval: page.data?.revision ? false : getOrderPollInterval,
+    gcTime: 0,
+  });
+  const selectedOrder = !accessDenied && !detail.isError ? detail.data : undefined;
 
   const deleteOrderMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -158,6 +166,7 @@ export default function AdminOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-orders-count"] });
       toast({
         title: "Амжилттай",
         description: "Захиалга устгагдлаа.",
@@ -173,47 +182,8 @@ export default function AdminOrders() {
     },
   });
 
-  // Selected order for detailed view
-  const selectedOrder = orders.find((order) => order.id === selectedOrderId);
-
-  // Filtered orders based on search and status
-  const filteredOrders = orders.filter((order) => {
-    // Apply status filter
-    if (statusFilter !== "all" && order.status !== statusFilter) {
-      return false;
-    }
-
-    // Apply search filter (on order ID or customer name)
-    if (searchQuery) {
-      const orderIdString = formatOrderId(order.id);
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        orderIdString.includes(searchLower) ||
-        order.customerName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    return true;
-  });
-
-  // Open order details
-  const handleViewOrder = (orderId: number) => {
-    setSelectedOrderId(orderId);
-    setOrderDetailsOpen(true);
-
-    // Update URL without full navigation
-    const newUrl = window.location.pathname + `?id=${orderId}`;
-    window.history.pushState({ path: newUrl }, "", newUrl);
-  };
-
-  // Close order details
-  const handleCloseDetails = () => {
-    setOrderDetailsOpen(false);
-
-    // Update URL without full navigation
-    const newUrl = window.location.pathname;
-    window.history.pushState({ path: newUrl }, "", newUrl);
-  };
+  const handleViewOrder = (id: number) => navigate(`${location}?id=${id}`);
+  const handleCloseDetails = () => navigate(location, { replace: true });
 
   return (
     <div className="min-h-screen bg-neutral flex">
@@ -268,6 +238,7 @@ export default function AdminOrders() {
                         mode="single"
                         selected={startDate}
                         onSelect={(date) => {
+                          setCursors([]);
                           setStartDate(date || undefined);
                           // If end date is before start date, reset it
                           if (date && endDate && date > endDate) {
@@ -282,7 +253,7 @@ export default function AdminOrders() {
                             variant="ghost"
                             size="sm"
                             className="w-full justify-center"
-                            onClick={() => setStartDate(undefined)}
+                            onClick={() => { setStartDate(undefined); setCursors([]); }}
                           >
                             Цэвэрлэх
                           </Button>
@@ -312,7 +283,7 @@ export default function AdminOrders() {
                       <Calendar
                         mode="single"
                         selected={endDate}
-                        onSelect={setEndDate}
+                        onSelect={(date) => { setEndDate(date); setCursors([]); }}
                         initialFocus
                         disabled={(date) =>
                           startDate ? date < startDate : false
@@ -324,7 +295,7 @@ export default function AdminOrders() {
                             variant="ghost"
                             size="sm"
                             className="w-full justify-center"
-                            onClick={() => setEndDate(undefined)}
+                            onClick={() => { setEndDate(undefined); setCursors([]); }}
                           >
                             Цэвэрлэх
                           </Button>
@@ -336,7 +307,7 @@ export default function AdminOrders() {
 
                 {/* Status Filter */}
                 <div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={statusFilter} onValueChange={(status) => { setStatusFilter(status); setCursors([]); }}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Төлөв сонгох" />
                     </SelectTrigger>
@@ -382,7 +353,7 @@ export default function AdminOrders() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {isLoading ? (
+                    {page.isPending ? (
                       Array(5)
                         .fill(0)
                         .map((_, i) => (
@@ -392,7 +363,13 @@ export default function AdminOrders() {
                             </td>
                           </tr>
                         ))
-                    ) : filteredOrders.length === 0 ? (
+                    ) : page.isError ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-4 text-center" role="alert">
+                          Захиалгыг ачаалж чадсангүй. <Button variant="link" onClick={() => page.refetch()}>{t.retry}</Button>
+                        </td>
+                      </tr>
+                    ) : page.data.orders.length === 0 ? (
                       <tr>
                         <td
                           colSpan={7}
@@ -404,7 +381,7 @@ export default function AdminOrders() {
                         </td>
                       </tr>
                     ) : (
-                      filteredOrders.map((order) => (
+                      page.data.orders.map((order) => (
                         <tr key={order.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {formatOrderId(order.id)}
@@ -444,7 +421,7 @@ export default function AdminOrders() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatDate(order.createdAt)}
+                            {order.createdAt ? formatDate(order.createdAt) : "—"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center gap-2">
@@ -473,19 +450,27 @@ export default function AdminOrders() {
                 </table>
               </div>
 
-              {/* Pagination (if needed) */}
-              {filteredOrders.length > 0 && (
-                <div className="mt-4 flex justify-between items-center">
+              {page.isSuccess && page.data.total > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2 justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    Нийт: {filteredOrders.length} захиалга
+                    Нийт: {page.data.total} захиалга
                   </div>
+                  {(cursor || page.data.nextCursor) && (
+                    <nav aria-label="Захиалгын хуудас" className="flex gap-2">
+                      <Button variant="outline" size="sm" disabled={!cursor} onClick={() => setCursors(c => c.slice(0, -1))}>{t.previousPage}</Button>
+                      <Button variant="outline" size="sm" disabled={!page.data.nextCursor} onClick={() => {
+                        const next = page.data.nextCursor;
+                        if (next) setCursors(c => [...c, next]);
+                      }}>{t.nextPage}</Button>
+                    </nav>
+                  )}
                 </div>
               )}
             </div>
           </Card>
 
           {/* Order Details Modal */}
-          <Dialog open={orderDetailsOpen} onOpenChange={setOrderDetailsOpen}>
+          <Dialog open={orderDetailsOpen} onOpenChange={(open) => { if (!open) handleCloseDetails(); }}>
             <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle>Захиалгын дэлгэрэнгүй</DialogTitle>
@@ -505,7 +490,7 @@ export default function AdminOrders() {
 
                           <p className="text-sm text-gray-500">Огноо:</p>
                           <p className="text-sm font-medium">
-                            {formatDate(selectedOrder.createdAt)}
+                            {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) : "—"}
                           </p>
 
                           <p className="text-sm text-gray-500">
@@ -670,14 +655,20 @@ export default function AdminOrders() {
                 </div>
               ) : (
                 <div className="text-center py-6">
-                  <p className="text-gray-500">Захиалгын мэдээлэл олдсонгүй</p>
+                  {accessDenied ? <p role="alert">Хандах эрхгүй байна.</p> : detail.isPending ? (
+                    <p role="status">{t.loading}</p>
+                  ) : /^404:/.test(detail.error?.message ?? "") ? (
+                    <p>Захиалгын мэдээлэл олдсонгүй</p>
+                  ) : (
+                    <p role="alert">Захиалгыг ачаалж чадсангүй. <Button variant="link" onClick={() => detail.refetch()}>{t.retry}</Button></p>
+                  )}
                 </div>
               )}
             </DialogContent>
           </Dialog>
 
           {/* SMS Message Dialog */}
-          <Dialog open={smsDialogOpen} onOpenChange={setSmsDialogOpen}>
+          <Dialog open={smsDialogOpen && !accessDenied} onOpenChange={setSmsDialogOpen}>
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
@@ -807,7 +798,7 @@ export default function AdminOrders() {
           </Dialog>
 
           {/* Delete Confirmation Dialog */}
-          <AlertDialog open={!!orderToDelete} onOpenChange={(open) => !open && setOrderToDelete(null)}>
+          <AlertDialog open={!!orderToDelete && !accessDenied} onOpenChange={(open) => !open && setOrderToDelete(null)}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Захиалга устгах</AlertDialogTitle>

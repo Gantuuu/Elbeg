@@ -162,6 +162,9 @@ async function main() {
     console.log("Pre-migration D1 rows read per SQL statement");
     const before = await measure(lookups);
     await compareFullList(original, before.fullList);
+    const legacyPage = await get('/admin/order-summaries');
+    assert.equal(legacyPage.status, 200, 'a deployment can serve orders before migrations run');
+    assert.equal((await legacyPage.json()).total, 670);
     const migrations = ["0001_order_read_indexes.sql", "0002_pending_order_count.sql"];
     for (let pass = 0; pass < 2; pass++) {
       for (const file of migrations) {
@@ -179,6 +182,8 @@ async function main() {
     assert.ok(after.items <= 5 && after.history <= 2);
     assert.equal(after.revision, 1);
     assert.equal(after.pending, 1);
+
+    await require('./check-admin-order-summaries.cjs')({ db, get, call, run });
 
     const full = await get("/orders");
     assert.equal(full.status, 200);

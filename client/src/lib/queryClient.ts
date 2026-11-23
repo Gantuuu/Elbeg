@@ -52,8 +52,10 @@ export async function apiRequest(
 
   if (isMobile) {
     // The admin list must retain its private response to revalidate its ETag on each poll.
-    const revalidateOrders = method === "GET" &&
-      url.split("?")[0] === apiBaseUrl + "/api/orders";
+    const path = url.split("?")[0];
+    const revalidateOrders = method === "GET" && (
+      path === apiBaseUrl + "/api/orders" || path === apiBaseUrl + "/api/admin/order-summaries"
+    );
     if (!revalidateOrders) {
       headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
       headers["Pragma"] = "no-cache";

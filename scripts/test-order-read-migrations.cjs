@@ -8,6 +8,9 @@ const { unstable_splitSqlQuery: splitSQL } = require('wrangler');
 const { Miniflare } = createRequire(require.resolve('wrangler'))('miniflare');
 
 const files = ['0001_order_read_indexes.sql', '0002_pending_order_count.sql'];
+const totalFile = '0003_order_total_count.sql';
+const totalSQL = splitSQL(readFileSync('migrations/' + totalFile, 'utf8'));
+const verifyTotal = readFileSync('scripts/verify-order-total-count.sql', 'utf8');
 const verify = readFileSync('scripts/verify-order-read-migrations.sql', 'utf8');
 const migrations = files.map(name => splitSQL(readFileSync('migrations/' + name, 'utf8')));
 const origin = 'https://arvijix.kr';
@@ -96,7 +99,8 @@ async function assertVerified(db) {
     expected_4_indexes: 4, expected_12_triggers: 12, revision_ok: 1, pending_count_ok: 1,
   });
   const entries = await db.prepare('SELECT name FROM d1_migrations ORDER BY name').all();
-  assert.deepEqual(entries.results.map(row => row.name), files);
+  assert.deepEqual(entries.results.map(row => row.name), [...files, totalFile]);
+  assert.deepEqual(await db.prepare(verifyTotal).first(), {expected_2_triggers: 2, total_count_ok: 1});
 }
 
 function businessRows(db) {
@@ -104,13 +108,15 @@ function businessRows(db) {
     (await db.prepare(`SELECT * FROM ${table} ORDER BY id`).all()).results));
 }
 
-test('deployed SQL matches both version-controlled migrations and verification query', () => {
+test('deployed SQL matches all three version-controlled migrations and verification queries', () => {
   const deployed = JSON.parse(readFileSync('worker/order-read-migrations.generated.json', 'utf8'));
   const normalize = sql => sql.replace(/\r\n/g, '\n').trim();
   for (const [index, name] of files.entries()) {
     assert.deepEqual(deployed[name].map(normalize), migrations[index].map(normalize));
   }
   assert.equal(normalize(deployed.verify), normalize(verify));
+  assert.deepEqual(deployed[totalFile].map(normalize), totalSQL.map(normalize));
+  assert.equal(normalize(deployed.verifyTotal), normalize(verifyTotal));
 });
 
 test('authorized production badge read reconciles concurrent first runs and preserves business records', async t => {
@@ -189,7 +195,53 @@ test('already migrated database verifies once per isolate and leaves Wrangler hi
   assert.ok(cold.queries.filter(s => /count\(\*\)\s+from\s+orders\s+where\s+status\s*=/i.test(s)).length <= 1);
   const hot = await request({token: admin, isolate: 'cold', now: start + 60000});
   assert.ok(hot.queries.length <= 2, 'a repeated healthy read cannot rescan orders or migration history');
-  assert.deepEqual((await db.prepare('SELECT * FROM d1_migrations ORDER BY id').all()).results, initial);
+  assert.deepEqual((await db.prepare('SELECT * FROM d1_migrations WHERE name <> ? ORDER BY id').bind(totalFile).all()).results, initial);
+});
+
+test('0003 seeds all existing orders and tracks committed inserts and deletes exactly', async t => {
+  const {db, run, request, admin} = await fixture(t);
+  const before = await businessRows(db);
+  assert.equal((await request({token: admin})).status, 200);
+  await assertVerified(db);
+  assert.deepEqual(await businessRows(db), before);
+  const total = () => db.prepare('SELECT total_count FROM order_total_count WHERE id=1').first('total_count');
+  const bulk = `INSERT INTO orders(customer_name,customer_email,customer_phone,customer_address,total_amount,status)
+    VALUES ('new','a','a','a',7,'pending'),('new','a','a','a',3,'done')`;
+  assert.equal(await total(), 2);
+  await run(bulk); assert.equal(await total(), 4);
+  await run("UPDATE orders SET status='pending' WHERE status='done'"); assert.equal(await total(), 4);
+  await assert.rejects(db.batch([db.prepare(bulk), db.prepare('INSERT INTO order_total_count VALUES(1,1)')]));
+  assert.equal(await total(), 4);
+  await run("DELETE FROM orders WHERE customer_name='new'"); assert.equal(await total(), 2);
+  await run('DELETE FROM orders'); assert.equal(await total(), 0);
+  await run(bulk); assert.equal(await total(), 2);
+  await db.batch(totalSQL.map(sql => db.prepare(sql))); assert.equal(await total(), 2);
+  assert.deepEqual(await db.prepare(verifyTotal).first(), {expected_2_triggers: 2, total_count_ok: 1});
+});
+
+test('wrong total singleton or a missing trigger is repaired using current orders and preserves the journal', async t => {
+  const {db, run, request, admin} = await fixture(t);
+  await request({token:admin});
+  const journal = (await db.prepare('SELECT * FROM d1_migrations ORDER BY id').all()).results;
+  await run('DROP TRIGGER count_order_total_delete');
+  await run('UPDATE order_total_count SET total_count=10 WHERE id=1');
+  await request({token:admin, isolate:'cold'});
+  await assertVerified(db);
+  assert.deepEqual((await db.prepare('SELECT * FROM d1_migrations ORDER BY id').all()).results, journal);
+});
+
+test('a failed 0003 postcondition rolls back its own changes and preserves the earlier migrations', async t => {
+  const {db, run, request, admin} = await fixture(t);
+  await run(totalSQL[0]);
+  await run(`CREATE TRIGGER fixture_wrong_total AFTER INSERT ON order_total_count BEGIN
+    UPDATE order_total_count SET total_count=99 WHERE id=1; END`);
+  const before = await businessRows(db);
+  const response = await request({token:admin}); assert.equal(response.status, 200);
+  assert.deepEqual(await businessRows(db), before);
+  assert.deepEqual(await db.prepare(verify).first(), {expected_4_indexes:4,expected_12_triggers:12,revision_ok:1,pending_count_ok:1});
+  assert.deepEqual((await db.prepare('SELECT name FROM d1_migrations ORDER BY name').all()).results.map(x=>x.name),files);
+  assert.equal(await db.prepare('SELECT COUNT(*) AS n FROM order_total_count').first('n'),0);
+  assert.equal(await db.prepare("SELECT COUNT(*) AS n FROM sqlite_schema WHERE name LIKE 'count_order_total_%'").first('n'),0);
 });
 
 test('only the missing pending-count migration is executed on an installation with a healthy order revision', async t => {

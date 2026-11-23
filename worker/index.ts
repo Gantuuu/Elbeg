@@ -38,7 +38,8 @@ app.use('*', async (c, next) => {
 });
 
 // Global middleware
-app.use('*', logger());
+// Admin search terms can contain customer names. Retain the route, status and timing.
+app.use('*', logger(line => console.log(line.replace(/(\/api\/admin\/order-summaries)\?\S+/g, '$1'))));
 app.use('*', cors({
     origin: (origin) => origin, // Allow all origins for now
     credentials: true,

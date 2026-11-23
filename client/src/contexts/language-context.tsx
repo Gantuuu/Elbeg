@@ -141,6 +141,8 @@ export interface Translations {
   accountNumber: string;
   loadingBankInfo: string;
   loadingOrderHistory: string;
+  previousPage: string;
+  nextPage: string;
   retry: string;
 
   // 인증
@@ -342,6 +344,8 @@ const translations: Record<Language, Translations> = {
     loadingBankInfo: "Банкны данс мэдээлэл ачааллаж байна...",
     loadingOrderHistory: "Захиалгын түүхийг ачааллаж байна...",
     retry: "Дахин оролдох",
+    previousPage: "Өмнөх",
+    nextPage: "Дараах",
 
     // 인증
     usernameOrEmail: "Хэрэглэгчийн нэр эсвэл И-мэйл",
@@ -542,6 +546,8 @@ const translations: Record<Language, Translations> = {
     loadingBankInfo: "Загрузка информации о банке...",
     loadingOrderHistory: "Загрузка истории заказов...",
     retry: "Повторить",
+    previousPage: "Назад",
+    nextPage: "Далее",
 
     // 인증
     usernameOrEmail: "Имя пользователя или Email",
@@ -743,6 +749,8 @@ const translations: Record<Language, Translations> = {
     loadingBankInfo: "Loading bank information...",
     loadingOrderHistory: "Loading order history...",
     retry: "Retry",
+    previousPage: "Previous",
+    nextPage: "Next",
 
     // 인증
     usernameOrEmail: "Username or Email",

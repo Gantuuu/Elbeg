@@ -1,6 +1,7 @@
 import express, { type Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { parseOrderPage } from '../shared/admin-order-page';
 import { eq } from "drizzle-orm";
 import multer from "multer";
 import fs from "fs";
@@ -1157,6 +1158,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/order-summaries', authenticateAdmin, async (req, res, next) => {
+    try {
+      const filters = parseOrderPage(new URL(req.originalUrl, 'http://localhost').searchParams);
+      if (!filters) return res.status(400).json({ message: 'Invalid order page or date' });
+      res.set('Cache-Control', 'private, no-cache');
+      res.vary('Cookie');
+      res.json(await storage.getAdminOrderPage(filters));
+    } catch (error) { next(error); }
+  });
+
   app.get("/api/orders", async (req, res) => {
     try {
       // Check if user is authenticated or has admin session
@@ -1211,8 +1222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders/:id", async (req, res) => {
     try {
-      // Check if user is authenticated
-      if (!req.isAuthenticated()) {
+      const adminSession = req.session?.adminLoggedIn === true;
+      if (!adminSession && !req.isAuthenticated()) {
         return res.status(401).json({ message: "Үйлдлийг гүйцэтгэхийн тулд нэвтрэх шаардлагатай" });
       }
 
@@ -1230,7 +1241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user has permission to view this order
-      if (!req.user.isAdmin && order.userId !== req.user.id) {
+      if (!adminSession && !req.user?.isAdmin && order.userId !== req.user?.id) {
         return res.status(403).json({ message: "Энэ захиалгыг харах эрх байхгүй байна" });
       }
 
