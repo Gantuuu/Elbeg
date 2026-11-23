@@ -13,8 +13,14 @@ const testEntrypoint = `
   export default {
     async fetch(request, env, ctx) {
       const queries = [];
+      const batchReads = [];
       const db = new Proxy(env.DB, {
         get(target, prop) {
+          if (prop === "batch") return async statements => {
+            const results = await target.batch(statements);
+            batchReads.push(results.map(result => result.meta.rows_read));
+            return results;
+          };
           if (prop === "prepare") return sql => {
             queries.push(sql);
             return target.prepare(sql);
@@ -26,6 +32,7 @@ const testEntrypoint = `
       const response = await worker.fetch(request, { ...env, DB: db }, ctx);
       const result = new Response(response.body, response);
       result.headers.set("X-Test-Queries", JSON.stringify(queries));
+      result.headers.set("X-Test-Batch-Reads", JSON.stringify(batchReads));
       return result;
     }
   };`;
@@ -73,7 +80,8 @@ async function main() {
     for (const query of splitSQL(schema)) await run(query);
     // Column present in the deployed product schema after the original baseline.
     await run("ALTER TABLE products ADD COLUMN thumbnail_url TEXT");
-    await run("INSERT INTO products(name,description,category,price,image_url) VALUES ('test','','x',1,'')");
+    await run(`INSERT INTO products(name, name_en, description, category, price, image_url, thumbnail_url, stock, min_order_quantity, store_id, created_at)
+      VALUES ('test', 'test EN', 'sample', 'x', 0, '/image', '/thumb', 12, 2, 3, 1700000000)`);
     await run(`WITH RECURSIVE n(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM n WHERE x<670)
       INSERT INTO orders(user_id,customer_name,customer_email,customer_phone,customer_address,total_amount,status,created_at)
       SELECT x,'test','test','0','test',1,CASE WHEN x%20=0 THEN 'pending' ELSE 'done' END, 1700000000+x FROM n`);
@@ -100,9 +108,24 @@ async function main() {
     assert.equal(original.headers.get("etag"), null);
     const originalOrders = await original.json();
     assert.equal(originalOrders.length, 670);
+    assert.deepEqual(originalOrders[0].items[0].product, {
+      id: 1, name: "test", nameRu: null, nameEn: null, description: "sample",
+      descriptionRu: null, descriptionEn: null, category: "x", price: 1,
+      imageUrl: "/image", thumbnailUrl: "/thumb", stock: 12, minOrderQuantity: 1,
+      storeId: 3, createdAt: new Date(1700000000 * 1000).toISOString(),
+    }, "preserve the order API's product fields and historical price/language fallbacks");
     assert.deepEqual(await (await get("/orders/pending-count")).json(), { count: 33 });
-    const join = JSON.parse(original.headers.get("x-test-queries")).find(q => /left join/i.test(q));
-    assert.ok(join, "measure the actual administrator join emitted by Drizzle");
+    // A lower bound before all seeded timestamps exercises the existing joined
+    // route for the same data and the same public response shape as a full read.
+    const reference = await get("/orders?startDate=1970-01-01");
+    assert.equal(reference.status, 200);
+    assert.deepEqual(originalOrders, await reference.json());
+    const filteredJoin = JSON.parse(reference.headers.get("x-test-queries")).find(q => /left join/i.test(q));
+    const fixtureLowerBound = / where "orders"\."created_at" >= \?(?= order by)/i;
+    assert.match(filteredJoin, fixtureLowerBound);
+    // Restore the exact unfiltered legacy SELECT so its execution plan and
+    // D1 row cost can be measured against the new batch on this same database.
+    const join = filteredJoin.replace(fixtureLowerBound, "");
     const lookups = {
       fullList: join,
       items: "SELECT * FROM order_items WHERE order_id=1",
@@ -118,8 +141,27 @@ async function main() {
       }
       return values;
     }
+    async function compareFullList(response, legacyReads) {
+      const batches = JSON.parse(response.headers.get("x-test-batch-reads"));
+      assert.equal(batches.length, 1, "an uncached full list reads one consistent D1 batch");
+      assert.equal(batches[0].length, 3, "one scan each for orders, items and products");
+      const reads = batches[0].reduce((sum, n) => sum + n, 0);
+      const queries = JSON.parse(response.headers.get("x-test-queries"));
+      assert.ok(!queries.some(q => /left join/i.test(q)), "an unfiltered list cannot re-run the historical join");
+      for (const table of ["orders", "order_items", "products"]) {
+        const sql = queries.find(q => q.includes(`from "${table}"`));
+        assert.ok(sql, `missing batch read from ${table}`);
+        const plan = await run("EXPLAIN QUERY PLAN " + sql);
+        console.log(table, plan.results.map(row => row.detail).join(" / "));
+      }
+      console.log(`Full order data: legacy JOIN = ${legacyReads} rows (1 statement), batch = ${reads} rows (3 statements)`);
+      // D1 also charges a scan of the sorter or created_at index for the 670 orders.
+      assert.ok(reads <= 4000 && reads < legacyReads * 0.65,
+        "the full batch should avoid repeated order and product lookups for each item");
+    }
     console.log("Pre-migration D1 rows read per SQL statement");
     const before = await measure(lookups);
+    await compareFullList(original, before.fullList);
     const migrations = ["0001_order_read_indexes.sql", "0002_pending_order_count.sql"];
     for (let pass = 0; pass < 2; pass++) {
       for (const file of migrations) {
@@ -140,6 +182,7 @@ async function main() {
 
     const full = await get("/orders");
     assert.equal(full.status, 200);
+    await compareFullList(full, after.fullList);
     assert.deepEqual(await full.json(), originalOrders);
     let tag = full.headers.get("etag");
     assert.ok(tag);
@@ -157,6 +200,7 @@ async function main() {
       const fresh = await get("/orders", tag);
       assert.equal(fresh.status, 304);
       assert.equal(await fresh.text(), "");
+      assert.deepEqual(JSON.parse(fresh.headers.get("x-test-batch-reads")), [], "304 must skip the full-list batch");
       const queries = JSON.parse(fresh.headers.get("x-test-queries"));
       assert.equal(queries.length, 2, "one user PK lookup and one generation lookup");
       assert.ok(queries.some(q => /from "users"/i.test(q)));
@@ -189,6 +233,8 @@ async function main() {
     }
     await mutate(`INSERT INTO orders(id,customer_name,customer_email,customer_phone,customer_address,total_amount)
       VALUES (9999,'guest','guest@example.invalid','0','test',1)`, 34);
+    const emptyOrder = (await (await get("/orders")).json()).find(order => order.id === 9999);
+    assert.deepEqual(emptyOrder.items, [], "a full list includes orders with no items");
     await mutate("UPDATE orders SET status='done' WHERE id=9999", 33);
     await mutate("UPDATE orders SET status='pending' WHERE id=9999", 34);
     await mutate("UPDATE orders SET status='pending' WHERE id=9999", 34);
@@ -197,8 +243,19 @@ async function main() {
     await mutate("INSERT INTO order_items(id,order_id,product_id,quantity,price) VALUES (9999,1,2,1,1)", 33);
     await mutate("UPDATE products SET name='new name' WHERE id=2", 33);
     await mutate("UPDATE order_items SET quantity=3 WHERE id=9999", 33);
-    await mutate("DELETE FROM order_items WHERE id=9999", 33);
     await mutate("DELETE FROM products WHERE id=2", 33);
+    async function getOrphanItem(route) {
+      const response = await get(route);
+      assert.equal(response.status, 200);
+      const orders = await response.json();
+      const item = orders.find(order => order.id === 1).items.find(item => item.id === 9999);
+      // The existing API gives deleted products the current time at read time.
+      assert.ok(Math.abs(Date.now() - Date.parse(item.product.createdAt)) < 60_000);
+      const { createdAt, ...product } = item.product;
+      return { ...item, product };
+    }
+    assert.deepEqual(await getOrphanItem("/orders"), await getOrphanItem("/orders?startDate=1970-01-01"));
+    await mutate("DELETE FROM order_items WHERE id=9999", 33);
     await mutate("UPDATE orders SET status='pending'", 670);
     assert.equal((await run("SELECT pending_count FROM pending_order_count WHERE id=1")).meta.rows_read, 1);
     assert.deepEqual((await (await call("/products")).json()).map(p => p.name), ["test"]);

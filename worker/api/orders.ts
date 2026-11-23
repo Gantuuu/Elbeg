@@ -3,6 +3,7 @@ import { Bindings } from '../types';
 import { requireAuth, requireAdmin } from '../middleware';
 import { UserWithNullablePhone } from '@shared/schema';
 import { D1Storage, IStorage } from '../storage';
+import { scheduleOrderReadMigrations } from '../order-read-migrations';
 
 type Env = {
     Bindings: Bindings;
@@ -18,6 +19,7 @@ const app = new Hono<Env>();
 app.on('GET', ['/orders/pending-count', '/admin/pending-orders-count'], requireAdmin, async (c) => {
     const storage = c.get('storage');
     const count = await storage.getPendingOrdersCount();
+    scheduleOrderReadMigrations(c.req.url, c.env.DB, c.executionCtx);
     return c.json({ count });
 });
 

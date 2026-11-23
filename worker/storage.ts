@@ -21,12 +21,41 @@ import {
     reviews, type Review, type InsertReview
 } from "@shared/schema";
 import { DrizzleDB } from "./db";
-import { eq, desc, and, asc, inArray, not, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, asc, getTableColumns, inArray, not, gte, lte, sql } from "drizzle-orm";
 import { scrypt, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 
 // Promisify scrypt for async usage
 const scryptAsync = promisify(scrypt);
+
+const orderProductColumns = {
+    id: products.id, name: products.name, description: products.description,
+    category: products.category, price: products.price, imageUrl: products.imageUrl,
+    thumbnailUrl: products.thumbnailUrl, stock: products.stock, storeId: products.storeId,
+    createdAt: products.createdAt,
+};
+
+type ListedOrder = Order & { items: (OrderItem & { product: Product })[] };
+
+function listedItem(item: OrderItem, product?: Pick<Product, keyof typeof orderProductColumns> | null) {
+    return {
+        ...item,
+        product: {
+            id: product?.id || item.productId,
+            name: product?.name || `Устгагдсан бүтээгдэхүүн (ID: ${item.productId})`,
+            description: product?.description || '',
+            nameRu: null, nameEn: null, descriptionRu: null, descriptionEn: null,
+            category: product?.category || 'Unknown',
+            price: product?.price || item.price,
+            imageUrl: product?.imageUrl || '',
+            thumbnailUrl: product?.thumbnailUrl || null,
+            stock: product?.stock || 0,
+            minOrderQuantity: 1,
+            storeId: product?.storeId || null,
+            createdAt: product?.createdAt || new Date(),
+        },
+    };
+}
 
 export interface IStorage {
     // Product operations
@@ -332,8 +361,24 @@ export class D1Storage implements IStorage {
         }
     }
 
-    async getOrdersWithItems(startDate?: Date, endDate?: Date, limit?: number): Promise<(Order & { items: (OrderItem & { product: Product })[] })[]> {
-        // Build conditions for date filtering
+    async getOrdersWithItems(startDate?: Date, endDate?: Date, limit?: number): Promise<ListedOrder[]> {
+        if (!startDate && !endDate && limit === undefined) {
+            // A D1 batch gives all three reads one transaction. Reuse products across items.
+            const [orderRows, items, productRows] = await this.db.batch([
+                this.db.select().from(orders).orderBy(desc(orders.createdAt)),
+                this.db.select().from(orderItems).orderBy(asc(orderItems.id)),
+                this.db.select(orderProductColumns).from(products),
+            ]);
+            const byOrder = new Map<number, ListedOrder>(
+                orderRows.map(order => [order.id, { ...order, items: [] }])
+            );
+            const byProduct = new Map(productRows.map(product => [product.id, product]));
+            for (const item of items) {
+                if (item.id) byOrder.get(item.orderId)?.items.push(listedItem(item, byProduct.get(item.productId)));
+            }
+            return Array.from(byOrder.values());
+        }
+
         const conditions = [];
         if (startDate) {
             conditions.push(gte(orders.createdAt, startDate));
@@ -349,100 +394,26 @@ export class D1Storage implements IStorage {
             conditions.push(inArray(orders.id, latestIds));
         }
 
-        // Use a single optimized query with joins to get all data at once
-        const query = this.db.select({
-            // Order fields
-            orderId: orders.id,
-            userId: orders.userId,
-            customerName: orders.customerName,
-            customerEmail: orders.customerEmail,
-            customerPhone: orders.customerPhone,
-            customerAddress: orders.customerAddress,
-            paymentMethod: orders.paymentMethod,
-            totalAmount: orders.totalAmount,
-            status: orders.status,
-            orderCreatedAt: orders.createdAt,
-
-            // Order item fields
-            itemId: orderItems.id,
-            itemOrderId: orderItems.orderId,
-            itemProductId: orderItems.productId,
-            itemQuantity: orderItems.quantity,
-            itemPrice: orderItems.price,
-
-            // Product fields
-            productId: products.id,
-            productName: products.name,
-            productDescription: products.description,
-            productCategory: products.category,
-            productPrice: products.price,
-            productImageUrl: products.imageUrl,
-            productThumbnailUrl: products.thumbnailUrl,
-            productStock: products.stock,
-            productStoreId: products.storeId,
-            productCreatedAt: products.createdAt
+        const rows = await this.db.select({
+            order: getTableColumns(orders),
+            item: getTableColumns(orderItems),
+            product: orderProductColumns,
         })
             .from(orders)
             .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
             .leftJoin(products, eq(orderItems.productId, products.id))
+            .where(and(...conditions))
             .orderBy(desc(orders.createdAt));
 
-        // Apply date filtering if conditions exist
-        const results = conditions.length > 0
-            ? await query.where(conditions.length > 1 ? and(...conditions) : conditions[0])
-            : await query;
-
-        // Group results by order
-        const orderMap = new Map<number, Order & { items: (OrderItem & { product: Product })[] }>();
-
-        for (const row of results) {
-            if (!orderMap.has(row.orderId)) {
-                orderMap.set(row.orderId, {
-                    id: row.orderId,
-                    userId: row.userId,
-                    customerName: row.customerName,
-                    customerEmail: row.customerEmail,
-                    customerPhone: row.customerPhone,
-                    customerAddress: row.customerAddress,
-                    paymentMethod: row.paymentMethod,
-                    totalAmount: row.totalAmount,
-                    status: row.status,
-                    createdAt: row.orderCreatedAt,
-                    items: []
-                });
+        const orderMap = new Map<number, ListedOrder>();
+        for (const row of rows) {
+            let order = orderMap.get(row.order.id);
+            if (!order) {
+                order = { ...row.order, items: [] };
+                orderMap.set(order.id, order);
             }
-
-            const order = orderMap.get(row.orderId)!;
-
-            // Only add item if it exists (left join might have null values)
-            if (row.itemId) {
-                order.items.push({
-                    id: row.itemId,
-                    orderId: row.itemOrderId!,
-                    productId: row.itemProductId!,
-                    quantity: row.itemQuantity!,
-                    price: row.itemPrice!,
-                    product: {
-                        id: row.productId || row.itemProductId!,
-                        name: row.productName || `Устгагдсан бүтээгдэхүүн (ID: ${row.itemProductId})`,
-                        description: row.productDescription || '',
-                        nameRu: null,
-                        nameEn: null,
-                        descriptionRu: null,
-                        descriptionEn: null,
-                        category: row.productCategory || 'Unknown',
-                        price: row.productPrice || row.itemPrice!,
-                        imageUrl: row.productImageUrl || '',
-                        thumbnailUrl: row.productThumbnailUrl || null,
-                        stock: row.productStock || 0,
-                        minOrderQuantity: 1,
-                        storeId: row.productStoreId || null,
-                        createdAt: row.productCreatedAt || new Date()
-                    }
-                });
-            }
+            if (row.item?.id) order.items.push(listedItem(row.item, row.product));
         }
-
         return Array.from(orderMap.values());
     }
 
